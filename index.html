@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TN Grid Master: Solar vs Coal Showdown | School Edition</title>
+  <meta name="description" content="An interactive, gamified power grid simulation comparing peak daytime solar energy at Kamuthi against evening coal energy at Mettur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-solar">
+  <!-- Dynamic Sky Background with Sun, Moon, Stars, and Smog -->
+  <div id="skyBackground" class="sky-background">
+    <div class="sun-disc" id="sunDisc"></div>
+    <div class="moon-disc" id="moonDisc"></div>
+    <div class="stars-layer" id="starsLayer"></div>
+    <div class="smog-overlay" id="smogOverlay"></div>
+    <div class="solar-glow-overlay" id="solarGlowOverlay"></div>
+  </div>
+
+  <div class="game-wrapper">
+    <!-- Top Game Bar: Big, Friendly, Clean Badges -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1 class="brand-title">TN GRID MASTER</h1>
+          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Edition</p>
+        </div>
+      </div>
+
+      <!-- Top Gamified Telemetry Badges -->
+      <div class="hud-badges">
+        <!-- Badge 1: Town Happiness -->
+        <div class="badge-item" id="badgeHappiness" title="Town Happiness: Drops when power brownouts occur!">
+          <span class="badge-emoji" id="townEmoji">😃</span>
+          <div class="badge-meta">
+            <span class="badge-caption">TOWN MOOD</span>
+            <span class="badge-stat text-green" id="townHappiness">100% Happy</span>
+          </div>
+        </div>
+
+        <!-- Badge 2: Air Cleanliness -->
+        <div class="badge-item" id="badgeAir" title="Air Quality: Pure under Solar, Smoggy under Coal!">
+          <span class="badge-emoji" id="airEmoji">🌿</span>
+          <div class="badge-meta">
+            <span class="badge-caption">AIR QUALITY</span>
+            <span class="badge-stat text-cyan" id="airQuality">100% Clean</span>
+          </div>
+        </div>
+
+        <!-- Badge 3: Connected Fan RPM -->
+        <div class="badge-item" id="badgeFan" title="Connected Town Fans: Spin fast with clean energy, stall during brownouts!">
+          <span class="badge-emoji spin" id="fanEmoji">🌀</span>
+          <div class="badge-meta">
+            <span class="badge-caption">COOLING FANS</span>
+            <span class="badge-stat text-gold" id="fanRpm">3,600 RPM</span>
+          </div>
+        </div>
+
+        <!-- Badge 4: Player Eco Score -->
+        <div class="badge-item player-score" id="badgeScore" title="Your Clean Energy Score!">
+          <span class="badge-emoji">⭐</span>
+          <div class="badge-meta">
+            <span class="badge-caption">ECO SCORE</span>
+            <span class="badge-stat text-gold" id="playerScore">1,200</span>
+          </div>
+        </div>
+
+        <!-- Sound & Guide Buttons -->
+        <button class="icon-toggle-btn" id="audioBtn" title="Toggle Sound FX">
+          <span id="audioIcon">🔊 Sound ON</span>
+        </button>
+
+        <button class="guide-toggle-btn" id="guideBtn" title="How to Play & Teacher Guide">
+          <span>🎓 Guide</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 30-Second Challenge Banner -->
+    <div class="challenge-alert hidden" id="challengeAlert">
+      <div class="challenge-text">
+        <span class="challenge-icon">🔥</span>
+        <div>
+          <strong id="challengeGoal">MISSION: KEEP THE TOWN POWERED & CLEAN!</strong>
+          <p id="challengeSub">The clock is ticking. Harvest solar energy at noon and manage coal cleanly as the sun sets!</p>
+        </div>
+      </div>
+      <div class="timer-pill">
+        <span id="gameTimer">30s</span>
+      </div>
+    </div>
+
+    <!-- Main Game Canvas Stage -->
+    <main class="canvas-stage" id="canvasStage">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Floating Student Tip -->
+      <div class="stage-tip">
+        <span>💡 <strong>Click to Play:</strong> Click houses to turn appliances on/off! Click the Solar Park for an Eco-Boost! Click the Coal Stacks to see smog penalty!</span>
+      </div>
+
+      <!-- Exploded Hardware Modal Overlay (From old project, gamified) -->
+      <div class="hardware-card hidden" id="hardwareCard">
+        <div class="card-top">
+          <div class="card-title-group">
+            <span class="card-icon" id="hwIcon">🔬</span>
+            <h3 id="hwTitle">Hardware Inspector</h3>
+          </div>
+          <button class="card-close" id="hwCloseBtn">&times;</button>
+        </div>
+        <div class="card-tabs">
+          <button class="hw-tab active" id="tabSolarHw">Solar Module Layers</button>
+          <button class="hw-tab" id="tabCoalHw">Coal Boiler Components</button>
+        </div>
+        <div class="card-content" id="hwContent">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Controls Deck -->
+    <footer class="deck-controls">
+      <!-- Big Hero Comparison Buttons (Perfect for Classroom Demo) -->
+      <div class="hero-selector">
+        <button class="hero-card solar active" id="btnSolarNoon">
+          <span class="hero-icon">☀️</span>
+          <div class="hero-info">
+            <div class="hero-title-row">
+              <strong>12:00 NOON SOLAR PEAK</strong>
+              <span class="tag-clean">100% CLEAN</span>
+            </div>
+            <p>Kamuthi Solar Park • 95% Efficiency • 0g Pollution • All Homes Lit</p>
+          </div>
+        </button>
+
+        <div class="vs-badge">VS</div>
+
+        <button class="hero-card coal" id="btnCoalPeak">
+          <span class="hero-icon">🏭</span>
+          <div class="hero-info">
+            <div class="hero-title-row">
+              <strong>19:30 EVENING COAL PEAK</strong>
+              <span class="tag-dirty">DIRTY & LOSS-PRONE</span>
+            </div>
+            <p>Mettur Coal Station • 32% Heat Loss • High Smog • Brownouts</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Timeline Scrubber & Game Actions -->
+      <div class="timeline-row">
+        <div class="clock-display">
+          <span class="clock-digits" id="clockDigits">12:00 PM</span>
+          <span class="clock-label" id="clockLabel">Peak Solar Noon</span>
+        </div>
+
+        <div class="scrubber-bar">
+          <div class="scrubber-labels">
+            <span>🌅 06:00 Sunrise</span>
+            <span>☀️ 12:00 Solar Peak</span>
+            <span>🌇 18:00 Sunset</span>
+            <span>🌙 20:00 Coal Peak</span>
+          </div>
+          <input 
+            type="range" 
+            id="timeRange" 
+            min="0" 
+            max="1439" 
+            value="720" 
+            step="1"
+            aria-label="Time of Day Slider"
+          >
+        </div>
+
+        <div class="deck-actions">
+          <button class="deck-btn play" id="playToggleBtn">
+            <span id="playIcon">⏸️ Pause</span>
+          </button>
+          <button class="deck-btn challenge" id="challengeBtn">
+            <span>🎮 Start 30s Game</span>
+          </button>
+          <button class="deck-btn inspect" id="inspectBtn">
+            <span>🔬 Inspect Tech</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Classroom Presentation Guide Modal -->
+  <div class="modal-backdrop hidden" id="guideModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>🎓 Tamil Nadu Grid Master: Classroom Presentation Guide</h2>
+        <button class="modal-exit" id="guideCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-box solar">
+          <h3>☀️ 1. Daytime Solar Peak (12:00 Noon) — Kamuthi Solar Park</h3>
+          <p>
+            Kamuthi in Ramanathapuram is one of India's largest solar installations (<strong>648 MW</strong>).
+          </p>
+          <ul>
+            <li><strong>100% Clean:</strong> Generates electricity with zero carbon emissions ($0.00\text{ tons CO}_2$).</li>
+            <li><strong>High Efficiency (95%):</strong> Short transmission paths directly into high-voltage lines minimize losses.</li>
+            <li><strong>Zero Brownouts:</strong> All 6 town buildings (School, Clinic, Farm, Homes) receive full $230\text{V}$ power.</li>
+          </ul>
+        </div>
+
+        <div class="guide-box coal">
+          <h3>🏭 2. Evening Coal Peak (19:30) — Mettur Thermal Power Station</h3>
+          <p>
+            When the sun sets, electricity demand jumps as everyone turns on lights, fans, and televisions. The state must fire up coal boilers at <strong>Mettur (1,440 MW)</strong>.
+          </p>
+          <ul>
+            <li><strong>High Pollution:</strong> Releases thick particulate soot and $0.92\text{ tons CO}_2$ per MWh.</li>
+            <li><strong>Severe Heat Loss (>30%):</strong> Traversing long transmission distances causes electricity to evaporate as heat ($I^2R$ Joule loss).</li>
+            <li><strong>Voltage Sag & Brownouts:</strong> Downstream houses (Houses 4, 5, 6) suffer power drops, dimming bulbs, and blackouts.</li>
+          </ul>
+        </div>
+
+        <div class="guide-box tips">
+          <h3>🎮 3. How to Demo This as a Game in Class</h3>
+          <ul>
+            <li><strong>Click the 2 Big Hero Cards:</strong> Instantly switch between Solar and Coal to show the visual and numerical contrast!</li>
+            <li><strong>Interactive House Toggles:</strong> Click on any building to turn TVs and fans ON/OFF and watch town happiness respond.</li>
+            <li><strong>Click the Solar Panels:</strong> Gives the grid a "Solar Boost" for $+100$ bonus Eco points!</li>
+            <li><strong>30s Game Challenge:</strong> Hit "Start 30s Game" to see if you can balance town happiness and fresh air!</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-dismiss" id="guideDismissBtn">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="engine.js"></script>
+  <script type="module" src="ui.js"></script>
+</body>
+</html>

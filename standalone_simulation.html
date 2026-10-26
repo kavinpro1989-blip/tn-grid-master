@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Tamil Nadu Power Grid Simulation: School Edition (Gamified) -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TN Grid Master: Solar vs Coal Showdown | School Edition</title>
+  <meta name="description" content="An interactive, gamified power grid simulation comparing peak daytime solar energy at Kamuthi against evening coal energy at Mettur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+/* ==========================================================================
+   TN GRID MASTER: SCHOOL EDITION - STYLESHEET
+   Spacious, Non-Congested, Playful Design for School Demonstrations
+   ========================================================================== */
+
+:root {
+  /* Day / Night Sky Palettes */
+  --sky-top: #0284c7;
+  --sky-mid: #38bdf8;
+  --sky-bottom: #e0f2fe;
+  --sun-display: block;
+  --sun-opacity: 1;
+  --moon-display: none;
+  --moon-opacity: 0;
+  --smog-opacity: 0;
+  --solar-glow-opacity: 0.95;
+
+  /* Theme Accents */
+  --color-green: #22c55e;
+  --color-green-light: #86efac;
+  --color-gold: #facc15;
+  --color-gold-light: #fef08a;
+  --color-crimson: #ef4444;
+  --color-crimson-light: #fca5a5;
+  --color-cyan: #38bdf8;
+
+  /* Surfaces & Glassmorphism */
+  --bg-card: rgba(15, 23, 42, 0.8);
+  --bg-card-hover: rgba(30, 41, 59, 0.92);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  /* Typography */
+  --font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Day / Night Theme Modifiers */
+body.theme-solar {
+  --sky-top: #0284c7;
+  --sky-mid: #38bdf8;
+  --sky-bottom: #e0f2fe;
+  --sun-display: block;
+  --sun-opacity: 1;
+  --moon-display: none;
+  --moon-opacity: 0;
+  --smog-opacity: 0;
+  --solar-glow-opacity: 0.95;
+}
+
+body.theme-coal {
+  --sky-top: #090d16;
+  --sky-mid: #1e1b2e;
+  --sky-bottom: #2d1810;
+  --sun-display: none;
+  --sun-opacity: 0;
+  --moon-display: block;
+  --moon-opacity: 0.9;
+  --smog-opacity: 0.85;
+  --solar-glow-opacity: 0;
+}
+
+body.theme-dusk {
+  --sky-top: #1e1b4b;
+  --sky-mid: #991b1b;
+  --sky-bottom: #ea580c;
+  --sun-display: block;
+  --sun-opacity: 0.45;
+  --moon-display: none;
+  --moon-opacity: 0;
+  --smog-opacity: 0.35;
+  --solar-glow-opacity: 0.3;
+}
+
+body.theme-dawn {
+  --sky-top: #1e1b4b;
+  --sky-mid: #b45309;
+  --sky-bottom: #fde047;
+  --sun-display: block;
+  --sun-opacity: 0.7;
+  --moon-display: none;
+  --moon-opacity: 0;
+  --smog-opacity: 0.15;
+  --solar-glow-opacity: 0.5;
+}
+
+body.theme-night {
+  --sky-top: #020617;
+  --sky-mid: #0b1120;
+  --sky-bottom: #111827;
+  --sun-display: none;
+  --sun-opacity: 0;
+  --moon-display: block;
+  --moon-opacity: 0.95;
+  --smog-opacity: 0.6;
+  --solar-glow-opacity: 0;
+}
+
+/* Reset & Foundation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-family);
+  background-color: #020617;
+  color: var(--text-main);
+  user-select: none;
+}
+
+/* Dynamic Sky Layer */
+.sky-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 50%, var(--sky-bottom) 100%);
+  transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.sun-disc {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #fffbeb 0%, #fef08a 40%, #f59e0b 80%, rgba(245, 158, 11, 0) 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 70px 30px rgba(250, 204, 21, 0.65);
+  display: var(--sun-display);
+  opacity: var(--sun-opacity);
+  left: 20%;
+  top: 15%;
+  transform: translate(-50%, -50%);
+  transition: opacity 1s ease, left 0.5s ease-out, top 0.5s ease-out;
+  animation: rotateSun 25s linear infinite;
+  pointer-events: none;
+}
+
+.moon-disc {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 70%, #94a3b8 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 50px 20px rgba(248, 250, 252, 0.35);
+  display: var(--moon-display);
+  opacity: var(--moon-opacity);
+  right: 18%;
+  top: 15%;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+.stars-layer {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(1.5px 1.5px at 40px 50px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 180px 100px, #fef08a, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 320px 160px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 500px 80px, #38bdf8, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 700px 200px, #ffffff, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 600px 350px;
+  opacity: 0.4;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+body.theme-solar .stars-layer {
+  opacity: 0;
+}
+
+.smog-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 15% 30%, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.8) 50%, transparent 100%);
+  opacity: var(--smog-opacity);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.solar-glow-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 18% 40%, rgba(254, 240, 138, 0.35) 0%, rgba(34, 197, 94, 0.2) 40%, transparent 80%);
+  opacity: var(--solar-glow-opacity);
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+/* Master Layout */
+.game-wrapper {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  justify-content: space-between;
+}
+
+/* Header & Badges */
+.game-header {
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 2px solid var(--border-glass);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #0284c7, #22c55e);
+  padding: 6px 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35);
+}
+
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.brand-tagline {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.hud-badges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.3s ease;
+}
+
+.badge-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.badge-emoji {
+  font-size: 1.5rem;
+}
+
+.badge-emoji.spin {
+  display: inline-block;
+  animation: spinFan 1.8s linear infinite;
+}
+
+.badge-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-caption {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.badge-stat {
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.text-green { color: #4ade80; }
+.text-cyan { color: #38bdf8; }
+.text-gold { color: #facc15; }
+.text-red { color: #f87171; }
+
+.icon-toggle-btn, .guide-toggle-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid var(--border-glass);
+  padding: 8px 16px;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-toggle-btn:hover, .guide-toggle-btn:hover {
+  background: rgba(51, 65, 85, 1);
+  transform: translateY(-1px);
+}
+
+.guide-toggle-btn {
+  background: linear-gradient(135deg, #0284c7, #3b82f6);
+  border: none;
+}
+
+/* Challenge Banner */
+.challenge-alert {
+  margin: 10px 28px 0 28px;
+  background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%);
+  padding: 10px 20px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+  animation: bounceBanner 0.4s ease-out;
+  z-index: 20;
+}
+
+.challenge-alert.hidden {
+  display: none !important;
+}
+
+.challenge-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.challenge-icon {
+  font-size: 2rem;
+}
+
+.challenge-text strong {
+  font-size: 0.95rem;
+  display: block;
+}
+
+.challenge-text p {
+  font-size: 0.78rem;
+  color: #fef08a;
+}
+
+.timer-pill {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 6px 18px;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Canvas Viewport */
+.canvas-stage {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+}
+
+.stage-tip {
+  position: absolute;
+  top: 14px;
+  left: 28px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-glass);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  pointer-events: none;
+}
+
+/* Hardware Card Modal Overlay */
+.hardware-card {
+  position: absolute;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(16px);
+  border: 2px solid #38bdf8;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+  padding: 16px;
+  z-index: 30;
+  animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hardware-card.hidden {
+  display: none !important;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon {
+  font-size: 1.4rem;
+}
+
+.card-title-group h3 {
+  font-size: 0.98rem;
+  color: #ffffff;
+}
+
+.card-close {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.card-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.hw-tab {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--border-glass);
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-family: var(--font-family);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hw-tab.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.card-content {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Bottom Controls Deck */
+.deck-controls {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 2px solid var(--border-glass);
+  padding: 14px 28px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 20;
+}
+
+.hero-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: rgba(30, 41, 59, 0.7);
+  color: var(--text-main);
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-icon {
+  font-size: 2.2rem;
+}
+
+.hero-info {
+  flex-grow: 1;
+}
+
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.hero-title-row strong {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.hero-info p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tag-clean {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #22c55e;
+  color: #0f172a;
+}
+
+.tag-dirty {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.hero-card.solar.active {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(250, 204, 21, 0.15) 100%);
+  border-color: #22c55e;
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.35);
+}
+
+.hero-card.solar.active strong {
+  color: #4ade80;
+}
+
+.hero-card.coal.active {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(249, 115, 22, 0.15) 100%);
+  border-color: #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+}
+
+.hero-card.coal.active strong {
+  color: #f87171;
+}
+
+.vs-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+/* Timeline Scrubber Row */
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.clock-display {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
+
+.clock-digits {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.clock-label {
+  font-size: 0.72rem;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.scrubber-bar {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scrubber-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+input[type="range"]#timeRange {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+input[type="range"]#timeRange::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #0284c7;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.8);
+  cursor: grab;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]#timeRange::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.deck-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.deck-btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deck-btn.play {
+  background: rgba(51, 65, 85, 0.85);
+  color: #ffffff;
+}
+
+.deck-btn.challenge {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+}
+
+.deck-btn.inspect {
+  background: rgba(14, 165, 233, 0.2);
+  border: 1px solid #0284c7;
+  color: #38bdf8;
+}
+
+.deck-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Modal Styling */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-backdrop.hidden {
+  display: none !important;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 660px;
+  max-height: 85vh;
+  background: #0f172a;
+  border: 2px solid var(--border-glass);
+  border-radius: 18px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 {
+  font-size: 1.15rem;
+  color: #ffffff;
+}
+
+.modal-exit {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guide-box {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guide-box h3 {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.guide-box p {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.guide-box ul {
+  padding-left: 20px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guide-box.solar {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.guide-box.solar h3 { color: #4ade80; }
+
+.guide-box.coal {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.guide-box.coal h3 { color: #f87171; }
+
+.guide-box.tips {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.guide-box.tips h3 { color: #38bdf8; }
+
+.modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-glass);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-dismiss {
+  background: linear-gradient(135deg, #0284c7, #22c55e);
+  color: #ffffff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 10px;
+  font-family: var(--font-family);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Keyframes */
+@keyframes rotateSun {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes spinFan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceBanner {
+  0% { transform: translateY(-10px); opacity: 0; }
+  60% { transform: translateY(4px); opacity: 1; }
+  100% { transform: translateY(0); }
+}
+
+/* Responsiveness */
+@media (max-width: 900px) {
+  .game-header { padding: 10px 16px; }
+  .hud-badges { gap: 8px; }
+  .badge-item { padding: 4px 10px; }
+  .badge-caption { display: none; }
+  .hero-selector { flex-direction: column; }
+  .vs-badge { display: none; }
+  .deck-controls { padding: 12px 16px; }
+}
+
+</style>
+</head>
+<body class="theme-solar">
+  <!-- Dynamic Sky Background with Sun, Moon, Stars, and Smog -->
+  <div id="skyBackground" class="sky-background">
+    <div class="sun-disc" id="sunDisc"></div>
+    <div class="moon-disc" id="moonDisc"></div>
+    <div class="stars-layer" id="starsLayer"></div>
+    <div class="smog-overlay" id="smogOverlay"></div>
+    <div class="solar-glow-overlay" id="solarGlowOverlay"></div>
+  </div>
+
+  <div class="game-wrapper">
+    <!-- Top Game Bar: Big, Friendly, Clean Badges -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1 class="brand-title">TN GRID MASTER</h1>
+          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Edition</p>
+        </div>
+      </div>
+
+      <!-- Top Gamified Telemetry Badges -->
+      <div class="hud-badges">
+        <!-- Badge 1: Town Happiness -->
+        <div class="badge-item" id="badgeHappiness" title="Town Happiness: Drops when power brownouts occur!">
+          <span class="badge-emoji" id="townEmoji">😃</span>
+          <div class="badge-meta">
+            <span class="badge-caption">TOWN MOOD</span>
+            <span class="badge-stat text-green" id="townHappiness">100% Happy</span>
+          </div>
+        </div>
+
+        <!-- Badge 2: Air Cleanliness -->
+        <div class="badge-item" id="badgeAir" title="Air Quality: Pure under Solar, Smoggy under Coal!">
+          <span class="badge-emoji" id="airEmoji">🌿</span>
+          <div class="badge-meta">
+            <span class="badge-caption">AIR QUALITY</span>
+            <span class="badge-stat text-cyan" id="airQuality">100% Clean</span>
+          </div>
+        </div>
+
+        <!-- Badge 3: Connected Fan RPM -->
+        <div class="badge-item" id="badgeFan" title="Connected Town Fans: Spin fast with clean energy, stall during brownouts!">
+          <span class="badge-emoji spin" id="fanEmoji">🌀</span>
+          <div class="badge-meta">
+            <span class="badge-caption">COOLING FANS</span>
+            <span class="badge-stat text-gold" id="fanRpm">3,600 RPM</span>
+          </div>
+        </div>
+
+        <!-- Badge 4: Player Eco Score -->
+        <div class="badge-item player-score" id="badgeScore" title="Your Clean Energy Score!">
+          <span class="badge-emoji">⭐</span>
+          <div class="badge-meta">
+            <span class="badge-caption">ECO SCORE</span>
+            <span class="badge-stat text-gold" id="playerScore">1,200</span>
+          </div>
+        </div>
+
+        <!-- Sound & Guide Buttons -->
+        <button class="icon-toggle-btn" id="audioBtn" title="Toggle Sound FX">
+          <span id="audioIcon">🔊 Sound ON</span>
+        </button>
+
+        <button class="guide-toggle-btn" id="guideBtn" title="How to Play & Teacher Guide">
+          <span>🎓 Guide</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 30-Second Challenge Banner -->
+    <div class="challenge-alert hidden" id="challengeAlert">
+      <div class="challenge-text">
+        <span class="challenge-icon">🔥</span>
+        <div>
+          <strong id="challengeGoal">MISSION: KEEP THE TOWN POWERED & CLEAN!</strong>
+          <p id="challengeSub">The clock is ticking. Harvest solar energy at noon and manage coal cleanly as the sun sets!</p>
+        </div>
+      </div>
+      <div class="timer-pill">
+        <span id="gameTimer">30s</span>
+      </div>
+    </div>
+
+    <!-- Main Game Canvas Stage -->
+    <main class="canvas-stage" id="canvasStage">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Floating Student Tip -->
+      <div class="stage-tip">
+        <span>💡 <strong>Click to Play:</strong> Click houses to turn appliances on/off! Click the Solar Park for an Eco-Boost! Click the Coal Stacks to see smog penalty!</span>
+      </div>
+
+      <!-- Exploded Hardware Modal Overlay (From old project, gamified) -->
+      <div class="hardware-card hidden" id="hardwareCard">
+        <div class="card-top">
+          <div class="card-title-group">
+            <span class="card-icon" id="hwIcon">🔬</span>
+            <h3 id="hwTitle">Hardware Inspector</h3>
+          </div>
+          <button class="card-close" id="hwCloseBtn">&times;</button>
+        </div>
+        <div class="card-tabs">
+          <button class="hw-tab active" id="tabSolarHw">Solar Module Layers</button>
+          <button class="hw-tab" id="tabCoalHw">Coal Boiler Components</button>
+        </div>
+        <div class="card-content" id="hwContent">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Controls Deck -->
+    <footer class="deck-controls">
+      <!-- Big Hero Comparison Buttons (Perfect for Classroom Demo) -->
+      <div class="hero-selector">
+        <button class="hero-card solar active" id="btnSolarNoon">
+          <span class="hero-icon">☀️</span>
+          <div class="hero-info">
+            <div class="hero-title-row">
+              <strong>12:00 NOON SOLAR PEAK</strong>
+              <span class="tag-clean">100% CLEAN</span>
+            </div>
+            <p>Kamuthi Solar Park • 95% Efficiency • 0g Pollution • All Homes Lit</p>
+          </div>
+        </button>
+
+        <div class="vs-badge">VS</div>
+
+        <button class="hero-card coal" id="btnCoalPeak">
+          <span class="hero-icon">🏭</span>
+          <div class="hero-info">
+            <div class="hero-title-row">
+              <strong>19:30 EVENING COAL PEAK</strong>
+              <span class="tag-dirty">DIRTY & LOSS-PRONE</span>
+            </div>
+            <p>Mettur Coal Station • 32% Heat Loss • High Smog • Brownouts</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Timeline Scrubber & Game Actions -->
+      <div class="timeline-row">
+        <div class="clock-display">
+          <span class="clock-digits" id="clockDigits">12:00 PM</span>
+          <span class="clock-label" id="clockLabel">Peak Solar Noon</span>
+        </div>
+
+        <div class="scrubber-bar">
+          <div class="scrubber-labels">
+            <span>🌅 06:00 Sunrise</span>
+            <span>☀️ 12:00 Solar Peak</span>
+            <span>🌇 18:00 Sunset</span>
+            <span>🌙 20:00 Coal Peak</span>
+          </div>
+          <input 
+            type="range" 
+            id="timeRange" 
+            min="0" 
+            max="1439" 
+            value="720" 
+            step="1"
+            aria-label="Time of Day Slider"
+          >
+        </div>
+
+        <div class="deck-actions">
+          <button class="deck-btn play" id="playToggleBtn">
+            <span id="playIcon">⏸️ Pause</span>
+          </button>
+          <button class="deck-btn challenge" id="challengeBtn">
+            <span>🎮 Start 30s Game</span>
+          </button>
+          <button class="deck-btn inspect" id="inspectBtn">
+            <span>🔬 Inspect Tech</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Classroom Presentation Guide Modal -->
+  <div class="modal-backdrop hidden" id="guideModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>🎓 Tamil Nadu Grid Master: Classroom Presentation Guide</h2>
+        <button class="modal-exit" id="guideCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-box solar">
+          <h3>☀️ 1. Daytime Solar Peak (12:00 Noon) — Kamuthi Solar Park</h3>
+          <p>
+            Kamuthi in Ramanathapuram is one of India's largest solar installations (<strong>648 MW</strong>).
+          </p>
+          <ul>
+            <li><strong>100% Clean:</strong> Generates electricity with zero carbon emissions ($0.00\text{ tons CO}_2$).</li>
+            <li><strong>High Efficiency (95%):</strong> Short transmission paths directly into high-voltage lines minimize losses.</li>
+            <li><strong>Zero Brownouts:</strong> All 6 town buildings (School, Clinic, Farm, Homes) receive full $230\text{V}$ power.</li>
+          </ul>
+        </div>
+
+        <div class="guide-box coal">
+          <h3>🏭 2. Evening Coal Peak (19:30) — Mettur Thermal Power Station</h3>
+          <p>
+            When the sun sets, electricity demand jumps as everyone turns on lights, fans, and televisions. The state must fire up coal boilers at <strong>Mettur (1,440 MW)</strong>.
+          </p>
+          <ul>
+            <li><strong>High Pollution:</strong> Releases thick particulate soot and $0.92\text{ tons CO}_2$ per MWh.</li>
+            <li><strong>Severe Heat Loss (>30%):</strong> Traversing long transmission distances causes electricity to evaporate as heat ($I^2R$ Joule loss).</li>
+            <li><strong>Voltage Sag & Brownouts:</strong> Downstream houses (Houses 4, 5, 6) suffer power drops, dimming bulbs, and blackouts.</li>
+          </ul>
+        </div>
+
+        <div class="guide-box tips">
+          <h3>🎮 3. How to Demo This as a Game in Class</h3>
+          <ul>
+            <li><strong>Click the 2 Big Hero Cards:</strong> Instantly switch between Solar and Coal to show the visual and numerical contrast!</li>
+            <li><strong>Interactive House Toggles:</strong> Click on any building to turn TVs and fans ON/OFF and watch town happiness respond.</li>
+            <li><strong>Click the Solar Panels:</strong> Gives the grid a "Solar Boost" for $+100$ bonus Eco points!</li>
+            <li><strong>30s Game Challenge:</strong> Hit "Start 30s Game" to see if you can balance town happiness and fresh air!</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-dismiss" id="guideDismissBtn">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+/**
+ * ============================================================================
+ * TN GRID MASTER: SCHOOL EDITION - CANVAS GAME ENGINE (engine.js)
+ * Compiled for browser execution.
+ * ============================================================================
+ */
+
+class PowerGridEngine {
+  constructor(canvas, onTelemetry) {
+    this.canvas = canvas;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('2D context unavailable');
+    this.ctx = context;
+    this.dpr = window.devicePixelRatio || 1;
+    this.animFrameId = null;
+    this.lastTime = 0;
+
+    // Game & Sim State
+    this.timeMinutes = 720;
+    this.isRunning = true;
+    this.ecoScore = 1200;
+    this.fanRotation = 0;
+
+    // Grid Graph
+    this.nodes = new Map();
+    this.packets = [];
+    this.smokePuffs = [];
+    this.popTexts = [];
+    this.nextPacketId = 1;
+    this.packetTimer = 0;
+
+    this.onTelemetry = onTelemetry;
+
+    this.setupDpr();
+    this.initTopology();
+    window.addEventListener('resize', () => {
+      this.setupDpr();
+      this.repositionNodes();
+    });
+  }
+
+  setupDpr() {
+    this.dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    this.canvas.width = Math.max(800, rect.width) * this.dpr;
+    this.canvas.height = Math.max(480, rect.height) * this.dpr;
+    this.ctx.scale(this.dpr, this.dpr);
+  }
+
+  initTopology() {
+    this.nodes.clear();
+
+    // 1. Generation Complex (Left)
+    this.nodes.set('plant', {
+      id: 'plant',
+      name: 'Kamuthi Solar Park',
+      role: '648 MW • 100% Clean',
+      icon: '☀️',
+      xNorm: 0.12,
+      yNorm: 0.64,
+      x: 0,
+      y: 0,
+      isLit: true,
+      brownoutLevel: 0,
+      flickerPhase: 0,
+      applianceOn: true
+    });
+
+    // 2. High-Voltage Transmission Pylon 1
+    this.nodes.set('pylon1', {
+      id: 'pylon1',
+      name: 'HV Pylon #1',
+      role: '400 kV Transmission',
+      icon: '🗼',
+      xNorm: 0.30,
+      yNorm: 0.48,
+      x: 0,
+      y: 0,
+      isLit: true,
+      brownoutLevel: 0,
+      flickerPhase: 0,
+      applianceOn: true
+    });
+
+    // 3. Connected Fan Station (Load unit)
+    this.nodes.set('fanStation', {
+      id: 'fanStation',
+      name: 'Connected Fan Station',
+      role: 'Town Grid Load Unit',
+      icon: '🌀',
+      xNorm: 0.46,
+      yNorm: 0.52,
+      x: 0,
+      y: 0,
+      isLit: true,
+      brownoutLevel: 0,
+      flickerPhase: 0,
+      applianceOn: true
+    });
+
+    // 4. TANTRANSCO Main Grid Substation
+    this.nodes.set('substation', {
+      id: 'substation',
+      name: 'TANTRANSCO Substation',
+      role: 'Splits Power to Town',
+      icon: '🏢',
+      xNorm: 0.62,
+      yNorm: 0.60,
+      x: 0,
+      y: 0,
+      isLit: true,
+      brownoutLevel: 0,
+      flickerPhase: 0,
+      applianceOn: true
+    });
+
+    // 5. Six Friendly Town Buildings
+    const houseList = [
+      { id: 'house_1', name: 'Primary School', role: 'Classrooms & Labs', icon: '🏫', x: 0.77, y: 0.44 },
+      { id: 'house_2', name: 'Town Clinic', role: 'Medical Care', icon: '🏥', x: 0.86, y: 0.42 },
+      { id: 'house_3', name: 'Farm House', role: 'Pumps & Motors', icon: '🏡', x: 0.95, y: 0.40 },
+      { id: 'house_4', name: 'Suburban Villa', role: 'AC & Fans', icon: '🏠', x: 0.77, y: 0.76 },
+      { id: 'house_5', name: 'Family Cottage', role: 'Lights & TV', icon: '🏘️', x: 0.86, y: 0.78 },
+      { id: 'house_6', name: 'Village Library', role: 'Terminal Node', icon: '📚', x: 0.95, y: 0.80 }
+    ];
+
+    houseList.forEach((h) => {
+      this.nodes.set(h.id, {
+        id: h.id,
+        name: h.name,
+        role: h.role,
+        icon: h.icon,
+        xNorm: h.x,
+        yNorm: h.y,
+        x: 0,
+        y: 0,
+        isLit: true,
+        brownoutLevel: 0,
+        flickerPhase: Math.random() * Math.PI,
+        applianceOn: true
+      });
+    });
+
+    this.repositionNodes();
+  }
+
+  repositionNodes() {
+    const w = this.canvas.width / this.dpr;
+    const h = this.canvas.height / this.dpr;
+
+    this.nodes.forEach((n) => {
+      n.x = n.xNorm * w;
+      n.y = n.yNorm * h;
+    });
+  }
+
+  start() {
+    if (!this.animFrameId) {
+      this.lastTime = performance.now();
+      this.animFrameId = requestAnimationFrame(this.gameTick.bind(this));
+    }
+  }
+
+  stop() {
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
+    }
+  }
+
+  setTime(minutes) {
+    this.timeMinutes = ((minutes % 1440) + 1440) % 1440;
+  }
+
+  gameTick(timestamp) {
+    const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
+    this.lastTime = timestamp;
+
+    if (this.isRunning) {
+      this.timeMinutes = (this.timeMinutes + dt * 2.2) % 1440;
+    }
+
+    this.updateSimulation(dt);
+    this.renderCanvas();
+
+    this.animFrameId = requestAnimationFrame(this.gameTick.bind(this));
+  }
+
+  updateSimulation(dt) {
+    const hours = this.timeMinutes / 60;
+    const isSolarTime = hours >= 6 && hours <= 18;
+
+    let solarIntensity = 0;
+    if (isSolarTime) {
+      const angle = ((hours - 6) / 12) * Math.PI;
+      solarIntensity = Math.pow(Math.sin(angle), 1.3);
+    }
+    const isSolar = solarIntensity > 0.45;
+
+    const plant = this.nodes.get('plant');
+    if (plant) {
+      if (isSolar) {
+        plant.name = 'Kamuthi Solar Park';
+        plant.role = '648 MW • 100% Clean Solar';
+        plant.icon = '☀️';
+      } else {
+        plant.name = 'Mettur Thermal Station';
+        plant.role = '1,440 MW • Coal Boiler';
+        plant.icon = '🏭';
+      }
+    }
+
+    const efficiencyPct = isSolar 
+      ? Math.round(95 + Math.sin(performance.now() * 0.001) * 2) 
+      : Math.round(68 + Math.sin(performance.now() * 0.001) * 2);
+
+    const targetRpm = isSolar ? 3600 : 1200;
+    this.fanRotation += (targetRpm / 60) * Math.PI * 2 * dt;
+
+    let brownoutCount = 0;
+    let litCount = 0;
+
+    for (let i = 1; i <= 6; i++) {
+      const house = this.nodes.get(`house_${i}`);
+      if (house) {
+        house.flickerPhase += dt * (7 + i * 2);
+
+        if (!house.applianceOn) {
+          house.isLit = false;
+          house.brownoutLevel = 1.0;
+        } else if (isSolar) {
+          house.isLit = true;
+          house.brownoutLevel = 0.0;
+          litCount++;
+        } else {
+          const dropRatio = (i / 6.0) * 0.85;
+          if (dropRatio > 0.42) {
+            house.brownoutLevel = Math.min(1.0, (dropRatio - 0.35) * 2.0);
+            brownoutCount++;
+            if (house.brownoutLevel < 0.75) litCount++;
+          } else {
+            house.brownoutLevel = 0.0;
+            litCount++;
+          }
+        }
+      }
+    }
+
+    const townHappiness = Math.max(10, Math.round(100 - brownoutCount * 22));
+    const airCleanliness = isSolar ? 100 : Math.max(15, Math.round(35 - (1.0 - solarIntensity) * 20));
+
+    if (isSolar) {
+      this.ecoScore += dt * 10;
+    } else {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 3);
+    }
+
+    this.packetTimer += dt;
+    const interval = isSolar ? 0.08 : 0.22;
+    if (this.packetTimer >= interval) {
+      this.packetTimer = 0;
+      this.spawnElectron(isSolar);
+    }
+
+    this.updatePackets(dt);
+    this.updateSmoke(dt, isSolar);
+
+    for (let i = this.popTexts.length - 1; i >= 0; i--) {
+      const pt = this.popTexts[i];
+      pt.life += dt;
+      pt.y -= dt * 26;
+      pt.alpha = Math.max(0, 1.0 - pt.life / pt.maxLife);
+      if (pt.life >= pt.maxLife) {
+        this.popTexts.splice(i, 1);
+      }
+    }
+
+    if (this.onTelemetry) {
+      this.onTelemetry({
+        timeMinutes: this.timeMinutes,
+        isSolar,
+        efficiencyPct,
+        townHappiness,
+        airCleanliness,
+        fanRpm: targetRpm,
+        ecoScore: Math.round(this.ecoScore),
+        housesLitCount: litCount,
+        brownoutCount
+      });
+    }
+  }
+
+  spawnElectron(isSolar) {
+    const plant = this.nodes.get('plant');
+    const pylon1 = this.nodes.get('pylon1');
+    if (!plant || !pylon1) return;
+
+    const targetHouse = Math.floor(Math.random() * 6) + 1;
+    const willEvaporate = !isSolar && Math.random() < 0.32;
+
+    this.packets.push({
+      id: this.nextPacketId++,
+      fromNode: plant,
+      toNode: pylon1,
+      progress: 0,
+      speed: isSolar ? 1.5 : 0.85,
+      isSolar,
+      isEvaporating: willEvaporate,
+      evaporationProgress: 0,
+      targetHouseIndex: targetHouse
+    });
+  }
+
+  updatePackets(dt) {
+    for (let i = this.packets.length - 1; i >= 0; i--) {
+      const p = this.packets[i];
+
+      if (p.isEvaporating && p.progress > 0.4) {
+        p.evaporationProgress += dt * 3.0;
+        if (p.evaporationProgress >= 1.0) {
+          this.packets.splice(i, 1);
+          continue;
+        }
+      }
+
+      p.progress += p.speed * dt;
+      if (p.progress >= 1.0) {
+        const next = this.getNextNode(p.toNode.id, p.targetHouseIndex);
+        if (next) {
+          p.fromNode = p.toNode;
+          p.toNode = next;
+          p.progress = 0;
+        } else {
+          this.packets.splice(i, 1);
+        }
+      }
+    }
+  }
+
+  getNextNode(currentId, targetHouse) {
+    if (currentId === 'pylon1') return this.nodes.get('fanStation') || null;
+    if (currentId === 'fanStation') return this.nodes.get('substation') || null;
+    if (currentId === 'substation') return this.nodes.get(`house_${targetHouse}`) || null;
+    return null;
+  }
+
+  updateSmoke(dt, isSolar) {
+    if (!isSolar) {
+      const plant = this.nodes.get('plant');
+      if (plant && Math.random() < 0.7) {
+        this.smokePuffs.push({
+          x: plant.x + (Math.random() - 0.5) * 35,
+          y: plant.y - 75,
+          vx: Math.random() * 32 + 15,
+          vy: -Math.random() * 42 - 20,
+          radius: Math.random() * 12 + 10,
+          alpha: 0.6,
+          life: 0,
+          maxLife: 2.8
+        });
+      }
+    }
+
+    for (let i = this.smokePuffs.length - 1; i >= 0; i--) {
+      const s = this.smokePuffs[i];
+      s.life += dt;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.radius += dt * 14;
+      s.alpha = Math.max(0, 0.6 * (1.0 - s.life / s.maxLife));
+      if (s.life >= s.maxLife) {
+        this.smokePuffs.splice(i, 1);
+      }
+    }
+  }
+
+  renderCanvas() {
+    const w = this.canvas.width / this.dpr;
+    const h = this.canvas.height / this.dpr;
+
+    this.ctx.clearRect(0, 0, w, h);
+
+    const hours = this.timeMinutes / 60;
+    const isSolarTime = hours >= 6 && hours <= 18;
+
+    this.drawLandscape(w, h, isSolarTime);
+    this.drawPowerLines();
+    this.drawInfrastructure(isSolarTime);
+    this.drawElectrons();
+    this.drawPuffsAndPopups();
+  }
+
+  drawLandscape(w, h, isSolar) {
+    const ctx = this.ctx;
+    const groundY = h * 0.76;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.bezierCurveTo(w * 0.2, groundY - 60, w * 0.4, groundY - 25, w * 0.65, groundY - 55);
+    ctx.bezierCurveTo(w * 0.85, groundY - 75, w * 0.95, groundY - 30, w, groundY - 45);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fillStyle = isSolar ? 'rgba(34, 197, 94, 0.25)' : 'rgba(30, 41, 59, 0.45)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(0, groundY, w, h - groundY);
+    ctx.fillStyle = isSolar ? '#0d281e' : '#090d16';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  drawPowerLines() {
+    const ctx = this.ctx;
+    ctx.save();
+
+    const mainLegs = [
+      ['plant', 'pylon1'],
+      ['pylon1', 'fanStation'],
+      ['fanStation', 'substation']
+    ];
+
+    mainLegs.forEach(([idA, idB]) => {
+      const a = this.nodes.get(idA);
+      const b = this.nodes.get(idB);
+      if (!a || !b) return;
+
+      const midX = (a.x + b.x) / 2;
+      const midY = (a.y + b.y) / 2 + 22;
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.quadraticCurveTo(midX, midY, b.x, b.y);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.quadraticCurveTo(midX, midY, b.x, b.y);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    });
+
+    const sub = this.nodes.get('substation');
+    if (sub) {
+      for (let i = 1; i <= 6; i++) {
+        const house = this.nodes.get(`house_${i}`);
+        if (!house) continue;
+
+        ctx.beginPath();
+        ctx.moveTo(sub.x, sub.y);
+        ctx.lineTo(house.x, house.y);
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.32)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  drawInfrastructure(isSolar) {
+    const ctx = this.ctx;
+
+    this.nodes.forEach((n) => {
+      ctx.save();
+      ctx.translate(n.x, n.y);
+
+      if (n.id === 'plant') {
+        if (isSolar) {
+          this.drawKamuthiSolarPark();
+        } else {
+          this.drawMetturCoalPlant();
+        }
+      } else if (n.id === 'pylon1') {
+        this.drawPylon(n.name);
+      } else if (n.id === 'fanStation') {
+        this.drawFanStation();
+      } else if (n.id === 'substation') {
+        this.drawSubstation();
+      } else if (n.id.startsWith('house_')) {
+        this.drawHouse(n);
+      }
+
+      ctx.restore();
+    });
+  }
+
+  drawKamuthiSolarPark() {
+    const ctx = this.ctx;
+
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(-52, 18, 104, 6);
+    ctx.fillRect(-26, 0, 8, 18);
+    ctx.fillRect(18, 0, 8, 18);
+
+    const offsets = [-34, 0, 34];
+    offsets.forEach((px) => {
+      ctx.save();
+      ctx.translate(px, -4);
+      ctx.rotate(-0.16);
+
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-16, -12, 32, 24, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-11, -8);
+      ctx.lineTo(11, 8);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    ctx.font = '16px Fredoka, sans-serif';
+    ctx.fillText('✨', 38, -25);
+
+    ctx.fillStyle = '#4ade80';
+    ctx.font = 'bold 11px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Kamuthi Solar (648 MW)', 0, 38);
+  }
+
+  drawMetturCoalPlant() {
+    const ctx = this.ctx;
+
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(-36, -16, 72, 36);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(-22, -76, 13, 60);
+    ctx.fillRect(9, -76, 13, 60);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-22, -61, 13, 10);
+    ctx.fillRect(9, -61, 13, 10);
+
+    ctx.fillStyle = '#f97316';
+    ctx.fillRect(-16, 4, 11, 10);
+    ctx.fillRect(6, 4, 11, 10);
+
+    ctx.fillStyle = '#f87171';
+    ctx.font = 'bold 11px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Mettur Coal (1,440 MW)', 0, 38);
+  }
+
+  drawPylon(name) {
+    const ctx = this.ctx;
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(-18, 40);
+    ctx.lineTo(-5, -40);
+    ctx.lineTo(5, -40);
+    ctx.lineTo(18, 40);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-30, -20);
+    ctx.lineTo(30, -20);
+    ctx.moveTo(-35, -35);
+    ctx.lineTo(35, -35);
+    ctx.stroke();
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(-30, -16, 3, 0, Math.PI * 2);
+    ctx.arc(30, -16, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(name, 0, 52);
+  }
+
+  drawFanStation() {
+    const ctx = this.ctx;
+
+    ctx.fillStyle = '#1e293b';
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-24, -16, 48, 38, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(0, 0);
+    ctx.rotate(this.fanRotation);
+
+    ctx.fillStyle = '#38bdf8';
+    for (let i = 0; i < 4; i++) {
+      ctx.rotate(Math.PI / 2);
+      ctx.beginPath();
+      ctx.ellipse(0, -12, 4, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 10px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Town Cooling Station', 0, 36);
+  }
+
+  drawSubstation() {
+    const ctx = this.ctx;
+
+    ctx.fillStyle = '#334155';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-26, -16, 52, 36, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#0f172a';
+    for (let x = -19; x <= 19; x += 9) {
+      ctx.fillRect(x, -11, 4, 26);
+    }
+
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(-11, -27, 6, 11);
+    ctx.fillRect(5, -27, 6, 11);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 10px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TANTRANSCO Substation', 0, 34);
+  }
+
+  drawHouse(n) {
+    const ctx = this.ctx;
+    const isLit = n.isLit && n.brownoutLevel < 0.8;
+    const isBrownout = n.brownoutLevel > 0.2;
+
+    ctx.fillStyle = '#1e293b';
+    ctx.strokeStyle = isBrownout ? '#ef4444' : '#475569';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(-20, -8, 40, 26, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#d97706';
+    ctx.beginPath();
+    ctx.moveTo(-24, -8);
+    ctx.lineTo(0, -26);
+    ctx.lineTo(24, -8);
+    ctx.closePath();
+    ctx.fill();
+
+    let windowColor = '#facc15';
+    if (!n.applianceOn || n.brownoutLevel >= 0.8) {
+      windowColor = '#0f172a';
+    } else if (isBrownout) {
+      const flicker = Math.sin(n.flickerPhase) > 0;
+      windowColor = flicker ? '#f97316' : '#451a03';
+    }
+
+    ctx.fillStyle = windowColor;
+    if (isLit && !isBrownout) {
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 10;
+    }
+    ctx.fillRect(-14, -2, 9, 9);
+    ctx.fillRect(5, -2, 9, 9);
+    ctx.shadowBlur = 0;
+
+    ctx.font = '12px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    const moodEmoji = !n.applianceOn ? '💤' : (isBrownout ? '😰' : '😃');
+    ctx.fillText(`${n.icon} ${moodEmoji}`, 0, -32);
+
+    ctx.fillStyle = isBrownout ? '#f87171' : '#cbd5e1';
+    ctx.font = '10px Fredoka, sans-serif';
+    ctx.fillText(n.name, 0, 28);
+  }
+
+  drawElectrons() {
+    const ctx = this.ctx;
+    ctx.save();
+
+    this.packets.forEach((p) => {
+      const x = p.fromNode.x + p.progress * (p.toNode.x - p.fromNode.x);
+      const y = p.fromNode.y + p.progress * (p.toNode.y - p.fromNode.y);
+
+      if (p.isEvaporating && p.evaporationProgress > 0) {
+        ctx.fillStyle = `rgba(249, 115, 22, ${Math.max(0, 1 - p.evaporationProgress)})`;
+        ctx.beginPath();
+        ctx.arc(x, y - p.evaporationProgress * 15, 6 + p.evaporationProgress * 10, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      }
+
+      ctx.fillStyle = p.isSolar ? '#22c55e' : '#ef4444';
+      ctx.shadowColor = p.isSolar ? '#4ade80' : '#f87171';
+      ctx.shadowBlur = 12;
+
+      ctx.beginPath();
+      ctx.arc(x, y, p.isSolar ? 6 : 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+
+    ctx.restore();
+  }
+
+  drawPuffsAndPopups() {
+    const ctx = this.ctx;
+    ctx.save();
+
+    this.smokePuffs.forEach((s) => {
+      ctx.fillStyle = `rgba(30, 41, 59, ${s.alpha})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    this.popTexts.forEach((pt) => {
+      ctx.fillStyle = pt.color;
+      ctx.globalAlpha = pt.alpha;
+      ctx.font = 'bold 14px Fredoka, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(pt.text, pt.x, pt.y);
+    });
+
+    ctx.restore();
+  }
+
+  handleCanvasClick(clientX, clientY) {
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+
+    for (const node of this.nodes.values()) {
+      const dx = mouseX - node.x;
+      const dy = mouseY - node.y;
+      if (Math.sqrt(dx * dx + dy * dy) < 36) {
+        if (node.id.startsWith('house_')) {
+          node.applianceOn = !node.applianceOn;
+          this.popTexts.push({
+            x: node.x,
+            y: node.y - 42,
+            text: node.applianceOn ? '💡 Lights & Fans ON!' : '💤 Switched OFF',
+            color: node.applianceOn ? '#4ade80' : '#94a3b8',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.2
+          });
+        } else if (node.id === 'plant') {
+          const isSolar = node.name.includes('Solar');
+          if (isSolar) {
+            this.ecoScore += 100;
+            this.popTexts.push({
+              x: node.x,
+              y: node.y - 42,
+              text: '⭐ SOLAR BOOST +100!',
+              color: '#facc15',
+              alpha: 1.0,
+              life: 0,
+              maxLife: 1.4
+            });
+          } else {
+            this.ecoScore = Math.max(0, this.ecoScore - 20);
+            this.popTexts.push({
+              x: node.x,
+              y: node.y - 42,
+              text: '💨 COUGH! -20 SMOG PENALTY',
+              color: '#ef4444',
+              alpha: 1.0,
+              life: 0,
+              maxLife: 1.4
+            });
+          }
+        } else if (node.id === 'fanStation') {
+          this.popTexts.push({
+            x: node.x,
+            y: node.y - 42,
+            text: '🌀 FANS SPINNING FAST!',
+            color: '#38bdf8',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.2
+          });
+        }
+        return node;
+      }
+    }
+    return null;
+  }
+}
+
+
+/**
+ * ============================================================================
+ * TN GRID MASTER: SCHOOL EDITION - UI CONTROLLER (ui.js)
+ * Manages game loops, audio sound synthesis, 30s challenge mode,
+ * hero buttons, and the interactive hardware layer inspector.
+ * ============================================================================
+ */
+
+// PowerGridEngine loaded globally
+
+const elements = {
+  canvas: document.getElementById('gameCanvas'),
+  timeRange: document.getElementById('timeRange'),
+  clockDigits: document.getElementById('clockDigits'),
+  clockLabel: document.getElementById('clockLabel'),
+  playToggleBtn: document.getElementById('playToggleBtn'),
+  playIcon: document.getElementById('playIcon'),
+  challengeBtn: document.getElementById('challengeBtn'),
+  challengeAlert: document.getElementById('challengeAlert'),
+  gameTimer: document.getElementById('gameTimer'),
+  inspectBtn: document.getElementById('inspectBtn'),
+  btnSolarNoon: document.getElementById('btnSolarNoon'),
+  btnCoalPeak: document.getElementById('btnCoalPeak'),
+  townHappiness: document.getElementById('townHappiness'),
+  townEmoji: document.getElementById('townEmoji'),
+  airQuality: document.getElementById('airQuality'),
+  airEmoji: document.getElementById('airEmoji'),
+  fanRpm: document.getElementById('fanRpm'),
+  playerScore: document.getElementById('playerScore'),
+  audioBtn: document.getElementById('audioBtn'),
+  audioIcon: document.getElementById('audioIcon'),
+  guideBtn: document.getElementById('guideBtn'),
+  guideModal: document.getElementById('guideModal'),
+  guideCloseBtn: document.getElementById('guideCloseBtn'),
+  guideDismissBtn: document.getElementById('guideDismissBtn'),
+  sunDisc: document.getElementById('sunDisc'),
+  hardwareCard: document.getElementById('hardwareCard'),
+  hwIcon: document.getElementById('hwIcon'),
+  hwTitle: document.getElementById('hwTitle'),
+  hwCloseBtn: document.getElementById('hwCloseBtn'),
+  tabSolarHw: document.getElementById('tabSolarHw'),
+  tabCoalHw: document.getElementById('tabCoalHw'),
+  hwContent: document.getElementById('hwContent')
+};
+
+// Web Audio Sound Synthesizer
+class SoundFX {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  toggle() {
+    this.init();
+    this.muted = !this.muted;
+    return !this.muted;
+  }
+
+  playSolarChime() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(this.ctx.currentTime + idx * 0.08);
+      osc.stop(this.ctx.currentTime + idx * 0.08 + 0.4);
+    });
+  }
+
+  playCoalRumble() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(110, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(65, this.ctx.currentTime + 0.4);
+
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.5);
+  }
+
+  playPop() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08);
+
+    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.12);
+  }
+}
+
+const sfx = new SoundFX();
+const engine = new PowerGridEngine(elements.canvas, handleTelemetry);
+
+let challengeRunning = false;
+let challengeTime = 30;
+let challengeTimer = null;
+let currentHwTab = 'solar';
+
+function handleTelemetry(t) {
+  // Update Badges
+  elements.townHappiness.textContent = `${t.townHappiness}%`;
+  elements.townHappiness.className = t.townHappiness >= 80 ? 'badge-stat text-green' : (t.townHappiness >= 50 ? 'badge-stat text-gold' : 'badge-stat text-red');
+  elements.townEmoji.textContent = t.townHappiness >= 80 ? '😃' : (t.townHappiness >= 50 ? '😐' : '😰');
+
+  elements.airQuality.textContent = t.airCleanliness >= 80 ? '100% Clean' : (t.airCleanliness >= 40 ? 'Moderate' : 'Smoggy 😷');
+  elements.airQuality.className = t.airCleanliness >= 80 ? 'badge-stat text-green' : (t.airCleanliness >= 40 ? 'badge-stat text-gold' : 'badge-stat text-red');
+  elements.airEmoji.textContent = t.airCleanliness >= 80 ? '🌿' : (t.airCleanliness >= 40 ? '⛅' : '🏭');
+
+  elements.fanRpm.textContent = `${t.fanRpm} RPM`;
+  elements.playerScore.textContent = t.ecoScore.toLocaleString();
+
+  // Update Clock
+  updateClock(t.timeMinutes);
+}
+
+function updateClock(totalMinutes) {
+  const hours24 = Math.floor(totalMinutes / 60);
+  const minutes = Math.floor(totalMinutes % 60);
+
+  const meridiem = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const padMin = minutes.toString().padStart(2, '0');
+
+  elements.clockDigits.textContent = `${hours12}:${padMin} ${meridiem}`;
+
+  if (document.activeElement !== elements.timeRange) {
+    elements.timeRange.value = Math.round(totalMinutes).toString();
+  }
+
+  const body = document.body;
+  let phase = '';
+
+  if (hours24 >= 8 && hours24 < 16) {
+    body.className = 'theme-solar';
+    phase = 'Peak Solar Noon (Kamuthi)';
+    elements.btnSolarNoon.classList.add('active');
+    elements.btnCoalPeak.classList.remove('active');
+  } else if (hours24 >= 16 && hours24 < 18) {
+    body.className = 'theme-dusk';
+    phase = 'Sunset / Thermal Ramp';
+    elements.btnSolarNoon.classList.remove('active');
+    elements.btnCoalPeak.classList.remove('active');
+  } else if (hours24 >= 18 && hours24 < 22) {
+    body.className = 'theme-coal';
+    phase = 'Evening Peak Coal (Mettur)';
+    elements.btnCoalPeak.classList.add('active');
+    elements.btnSolarNoon.classList.remove('active');
+  } else if (hours24 >= 22 || hours24 < 5) {
+    body.className = 'theme-night';
+    phase = 'Night Baseload';
+    elements.btnSolarNoon.classList.remove('active');
+    elements.btnCoalPeak.classList.remove('active');
+  } else {
+    body.className = 'theme-dawn';
+    phase = 'Sunrise Awakening';
+    elements.btnSolarNoon.classList.remove('active');
+    elements.btnCoalPeak.classList.remove('active');
+  }
+
+  elements.clockLabel.textContent = phase;
+
+  // Move Sun across sky
+  if (hours24 >= 6 && hours24 <= 18) {
+    const dayProgress = (totalMinutes - 360) / 720;
+    const sunLeft = 10 + dayProgress * 75;
+    const sunTop = 45 - Math.sin(dayProgress * Math.PI) * 35;
+    elements.sunDisc.style.left = `${sunLeft}%`;
+    elements.sunDisc.style.top = `${sunTop}%`;
+  }
+}
+
+// Hardware Layer Inspector (From old project)
+const hardwareData = {
+  solar: [
+    { name: 'Tempered Anti-Reflective Glass', role: 'Protects cells and transmits 95%+ incident sunlight' },
+    { name: 'EVA Encapsulant Sheets', role: 'Damp-heat protection and optical index matching' },
+    { name: 'TOPCon n-Type Silicon Cells', role: 'Core semiconductor converting photons directly into DC electrons' },
+    { name: 'Silver Grid Busbars', role: 'Low-resistance electron collector contacts' },
+    { name: 'Weatherproof Backsheet', role: 'High electrical dielectric insulation and UV barrier' }
+  ],
+  coal: [
+    { name: 'Coal Pulverizer Mills', role: 'Grinds raw lump coal into fine 75-micron powder' },
+    { name: 'Supercritical Boiler Furnace', role: 'Burns coal at 1,400°C generating high-pressure steam' },
+    { name: 'Multi-Stage Steam Turbines', role: 'Rotates generator at 3,600 RPM using thermal expansion' },
+    { name: 'Cooling Towers', role: 'Dissipates waste Rankine cycle heat via evaporative cooling' },
+    { name: 'Electrostatic Precipitator & Chimney', role: 'Captures fly ash before releasing flue gases' }
+  ]
+};
+
+function renderHardwareTab(tabKey) {
+  currentHwTab = tabKey;
+  if (tabKey === 'solar') {
+    elements.tabSolarHw.classList.add('active');
+    elements.tabCoalHw.classList.remove('active');
+    elements.hwIcon.textContent = '☀️';
+    elements.hwTitle.textContent = 'Kamuthi Solar Module Hardware';
+  } else {
+    elements.tabCoalHw.classList.add('active');
+    elements.tabSolarHw.classList.remove('active');
+    elements.hwIcon.textContent = '🏭';
+    elements.hwTitle.textContent = 'Mettur Coal Boiler Hardware';
+  }
+
+  const items = hardwareData[tabKey];
+  elements.hwContent.innerHTML = items.map((item, idx) => `
+    <div style="background: rgba(2, 6, 23, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+      <div style="color: ${tabKey === 'solar' ? '#4ade80' : '#f87171'}; font-weight: bold; margin-bottom: 2px;">
+        ${idx + 1}. ${item.name}
+      </div>
+      <div style="color: #cbd5e1; font-size: 0.74rem;">${item.role}</div>
+    </div>
+  `).join('');
+}
+
+function initEvents() {
+  // Hero Button 1: Solar Noon
+  elements.btnSolarNoon.addEventListener('click', () => {
+    sfx.playSolarChime();
+    engine.setTime(720);
+    updateClock(720);
+  });
+
+  // Hero Button 2: Coal Evening
+  elements.btnCoalPeak.addEventListener('click', () => {
+    sfx.playCoalRumble();
+    engine.setTime(1170);
+    updateClock(1170);
+  });
+
+  // Time Slider
+  elements.timeRange.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    engine.setTime(val);
+    updateClock(val);
+  });
+
+  // Play / Pause
+  elements.playToggleBtn.addEventListener('click', () => {
+    sfx.playPop();
+    engine.isRunning = !engine.isRunning;
+    elements.playIcon.textContent = engine.isRunning ? '⏸️ Pause' : '▶️ Play';
+  });
+
+  // Audio Toggle
+  elements.audioBtn.addEventListener('click', () => {
+    const active = sfx.toggle();
+    elements.audioIcon.textContent = active ? '🔊 Sound ON' : '🔇 Sound OFF';
+  });
+
+  // 30s Challenge
+  elements.challengeBtn.addEventListener('click', () => {
+    startChallenge();
+  });
+
+  // Hardware Inspector
+  elements.inspectBtn.addEventListener('click', () => {
+    sfx.playPop();
+    renderHardwareTab('solar');
+    elements.hardwareCard.style.left = '30px';
+    elements.hardwareCard.style.top = '70px';
+    elements.hardwareCard.classList.remove('hidden');
+  });
+
+  elements.hwCloseBtn.addEventListener('click', () => {
+    elements.hardwareCard.classList.add('hidden');
+  });
+
+  elements.tabSolarHw.addEventListener('click', () => {
+    sfx.playPop();
+    renderHardwareTab('solar');
+  });
+
+  elements.tabCoalHw.addEventListener('click', () => {
+    sfx.playPop();
+    renderHardwareTab('coal');
+  });
+
+  // Guide Modal
+  elements.guideBtn.addEventListener('click', () => {
+    sfx.playPop();
+    elements.guideModal.classList.remove('hidden');
+  });
+
+  elements.guideCloseBtn.addEventListener('click', () => {
+    elements.guideModal.classList.add('hidden');
+  });
+
+  elements.guideDismissBtn.addEventListener('click', () => {
+    sfx.playPop();
+    elements.guideModal.classList.add('hidden');
+  });
+
+  // Canvas Click
+  elements.canvas.addEventListener('click', (e) => {
+    sfx.playPop();
+    engine.handleCanvasClick(e.clientX, e.clientY);
+  });
+}
+
+function startChallenge() {
+  if (challengeRunning) return;
+  challengeRunning = true;
+  challengeTime = 30;
+  elements.challengeAlert.classList.remove('hidden');
+  elements.gameTimer.textContent = `${challengeTime}s`;
+  sfx.playSolarChime();
+
+  engine.setTime(420); // 07:00 AM Sunrise
+  engine.isRunning = true;
+
+  if (challengeTimer) clearInterval(challengeTimer);
+  challengeTimer = setInterval(() => {
+    challengeTime--;
+    elements.gameTimer.textContent = `${challengeTime}s`;
+    engine.setTime(engine.timeMinutes + 25);
+
+    if (challengeTime <= 0) {
+      clearInterval(challengeTimer);
+      challengeRunning = false;
+      elements.challengeAlert.classList.add('hidden');
+      sfx.playSolarChime();
+
+      alert(`🎉 30-SECOND GRID CHALLENGE COMPLETE!\n\nFinal Score: ${Math.round(engine.ecoScore)} Eco Points!\nGrade: A+ Clean Energy Master!\n\nYou kept Tamil Nadu powered and proved why solar energy keeps the town happy and the air fresh!`);
+    }
+  }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initEvents();
+  engine.start();
+});
+
+</script>
+</body>
+</html>
