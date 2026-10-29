@@ -16,10 +16,22 @@ export class PowerGridEngine {
     this.lastTime = 0;
 
     // Game & Sim State
-    this.timeMinutes = 720;
+    this.timeMinutes = 720; // Default: 12:00 Noon
     this.isRunning = true;
+    this.autoAdvanceTime = false; // 🛑 Time locked! Sun never moves on its own
     this.ecoScore = 1200;
     this.fanRotation = 0;
+
+    // 🎛️ 8 Master of Control Levers (Full Grid Authority)
+    this.sliderSunshine   = 100; // 0 - 100% (Solar PV harvest)
+    this.sliderStorage    = 350; // 0 - 500 MWh (Battery reserve buffer)
+    this.sliderCoalFire   = 40;  // 0 - 100% (Thermal boiler burn rate)
+    this.sliderScrubber   = 80;  // 0 - 100% (Chimney soot precipitator)
+    this.sliderTownLoad   = 2;   // 1 (Eco), 2 (Normal), 3 (Heavy), 4 (Peak)
+    this.sliderAgriPumps  = 50;  // 0 - 100% (Agricultural irrigation motors)
+    this.sliderVoltage    = 230; // 190V - 250V (Substation transformer tap)
+    this.sliderGridTie    = 0;   // -200 MW (Export) to +200 MW (Import)
+    this.currentLineLossPct = 5;
 
     // Grid Graph
     this.nodes = new Map();
@@ -42,9 +54,11 @@ export class PowerGridEngine {
   setupDpr() {
     this.dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.getBoundingClientRect();
-    this.canvas.width = Math.max(800, rect.width) * this.dpr;
-    this.canvas.height = Math.max(480, rect.height) * this.dpr;
-    this.ctx.scale(this.dpr, this.dpr);
+    const w = rect.width > 0 ? rect.width : 1100;
+    const h = rect.height > 0 ? rect.height : 520;
+    this.canvas.width = Math.round(w * this.dpr);
+    this.canvas.height = Math.round(h * this.dpr);
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
   }
 
   initTopology() {
@@ -176,7 +190,8 @@ export class PowerGridEngine {
     const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
     this.lastTime = timestamp;
 
-    if (this.isRunning) {
+    // Time is locked unless explicitly commanded by user or challenge
+    if (this.autoAdvanceTime) {
       this.timeMinutes = (this.timeMinutes + dt * 2.2) % 1440;
     }
 
@@ -190,12 +205,16 @@ export class PowerGridEngine {
     const hours = this.timeMinutes / 60;
     const isSolarTime = hours >= 6 && hours <= 18;
 
-    let solarIntensity = 0;
+    let baseSun = 0;
     if (isSolarTime) {
       const angle = ((hours - 6) / 12) * Math.PI;
-      solarIntensity = Math.pow(Math.sin(angle), 1.3);
+      baseSun = Math.pow(Math.sin(angle), 1.3);
     }
-    const isSolar = solarIntensity > 0.45;
+    
+    // Dynamic Slider Modulation (100% Manual Master Control)
+    const effectiveSolar = baseSun * (this.sliderSunshine / 100);
+    const batteryBacking = this.sliderStorage > 50 && effectiveSolar < 0.45;
+    const isSolar = (effectiveSolar > 0.35) || (batteryBacking && this.sliderCoalFire < 45);
 
     const plant = this.nodes.get('plant');
     if (plant) {
@@ -210,13 +229,35 @@ export class PowerGridEngine {
       }
     }
 
-    const efficiencyPct = isSolar 
-      ? Math.round(95 + Math.sin(performance.now() * 0.001) * 2) 
-      : Math.round(68 + Math.sin(performance.now() * 0.001) * 2);
+    // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
+    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
+    const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
+    const netGridTie  = this.sliderGridTie; // negative = export, positive = import
+    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
 
-    const targetRpm = isSolar ? 3600 : 1200;
+    // Voltage & Line Loss (Joule Heating I^2 R)
+    // 230V is nominal. Low voltage causes brownout; excessive voltage triggers transmission sparks!
+    const voltageSagPenalty = Math.max(0, (230 - this.sliderVoltage) / 20.0);
+    const voltageOverload   = Math.max(0, (this.sliderVoltage - 238) / 12.0);
+    const coalStress = (this.sliderCoalFire / 100) * (totalDemand / 650.0);
+
+    const lineLossPct = isSolar 
+      ? Math.round(5 + (1.0 - effectiveSolar) * 5 + voltageOverload * 14) 
+      : Math.round(20 + coalStress * 24 + voltageOverload * 18);
+    this.currentLineLossPct = lineLossPct;
+    const efficiencyPct = Math.max(25, 100 - lineLossPct);
+
+    // Fan RPM: Direct visual consequence of power delivery & voltage
+    let targetRpm = 3600;
+    const voltageRatio = this.sliderVoltage / 230.0;
+    if (isSolar) {
+      targetRpm = Math.round((2800 + (effectiveSolar * 800)) * voltageRatio);
+    } else {
+      targetRpm = Math.max(250, Math.round((2200 - coalStress * 1500 - voltageSagPenalty * 900) * voltageRatio));
+    }
     this.fanRotation += (targetRpm / 60) * Math.PI * 2 * dt;
 
+    // Load & Brownout Calculation
     let brownoutCount = 0;
     let litCount = 0;
 
@@ -225,19 +266,24 @@ export class PowerGridEngine {
       if (house) {
         house.flickerPhase += dt * (7 + i * 2);
 
-        if (!house.applianceOn) {
+        // Special logic for Farm (house_3): heavily affected by agri pump demand
+        const isFarm = (house.id === 'house_3');
+        const farmOverload = isFarm && (this.sliderAgriPumps > 75) && !isSolar;
+
+        if (!house.applianceOn || farmOverload) {
           house.isLit = false;
           house.brownoutLevel = 1.0;
-        } else if (isSolar) {
+        } else if (isSolar && (effectiveSolar >= 0.25 || this.sliderStorage > 40) && this.sliderVoltage >= 205) {
           house.isLit = true;
           house.brownoutLevel = 0.0;
           litCount++;
         } else {
-          const dropRatio = (i / 6.0) * 0.85;
-          if (dropRatio > 0.42) {
-            house.brownoutLevel = Math.min(1.0, (dropRatio - 0.35) * 2.0);
+          // Downstream houses suffer voltage drops under coal load
+          const dropRatio = (i / 6.0) * (0.38 + coalStress * 0.60 + voltageSagPenalty * 0.55);
+          if (dropRatio > 0.35 || this.sliderVoltage < 205) {
+            house.brownoutLevel = Math.min(1.0, (dropRatio - 0.30) * 2.6);
             brownoutCount++;
-            if (house.brownoutLevel < 0.75) litCount++;
+            if (house.brownoutLevel < 0.70) litCount++;
           } else {
             house.brownoutLevel = 0.0;
             litCount++;
@@ -246,20 +292,27 @@ export class PowerGridEngine {
       }
     }
 
-    const townHappiness = Math.max(10, Math.round(100 - brownoutCount * 22));
-    const airCleanliness = isSolar ? 100 : Math.max(15, Math.round(35 - (1.0 - solarIntensity) * 20));
+    // Smog and Air Quality
+    const rawSmog = isSolar ? 0 : (this.sliderCoalFire / 100) * 100;
+    const filterReduction = (this.sliderScrubber / 100) * 0.82;
+    const finalSmog = isSolar ? 0 : Math.round(rawSmog * (1.0 - filterReduction));
+    const airCleanliness = Math.max(10, 100 - finalSmog);
 
-    if (isSolar) {
-      this.ecoScore += dt * 10;
-    } else {
-      this.ecoScore = Math.max(0, this.ecoScore - dt * 3);
+    // Town Happiness
+    const townHappiness = Math.max(10, Math.round(100 - (brownoutCount * 18) - (finalSmog * 0.25)));
+
+    // Eco Score Dynamics
+    if (townHappiness >= 85 && airCleanliness >= 80) {
+      this.ecoScore += dt * 25;
+    } else if (brownoutCount > 1 || airCleanliness < 45) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 15);
     }
 
     this.packetTimer += dt;
-    const interval = isSolar ? 0.08 : 0.22;
+    const interval = isSolar ? 0.08 : 0.20;
     if (this.packetTimer >= interval) {
       this.packetTimer = 0;
-      this.spawnElectron(isSolar);
+      this.spawnElectron(isSolar, lineLossPct);
     }
 
     this.updatePackets(dt);
@@ -285,18 +338,38 @@ export class PowerGridEngine {
         fanRpm: targetRpm,
         ecoScore: Math.round(this.ecoScore),
         housesLitCount: litCount,
-        brownoutCount
+        brownoutCount,
+        lineLossPct,
+        storageMwh: Math.round(this.sliderStorage),
+        sunshinePct: this.sliderSunshine,
+        coalFirePct: this.sliderCoalFire,
+        scrubberPct: this.sliderScrubber,
+        townLoad: this.sliderTownLoad,
+        agriPumps: this.sliderAgriPumps,
+        voltage: this.sliderVoltage,
+        gridTie: this.sliderGridTie
       });
     }
   }
 
-  spawnElectron(isSolar) {
+  setSlider(name, value) {
+    if (name === 'sunshine')  this.sliderSunshine  = Math.max(0, Math.min(100, value));
+    if (name === 'storage')   this.sliderStorage   = Math.max(0, Math.min(500, value));
+    if (name === 'coalFire')  this.sliderCoalFire  = Math.max(0, Math.min(100, value));
+    if (name === 'scrubber')  this.sliderScrubber  = Math.max(0, Math.min(100, value));
+    if (name === 'townLoad')  this.sliderTownLoad  = Math.max(1, Math.min(4, value));
+    if (name === 'agriPumps') this.sliderAgriPumps = Math.max(0, Math.min(100, value));
+    if (name === 'voltage')   this.sliderVoltage   = Math.max(190, Math.min(250, value));
+    if (name === 'gridTie')   this.sliderGridTie   = Math.max(-200, Math.min(200, value));
+  }
+
+  spawnElectron(isSolar, lineLossPct = 5) {
     const plant = this.nodes.get('plant');
     const pylon1 = this.nodes.get('pylon1');
     if (!plant || !pylon1) return;
 
     const targetHouse = Math.floor(Math.random() * 6) + 1;
-    const willEvaporate = !isSolar && Math.random() < 0.32;
+    const willEvaporate = !isSolar && Math.random() < (lineLossPct / 100);
 
     this.packets.push({
       id: this.nextPacketId++,
@@ -395,20 +468,43 @@ export class PowerGridEngine {
     const groundY = h * 0.76;
 
     ctx.save();
+    // Distant background ridge
     ctx.beginPath();
-    ctx.moveTo(0, groundY);
-    ctx.bezierCurveTo(w * 0.2, groundY - 60, w * 0.4, groundY - 25, w * 0.65, groundY - 55);
-    ctx.bezierCurveTo(w * 0.85, groundY - 75, w * 0.95, groundY - 30, w, groundY - 45);
+    ctx.moveTo(0, groundY - 30);
+    ctx.bezierCurveTo(w * 0.25, groundY - 75, w * 0.5, groundY - 35, w * 0.75, groundY - 65);
+    ctx.bezierCurveTo(w * 0.9, groundY - 80, w * 0.98, groundY - 40, w, groundY - 50);
     ctx.lineTo(w, h);
     ctx.lineTo(0, h);
     ctx.closePath();
-    ctx.fillStyle = isSolar ? 'rgba(34, 197, 94, 0.25)' : 'rgba(30, 41, 59, 0.45)';
+    ctx.fillStyle = isSolar ? 'rgba(16, 185, 129, 0.16)' : 'rgba(30, 41, 59, 0.4)';
     ctx.fill();
 
+    // Foreground rolling terrain
     ctx.beginPath();
-    ctx.rect(0, groundY, w, h - groundY);
-    ctx.fillStyle = isSolar ? '#0d281e' : '#090d16';
+    ctx.moveTo(0, groundY);
+    ctx.bezierCurveTo(w * 0.2, groundY - 35, w * 0.45, groundY - 10, w * 0.7, groundY - 30);
+    ctx.bezierCurveTo(w * 0.85, groundY - 45, w * 0.95, groundY - 15, w, groundY - 25);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fillStyle = isSolar ? '#0a2318' : '#0a0e1a';
     ctx.fill();
+
+    // Base ground solid bedrock
+    ctx.beginPath();
+    ctx.rect(0, groundY + 10, w, h - groundY);
+    ctx.fillStyle = isSolar ? '#061710' : '#060810';
+    ctx.fill();
+
+    // Subtle modern terrain contour accent line
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.bezierCurveTo(w * 0.2, groundY - 35, w * 0.45, groundY - 10, w * 0.7, groundY - 30);
+    ctx.bezierCurveTo(w * 0.85, groundY - 45, w * 0.95, groundY - 15, w, groundY - 25);
+    ctx.strokeStyle = isSolar ? 'rgba(52, 211, 153, 0.35)' : 'rgba(148, 163, 184, 0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
     ctx.restore();
   }
 
@@ -493,7 +589,7 @@ export class PowerGridEngine {
   drawKamuthiSolarPark() {
     const ctx = this.ctx;
 
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#475569';
     ctx.fillRect(-52, 18, 104, 6);
     ctx.fillRect(-26, 0, 8, 18);
     ctx.fillRect(18, 0, 8, 18);
@@ -504,19 +600,20 @@ export class PowerGridEngine {
       ctx.translate(px, -4);
       ctx.rotate(-0.16);
 
-      ctx.fillStyle = '#0284c7';
+      ctx.fillStyle = '#0369a1';
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.roundRect(-16, -12, 32, 24, 4);
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(-11, -8);
-      ctx.lineTo(11, 8);
+      ctx.moveTo(-16, 0); ctx.lineTo(16, 0);
+      ctx.moveTo(0, -12); ctx.lineTo(0, 12);
+      ctx.moveTo(-11, -8); ctx.lineTo(11, 8);
       ctx.stroke();
       ctx.restore();
     });
@@ -524,7 +621,7 @@ export class PowerGridEngine {
     ctx.font = '16px Fredoka, sans-serif';
     ctx.fillText('✨', 38, -25);
 
-    ctx.fillStyle = '#4ade80';
+    ctx.fillStyle = '#34d399';
     ctx.font = 'bold 11px Fredoka, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Kamuthi Solar (648 MW)', 0, 38);

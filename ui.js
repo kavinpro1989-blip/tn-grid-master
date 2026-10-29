@@ -27,8 +27,6 @@ const elements = {
   airEmoji: document.getElementById('airEmoji'),
   fanRpm: document.getElementById('fanRpm'),
   playerScore: document.getElementById('playerScore'),
-  audioBtn: document.getElementById('audioBtn'),
-  audioIcon: document.getElementById('audioIcon'),
   guideBtn: document.getElementById('guideBtn'),
   guideModal: document.getElementById('guideModal'),
   guideCloseBtn: document.getElementById('guideCloseBtn'),
@@ -40,96 +38,39 @@ const elements = {
   hwCloseBtn: document.getElementById('hwCloseBtn'),
   tabSolarHw: document.getElementById('tabSolarHw'),
   tabCoalHw: document.getElementById('tabCoalHw'),
-  hwContent: document.getElementById('hwContent')
+  hwContent: document.getElementById('hwContent'),
+
+  // 🎛️ 8 Manual Control Levers (Master of Control)
+  sliderSunshine: document.getElementById('sliderSunshine'),
+  valSunshine: document.getElementById('valSunshine'),
+  sliderStorage: document.getElementById('sliderStorage'),
+  valStorage: document.getElementById('valStorage'),
+  sliderCoalFire: document.getElementById('sliderCoalFire'),
+  valCoalFire: document.getElementById('valCoalFire'),
+  sliderScrubber: document.getElementById('sliderScrubber'),
+  valScrubber: document.getElementById('valScrubber'),
+  sliderTownLoad: document.getElementById('sliderTownLoad'),
+  valTownLoad: document.getElementById('valTownLoad'),
+  sliderAgriPumps: document.getElementById('sliderAgriPumps'),
+  valAgriPumps: document.getElementById('valAgriPumps'),
+  sliderVoltage: document.getElementById('sliderVoltage'),
+  valVoltage: document.getElementById('valVoltage'),
+  sliderGridTie: document.getElementById('sliderGridTie'),
+  valGridTie: document.getElementById('valGridTie')
 };
 
-// Web Audio Sound Synthesizer
+// Web Audio Sound Synthesizer (Permanently Silenced per User Request)
 class SoundFX {
   constructor() {
     this.ctx = null;
-    this.muted = false;
+    this.muted = true;
   }
 
-  init() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) this.ctx = new AudioCtx();
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-  }
-
-  toggle() {
-    this.init();
-    this.muted = !this.muted;
-    return !this.muted;
-  }
-
-  playSolarChime() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-    notes.forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
-
-      gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(this.ctx.currentTime + idx * 0.08);
-      osc.stop(this.ctx.currentTime + idx * 0.08 + 0.4);
-    });
-  }
-
-  playCoalRumble() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(110, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(65, this.ctx.currentTime + 0.4);
-
-    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.5);
-  }
-
-  playPop() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08);
-
-    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.12);
-  }
+  init() {}
+  toggle() { return false; }
+  playSolarChime() {}
+  playCoalRumble() {}
+  playPop() {}
 }
 
 const sfx = new SoundFX();
@@ -201,7 +142,7 @@ function updateClock(totalMinutes) {
     elements.btnCoalPeak.classList.remove('active');
   }
 
-  elements.clockLabel.textContent = phase;
+  elements.clockLabel.textContent = `${phase}${engine.autoAdvanceTime ? '' : ' • 🔒 Locked'}`;
 
   // Move Sun across sky
   if (hours24 >= 6 && hours24 <= 18) {
@@ -278,17 +219,12 @@ function initEvents() {
     updateClock(val);
   });
 
-  // Play / Pause
+  // Play / Pause (Toggles Auto-Clock Advance)
   elements.playToggleBtn.addEventListener('click', () => {
     sfx.playPop();
-    engine.isRunning = !engine.isRunning;
-    elements.playIcon.textContent = engine.isRunning ? '⏸️ Pause' : '▶️ Play';
-  });
-
-  // Audio Toggle
-  elements.audioBtn.addEventListener('click', () => {
-    const active = sfx.toggle();
-    elements.audioIcon.textContent = active ? '🔊 Sound ON' : '🔇 Sound OFF';
+    engine.autoAdvanceTime = !engine.autoAdvanceTime;
+    elements.playIcon.textContent = engine.autoAdvanceTime ? '▶️ Auto-Clock' : '🔒 Clock Locked';
+    updateClock(engine.timeMinutes);
   });
 
   // 30s Challenge
@@ -339,6 +275,72 @@ function initEvents() {
     sfx.playPop();
     engine.handleCanvasClick(e.clientX, e.clientY);
   });
+
+  // 🎛️ 5 Multi-Sliders Event Listeners
+  if (elements.sliderSunshine) {
+    elements.sliderSunshine.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valSunshine.textContent = `${val}%`;
+      engine.setSlider('sunshine', val);
+    });
+  }
+
+  if (elements.sliderStorage) {
+    elements.sliderStorage.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valStorage.textContent = `${val} MWh`;
+      engine.setSlider('storage', val);
+    });
+  }
+
+  if (elements.sliderCoalFire) {
+    elements.sliderCoalFire.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valCoalFire.textContent = `${val}%`;
+      engine.setSlider('coalFire', val);
+    });
+  }
+
+  if (elements.sliderScrubber) {
+    elements.sliderScrubber.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valScrubber.textContent = `${val}%`;
+      engine.setSlider('scrubber', val);
+    });
+  }
+
+  if (elements.sliderTownLoad) {
+    const loadLabels = ['', 'Eco (Low)', 'Normal', 'Heavy', 'Peak Demand'];
+    elements.sliderTownLoad.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valTownLoad.textContent = loadLabels[val] || 'Normal';
+      engine.setSlider('townLoad', val);
+    });
+  }
+
+  if (elements.sliderAgriPumps) {
+    elements.sliderAgriPumps.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valAgriPumps.textContent = `${val}%`;
+      engine.setSlider('agriPumps', val);
+    });
+  }
+
+  if (elements.sliderVoltage) {
+    elements.sliderVoltage.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valVoltage.textContent = `${val}V`;
+      engine.setSlider('voltage', val);
+    });
+  }
+
+  if (elements.sliderGridTie) {
+    elements.sliderGridTie.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      elements.valGridTie.textContent = val > 0 ? `+${val} MW` : `${val} MW`;
+      engine.setSlider('gridTie', val);
+    });
+  }
 }
 
 function startChallenge() {
@@ -350,6 +352,7 @@ function startChallenge() {
   sfx.playSolarChime();
 
   engine.setTime(420); // 07:00 AM Sunrise
+  engine.autoAdvanceTime = true; // Advance time during 30s challenge
   engine.isRunning = true;
 
   if (challengeTimer) clearInterval(challengeTimer);
@@ -361,6 +364,7 @@ function startChallenge() {
     if (challengeTime <= 0) {
       clearInterval(challengeTimer);
       challengeRunning = false;
+      engine.autoAdvanceTime = false; // Lock time again after challenge
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
 
@@ -369,7 +373,15 @@ function startChallenge() {
   }, 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function bootGame() {
   initEvents();
+  engine.autoAdvanceTime = false;
   engine.start();
-});
+  updateClock(engine.timeMinutes);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootGame);
+} else {
+  bootGame();
+}
