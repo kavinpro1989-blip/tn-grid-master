@@ -21,8 +21,9 @@ html_standalone = re.sub(
 
 # Clean export and import
 engine_clean = re.sub(r'export\s+class\s+PowerGridEngine', 'class PowerGridEngine', engine)
-engine_clean = re.sub(r'export\s+class\s+GridSimulationEngine', 'class GridSimulationEngine', engine)
-ui_clean = re.sub(r'import\s+\{\s*(PowerGridEngine|GridSimulationEngine)\s*\}\s+from\s+[\'"]./engine\.js[\'"];?', '// PowerGridEngine bundled inline', ui)
+engine_clean = re.sub(r'export\s+class\s+GridSimulationEngine', 'class GridSimulationEngine', engine_clean)
+engine_clean = re.sub(r'export\s+', '', engine_clean)
+ui_clean = re.sub(r'import\s+[^;]+;?', '// inlined module import', ui)
 
 # Replace script tags with inlined combined script
 script_pattern = r'\s*<script\s+type=["\']module["\']\s+src=["\']engine\.js["\']\s*></script>\s*<script\s+type=["\']module["\']\s+src=["\']ui\.js["\']\s*></script>'

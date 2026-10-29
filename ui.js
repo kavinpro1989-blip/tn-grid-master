@@ -102,6 +102,9 @@ class SoundFX {
 
 const sfx = new SoundFX();
 const engine = new PowerGridEngine(elements.canvas, handleTelemetry);
+if (typeof window !== 'undefined') {
+  window.engine = engine;
+}
 
 let challengeRunning = false;
 let challengeTime = 30;
@@ -476,6 +479,7 @@ function startChallenge() {
   if (challengeRunning) return;
   challengeRunning = true;
   challengeTime = 30;
+  if (document.body) document.body.classList.add('game-playing');
   elements.challengeAlert.classList.remove('hidden');
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
@@ -519,6 +523,7 @@ function startChallenge() {
     if (challengeTime <= 0) {
       clearInterval(challengeTimer);
       challengeRunning = false;
+      if (document.body) document.body.classList.remove('game-playing');
       engine.autoAdvanceTime = false; // Lock time again after challenge
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
@@ -659,6 +664,10 @@ function finishChallenge() {
 }
 
 function resetToDefaultBooth() {
+  if (challengeTimer) clearInterval(challengeTimer);
+  challengeRunning = false;
+  if (document.body) document.body.classList.remove('game-playing');
+  if (elements.challengeAlert) elements.challengeAlert.classList.add('hidden');
   engine.setTime(720); // 12:00 PM Noon
   engine.ecoScore = 0;
   engine.setSlider('sunshine', 0);

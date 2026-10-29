@@ -46,17 +46,28 @@ export class PowerGridEngine {
 
     this.setupDpr();
     this.initTopology();
-    window.addEventListener('resize', () => {
-      this.setupDpr();
-      this.repositionNodes();
-    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+      window.addEventListener('DOMContentLoaded', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+      window.addEventListener('load', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+    }
   }
 
   setupDpr() {
     this.dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.getBoundingClientRect();
-    const w = rect.width > 0 ? rect.width : 1100;
-    const h = rect.height > 0 ? rect.height : 520;
+    const w = rect.width > 0 ? rect.width : (typeof window !== 'undefined' ? window.innerWidth : 1100);
+    const h = rect.height > 0 ? rect.height : (typeof window !== 'undefined' ? Math.max(300, window.innerHeight - 260) : 480);
     this.canvas.width = Math.round(w * this.dpr);
     this.canvas.height = Math.round(h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);

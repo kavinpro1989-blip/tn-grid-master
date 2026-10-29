@@ -108,25 +108,23 @@ body.theme-night {
 
 html, body {
   width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-family);
   background-color: var(--bg-body);
   color: var(--text-main);
   user-select: none;
 }
 
-/* Master Layout */
+/* Master Layout: 100vh Single-Screen Viewport (Zero Scrollbars) */
 .game-wrapper {
   position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
-  height: auto;
-  overflow: visible;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Header & Gamified Telemetry Badges */
@@ -302,9 +300,9 @@ html, body {
 .canvas-stage {
   position: relative;
   width: 100%;
-  height: 460px;
-  min-height: 380px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-height: 280px;
+  height: auto;
   overflow: hidden;
   border-bottom: 1px solid var(--border-glass);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
@@ -507,40 +505,9 @@ body.theme-solar .stars-layer {
   gap: 8px;
 }
 
-/* Live Exhibition Marquee Ticker */
-.booth-ticker {
-  background: rgba(10, 15, 26, 0.98);
-  border-bottom: 1px solid var(--border-glass);
-  padding: 7px 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.82rem;
-  font-family: var(--font-family);
-  color: #cbd5e1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.ticker-dot {
-  font-size: 0.95rem;
-  display: inline-block;
-  animation: pulseDot 2s ease-in-out infinite;
-}
-
-@keyframes pulseDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.25); opacity: 0.75; }
-}
-
-.ticker-text {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ticker-text strong {
-  color: #ffffff;
+/* Live Exhibition Marquee Ticker: Completely Removed Per User Request */
+.booth-ticker, #boothTicker {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -551,11 +518,12 @@ body.theme-solar .stars-layer {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border-glass);
-  padding: 8px 18px 12px 18px;
+  padding: 8px 18px 10px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   z-index: 20;
+  flex-shrink: 0;
 }
 
 /* Big Hero Comparison Buttons */

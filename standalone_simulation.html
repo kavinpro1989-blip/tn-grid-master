@@ -119,25 +119,23 @@ body.theme-night {
 
 html, body {
   width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-family);
   background-color: var(--bg-body);
   color: var(--text-main);
   user-select: none;
 }
 
-/* Master Layout */
+/* Master Layout: 100vh Single-Screen Viewport (Zero Scrollbars) */
 .game-wrapper {
   position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
-  height: auto;
-  overflow: visible;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Header & Gamified Telemetry Badges */
@@ -313,9 +311,9 @@ html, body {
 .canvas-stage {
   position: relative;
   width: 100%;
-  height: 460px;
-  min-height: 380px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-height: 280px;
+  height: auto;
   overflow: hidden;
   border-bottom: 1px solid var(--border-glass);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
@@ -518,40 +516,9 @@ body.theme-solar .stars-layer {
   gap: 8px;
 }
 
-/* Live Exhibition Marquee Ticker */
-.booth-ticker {
-  background: rgba(10, 15, 26, 0.98);
-  border-bottom: 1px solid var(--border-glass);
-  padding: 7px 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.82rem;
-  font-family: var(--font-family);
-  color: #cbd5e1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.ticker-dot {
-  font-size: 0.95rem;
-  display: inline-block;
-  animation: pulseDot 2s ease-in-out infinite;
-}
-
-@keyframes pulseDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.25); opacity: 0.75; }
-}
-
-.ticker-text {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ticker-text strong {
-  color: #ffffff;
+/* Live Exhibition Marquee Ticker: Completely Removed Per User Request */
+.booth-ticker, #boothTicker {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -562,11 +529,12 @@ body.theme-solar .stars-layer {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border-glass);
-  padding: 8px 18px 12px 18px;
+  padding: 8px 18px 10px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   z-index: 20;
+  flex-shrink: 0;
 }
 
 /* Big Hero Comparison Buttons */
@@ -1526,14 +1494,6 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       </div>
     </main>
 
-    <!-- Live Exhibition Status Marquee Ticker -->
-    <div class="booth-ticker" id="boothTicker">
-      <span class="ticker-dot" id="tickerDot">🟢</span>
-      <span class="ticker-text" id="tickerText">
-        <strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன
-      </span>
-    </div>
-
     <!-- Bottom Controls Deck -->
     <footer class="deck-controls">
       <!-- 🎛️ 8-Slider Multi-Tuning Console: Master of Control (100% Manual Authority - Starts at 0%) -->
@@ -1829,7 +1789,7 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
  * ============================================================================
  */
 
-export class PowerGridEngine {
+class PowerGridEngine {
   constructor(canvas, onTelemetry) {
     this.canvas = canvas;
     const context = canvas.getContext('2d');
@@ -1870,17 +1830,28 @@ export class PowerGridEngine {
 
     this.setupDpr();
     this.initTopology();
-    window.addEventListener('resize', () => {
-      this.setupDpr();
-      this.repositionNodes();
-    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+      window.addEventListener('DOMContentLoaded', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+      window.addEventListener('load', () => {
+        this.setupDpr();
+        this.repositionNodes();
+      });
+    }
   }
 
   setupDpr() {
     this.dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.getBoundingClientRect();
-    const w = rect.width > 0 ? rect.width : 1100;
-    const h = rect.height > 0 ? rect.height : 520;
+    const w = rect.width > 0 ? rect.width : (typeof window !== 'undefined' ? window.innerWidth : 1100);
+    const h = rect.height > 0 ? rect.height : (typeof window !== 'undefined' ? Math.max(300, window.innerHeight - 260) : 480);
     this.canvas.width = Math.round(w * this.dpr);
     this.canvas.height = Math.round(h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
@@ -2999,7 +2970,7 @@ export class PowerGridEngine {
  * ============================================================================
  */
 
-// PowerGridEngine bundled inline
+// inlined module import
 
 const elements = {
   canvas: document.getElementById('gameCanvas'),
@@ -3095,6 +3066,9 @@ class SoundFX {
 
 const sfx = new SoundFX();
 const engine = new PowerGridEngine(elements.canvas, handleTelemetry);
+if (typeof window !== 'undefined') {
+  window.engine = engine;
+}
 
 let challengeRunning = false;
 let challengeTime = 30;
@@ -3469,6 +3443,7 @@ function startChallenge() {
   if (challengeRunning) return;
   challengeRunning = true;
   challengeTime = 30;
+  if (document.body) document.body.classList.add('game-playing');
   elements.challengeAlert.classList.remove('hidden');
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
@@ -3512,6 +3487,7 @@ function startChallenge() {
     if (challengeTime <= 0) {
       clearInterval(challengeTimer);
       challengeRunning = false;
+      if (document.body) document.body.classList.remove('game-playing');
       engine.autoAdvanceTime = false; // Lock time again after challenge
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
@@ -3652,6 +3628,10 @@ function finishChallenge() {
 }
 
 function resetToDefaultBooth() {
+  if (challengeTimer) clearInterval(challengeTimer);
+  challengeRunning = false;
+  if (document.body) document.body.classList.remove('game-playing');
+  if (elements.challengeAlert) elements.challengeAlert.classList.add('hidden');
   engine.setTime(720); // 12:00 PM Noon
   engine.ecoScore = 0;
   engine.setSlider('sunshine', 0);
