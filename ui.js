@@ -43,6 +43,7 @@ const elements = {
   valSunshine: document.getElementById('valSunshine'),
   sliderStorage: document.getElementById('sliderStorage'),
   valStorage: document.getElementById('valStorage'),
+  storageSummary: document.getElementById('storageSummary'),
   sliderCoalFire: document.getElementById('sliderCoalFire'),
   valCoalFire: document.getElementById('valCoalFire'),
   sliderScrubber: document.getElementById('sliderScrubber'),
@@ -130,6 +131,45 @@ function handleTelemetry(t) {
 
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
+
+  // Dynamic Battery Storage UI (Visual Charge / Drain Gauge)
+  if (elements.sliderStorage && document.activeElement !== elements.sliderStorage) {
+    elements.sliderStorage.value = Math.round(t.storageMwh);
+  }
+  if (elements.valStorage) {
+    if (t.batteryMode === 'charging') {
+      elements.valStorage.innerHTML = `${Math.round(t.storageMwh)} MWh <span style="color:#4ade80;font-size:0.75rem;font-weight:700;">▲ +${t.batteryFlowMW} MW</span>`;
+    } else if (t.batteryMode === 'discharging') {
+      elements.valStorage.innerHTML = `${Math.round(t.storageMwh)} MWh <span style="color:#f87171;font-size:0.75rem;font-weight:700;">▼ -${t.batteryFlowMW} MW</span>`;
+    } else if (t.storageMwh <= 0) {
+      elements.valStorage.innerHTML = `<span style="color:#ef4444;font-weight:700;">0 MWh (EMPTY)</span>`;
+    } else {
+      elements.valStorage.textContent = `${Math.round(t.storageMwh)} MWh`;
+    }
+  }
+  if (elements.storageSummary) {
+    if (t.batteryMode === 'charging') {
+      elements.storageSummary.textContent = 'CHARGING';
+      elements.storageSummary.className = 'slider-summary-pill';
+      elements.storageSummary.style.borderColor = '#4ade80';
+      elements.storageSummary.style.color = '#4ade80';
+    } else if (t.batteryMode === 'discharging') {
+      elements.storageSummary.textContent = 'DRAINING';
+      elements.storageSummary.className = 'slider-summary-pill';
+      elements.storageSummary.style.borderColor = '#f87171';
+      elements.storageSummary.style.color = '#f87171';
+    } else if (t.storageMwh <= 0) {
+      elements.storageSummary.textContent = 'EMPTY 0%';
+      elements.storageSummary.className = 'slider-summary-pill pill-danger';
+      elements.storageSummary.style.borderColor = '#ef4444';
+      elements.storageSummary.style.color = '#ef4444';
+    } else {
+      elements.storageSummary.textContent = 'RESERVE';
+      elements.storageSummary.className = 'slider-summary-pill';
+      elements.storageSummary.style.borderColor = '';
+      elements.storageSummary.style.color = '';
+    }
+  }
 
   // Update Live Grid Grade Badge
   if (elements.gridGrade) {

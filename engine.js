@@ -215,7 +215,6 @@ export class PowerGridEngine {
     // Dynamic Slider Modulation (100% Manual Master Control)
     const effectiveSolar = baseSun * (this.sliderSunshine / 100);
     const solarGenMW = Math.round(effectiveSolar * 648);
-    const batteryDischargeMW = (this.sliderStorage > 10) ? Math.min(300, Math.round(this.sliderStorage * 0.8)) : 0;
     const coalGenMW = Math.round((this.sliderCoalFire / 100) * 1440);
     const netGridTie = this.sliderGridTie;
 
@@ -224,9 +223,69 @@ export class PowerGridEngine {
     const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
     const totalDemand = Math.max(0, homesDemand + agriDemand - netGridTie);
 
+    // Dynamic Battery Energy Storage System (BESS) Physics: Realistic Charging & Draining
+    let batteryDischargeMW = 0;
+    let batteryChargeMW = 0;
+    let batteryMode = 'idle';
+    let batteryFlowMW = 0;
+
+    if (this.sliderSunshine > 0 && solarGenMW > totalDemand && totalDemand > 0) {
+      // ☀️ SURPLUS SOLAR: Excess clean electricity charges the battery!
+      const surplusSolarMW = solarGenMW - totalDemand;
+      batteryChargeMW = Math.min(220, surplusSolarMW);
+      if (this.sliderStorage < 500) {
+        const chargeDelta = (batteryChargeMW / 40.0) * dt;
+        this.sliderStorage = Math.min(500, this.sliderStorage + chargeDelta);
+        batteryMode = 'charging';
+        batteryFlowMW = batteryChargeMW;
+      } else {
+        batteryMode = 'full';
+        batteryFlowMW = 0;
+      }
+    } else if (solarGenMW < totalDemand && this.sliderStorage > 0.5) {
+      // 🌙 DEFICIT / NIGHT: Battery discharges to power the town and actively drains!
+      const solarDeficitMW = totalDemand - solarGenMW;
+      const maxDeliverableMW = Math.min(300, this.sliderStorage * 2.2);
+      batteryDischargeMW = Math.min(maxDeliverableMW, solarDeficitMW);
+
+      // Battery actively drains (MWh decreases over time)
+      const drainDelta = (batteryDischargeMW / 32.0) * dt;
+      this.sliderStorage = Math.max(0, this.sliderStorage - drainDelta);
+      batteryMode = 'discharging';
+      batteryFlowMW = batteryDischargeMW;
+
+      if (this.sliderStorage <= 0.5) {
+        this.sliderStorage = 0;
+        batteryDischargeMW = 0;
+        batteryMode = 'empty';
+        batteryFlowMW = 0;
+
+        if (!this.batteryDepletedNotified) {
+          this.batteryDepletedNotified = true;
+          this.popTexts.push({
+            x: this.canvas.width / (2 * this.dpr),
+            y: 140,
+            text: '🪫 BATTERY DEPLETED (0 MWh)! (பேட்டரி காலியானது)',
+            color: '#ef4444',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 2.5
+          });
+        }
+      } else {
+        this.batteryDepletedNotified = false;
+      }
+    } else if (this.sliderStorage <= 0.5) {
+      this.sliderStorage = 0;
+      batteryMode = 'empty';
+      batteryFlowMW = 0;
+    }
+
+    this.batteryMode = batteryMode;
+    this.batteryFlowMW = batteryFlowMW;
+
     // Operator Mode & Grid Dispatch
-    // Solar is primary if solar + battery can provide clean base and coal isn't heavily forced
-    const cleanPotentialMW = solarGenMW + (effectiveSolar < 0.85 ? batteryDischargeMW : 0);
+    const cleanPotentialMW = solarGenMW + batteryDischargeMW;
     const isSolar = (cleanPotentialMW >= 180 && this.sliderCoalFire < 50) || 
                     (solarGenMW > coalGenMW && solarGenMW > 120);
 
@@ -415,6 +474,8 @@ export class PowerGridEngine {
         brownoutCount,
         lineLossPct,
         storageMwh: Math.round(this.sliderStorage),
+        batteryMode: this.batteryMode,
+        batteryFlowMW: Math.round(this.batteryFlowMW),
         sunshinePct: this.sliderSunshine,
         coalFirePct: this.sliderCoalFire,
         scrubberPct: this.sliderScrubber,
