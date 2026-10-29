@@ -214,30 +214,45 @@ export class PowerGridEngine {
     
     // Dynamic Slider Modulation (100% Manual Master Control)
     const effectiveSolar = baseSun * (this.sliderSunshine / 100);
-    const batteryBacking = this.sliderStorage > 50 && effectiveSolar < 0.45;
-    const isSolar = (effectiveSolar > 0.35) || (batteryBacking && this.sliderCoalFire < 45);
+    const solarGenMW = Math.round(effectiveSolar * 648);
+    const batteryDischargeMW = (this.sliderStorage > 10) ? Math.min(300, Math.round(this.sliderStorage * 0.8)) : 0;
+    const coalGenMW = Math.round((this.sliderCoalFire / 100) * 1440);
+    const netGridTie = this.sliderGridTie;
+
+    // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
+    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
+    const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
+    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
+
+    // Operator Mode & Grid Dispatch
+    // Solar is primary if solar + battery can provide clean base and coal isn't heavily forced
+    const cleanPotentialMW = solarGenMW + (effectiveSolar < 0.85 ? batteryDischargeMW : 0);
+    const isSolar = (cleanPotentialMW >= 180 && this.sliderCoalFire < 50) || 
+                    (solarGenMW > coalGenMW && solarGenMW > 120);
 
     const plant = this.nodes.get('plant');
     if (plant) {
       if (isSolar) {
         plant.name = 'Kamuthi Solar Park';
-        plant.role = '648 MW • 100% Clean Solar';
+        plant.role = `${solarGenMW} MW • 100% Clean Solar`;
         plant.icon = '☀️';
       } else {
         plant.name = 'Mettur Thermal Station';
-        plant.role = '1,440 MW • Coal Boiler';
+        plant.role = `${coalGenMW} MW • Coal Boiler`;
         plant.icon = '🏭';
       }
     }
 
-    // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
-    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
-    const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
-    const netGridTie  = this.sliderGridTie; // negative = export, positive = import
-    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
+    // Active Supply vs Demand
+    const activeSupplyMW = isSolar 
+      ? (cleanPotentialMW + Math.max(0, netGridTie)) 
+      : (coalGenMW + Math.max(0, netGridTie));
+
+    const powerDeficit = Math.max(0, totalDemand - activeSupplyMW);
+    const deficitRatio = Math.min(1.0, powerDeficit / totalDemand);
+    const isTotalBlackout = (activeSupplyMW < 50) || (deficitRatio > 0.82);
 
     // Voltage & Line Loss (Joule Heating I^2 R)
-    // 230V is nominal. Low voltage causes brownout; excessive voltage triggers transmission sparks!
     const voltageSagPenalty = Math.max(0, (230 - this.sliderVoltage) / 20.0);
     const voltageOverload   = Math.max(0, (this.sliderVoltage - 238) / 12.0);
     const coalStress = (this.sliderCoalFire / 100) * (totalDemand / 650.0);
@@ -246,15 +261,17 @@ export class PowerGridEngine {
       ? Math.round(5 + (1.0 - effectiveSolar) * 5 + voltageOverload * 14) 
       : Math.round(20 + coalStress * 24 + voltageOverload * 18);
     this.currentLineLossPct = lineLossPct;
-    const efficiencyPct = Math.max(25, 100 - lineLossPct);
+    const efficiencyPct = Math.max(20, 100 - lineLossPct);
 
     // Fan RPM: Direct visual consequence of power delivery & voltage
-    let targetRpm = 3600;
+    let targetRpm = 0;
     const voltageRatio = this.sliderVoltage / 230.0;
-    if (isSolar) {
-      targetRpm = Math.round((2800 + (effectiveSolar * 800)) * voltageRatio);
+    if (isTotalBlackout) {
+      targetRpm = 0; // Fans completely dead in blackout!
+    } else if (isSolar) {
+      targetRpm = Math.max(200, Math.round((2800 + (effectiveSolar * 800) - (deficitRatio * 2000)) * voltageRatio));
     } else {
-      targetRpm = Math.max(250, Math.round((2200 - coalStress * 1500 - voltageSagPenalty * 900) * voltageRatio));
+      targetRpm = Math.max(100, Math.round((2200 - coalStress * 1400 - voltageSagPenalty * 900 - deficitRatio * 1500) * voltageRatio));
     }
     this.fanRotation += (targetRpm / 60) * Math.PI * 2 * dt;
 
@@ -267,19 +284,32 @@ export class PowerGridEngine {
       if (house) {
         house.flickerPhase += dt * (7 + i * 2);
 
-        // Special logic for Farm (house_3): heavily affected by agri pump demand
         const isFarm = (house.id === 'house_3');
         const farmOverload = isFarm && (this.sliderAgriPumps > 75) && !isSolar;
 
-        if (!house.applianceOn || farmOverload) {
+        if (isTotalBlackout || !house.applianceOn || farmOverload) {
           house.isLit = false;
           house.brownoutLevel = 1.0;
+          brownoutCount++;
+        } else if (deficitRatio > 0.15) {
+          // Deficit causes progressive shedding from farthest nodes
+          const shedThreshold = (7 - i) / 6.0;
+          if (deficitRatio >= shedThreshold * 0.75 || this.sliderVoltage < 205) {
+            house.isLit = false;
+            house.brownoutLevel = 1.0;
+            brownoutCount++;
+          } else {
+            house.isLit = true;
+            house.brownoutLevel = 0.5;
+            brownoutCount++;
+            litCount++;
+          }
         } else if (isSolar && (effectiveSolar >= 0.25 || this.sliderStorage > 40) && this.sliderVoltage >= 205) {
           house.isLit = true;
           house.brownoutLevel = 0.0;
           litCount++;
         } else {
-          // Downstream houses suffer voltage drops under coal load
+          // Coal or low voltage: progressive voltage sag
           const dropRatio = (i / 6.0) * (0.38 + coalStress * 0.60 + voltageSagPenalty * 0.55);
           if (dropRatio > 0.35 || this.sliderVoltage < 205) {
             house.brownoutLevel = Math.min(1.0, (dropRatio - 0.30) * 2.6);
@@ -295,29 +325,72 @@ export class PowerGridEngine {
 
     // Smog and Air Quality
     const rawSmog = isSolar ? 0 : (this.sliderCoalFire / 100) * 100;
-    const filterReduction = (this.sliderScrubber / 100) * 0.82;
+    const filterReduction = (this.sliderScrubber / 100) * 0.85;
     const finalSmog = isSolar ? 0 : Math.round(rawSmog * (1.0 - filterReduction));
-    const airCleanliness = Math.max(10, 100 - finalSmog);
+    const airCleanliness = Math.max(5, 100 - finalSmog);
 
-    // Town Happiness
-    const townHappiness = Math.max(10, Math.round(100 - (brownoutCount * 18) - (finalSmog * 0.25)));
+    // Realistic Town Happiness: Penalize Blackout (92%), Smog (up to 65%), and Voltage sag!
+    const smogPenalty = (finalSmog / 100) * 65;
+    const blackoutPenalty = isTotalBlackout ? 92 : (brownoutCount * 14 + deficitRatio * 35);
+    const voltagePenalty = (this.sliderVoltage < 205) ? (205 - this.sliderVoltage) * 1.5 : (this.sliderVoltage > 242 ? (this.sliderVoltage - 242) * 1.5 : 0);
+    const townHappiness = Math.max(5, Math.min(100, Math.round(100 - blackoutPenalty - smogPenalty - voltagePenalty)));
 
     // Eco Score Dynamics
-    if (townHappiness >= 85 && airCleanliness >= 80) {
-      this.ecoScore += dt * 25;
-    } else if (brownoutCount > 1 || airCleanliness < 45) {
-      this.ecoScore = Math.max(0, this.ecoScore - dt * 15);
+    if (isTotalBlackout) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 70); // Rapid crash to 0 in blackout!
+    } else if (finalSmog > 50) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 45); // Heavy smog pollution fine!
+    } else if (brownoutCount > 1 || this.sliderVoltage < 205) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 25); // Brownout instability penalty
+    } else if (isSolar && townHappiness >= 85 && airCleanliness >= 80) {
+      this.ecoScore = Math.min(3000, this.ecoScore + dt * 25); // Clean solar reward
+    } else if (!isSolar && coalGenMW > 0) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 10); // Carbon emission burn
     }
 
+    // Live Grid Performance Rating
+    let liveGrade = 'A';
+    let gradeTitle = 'CLEAN ENERGY CHAMPION';
+    let gradeTamil = 'தூய ஆற்றல் சாம்பியன்';
+    let gradeColor = '#4ade80';
+
+    if (isTotalBlackout || brownoutCount >= 5) {
+      liveGrade = 'F';
+      gradeTitle = 'TOTAL BLACKOUT';
+      gradeTamil = 'முழு மின்தடை';
+      gradeColor = '#ef4444';
+    } else if (finalSmog >= 65 || airCleanliness <= 25) {
+      liveGrade = 'D';
+      gradeTitle = 'TOXIC SMOG';
+      gradeTamil = 'நச்சுப் புகை';
+      gradeColor = '#f97316';
+    } else if (brownoutCount >= 2 || townHappiness < 55 || this.sliderVoltage < 205 || this.sliderVoltage > 244) {
+      liveGrade = 'C';
+      gradeTitle = 'UNSTABLE GRID';
+      gradeTamil = 'மின் தட்டுப்பாடு';
+      gradeColor = '#eab308';
+    } else if (!isSolar || this.sliderCoalFire > 35) {
+      liveGrade = 'B';
+      gradeTitle = 'COAL-DEPENDENT';
+      gradeTamil = 'நிலக்கரி சார்பு';
+      gradeColor = '#38bdf8';
+    } else if (this.ecoScore >= 1300 && townHappiness >= 90 && airCleanliness >= 90 && isSolar) {
+      liveGrade = 'A+';
+      gradeTitle = 'ELITE MASTER';
+      gradeTamil = 'தலைசிறந்தது';
+      gradeColor = '#22c55e';
+    }
+
+    // Electrons only flow if there is active generation!
     this.packetTimer += dt;
     const interval = isSolar ? 0.08 : 0.20;
-    if (this.packetTimer >= interval) {
+    if (!isTotalBlackout && activeSupplyMW > 40 && this.packetTimer >= interval) {
       this.packetTimer = 0;
       this.spawnElectron(isSolar, lineLossPct);
     }
 
     this.updatePackets(dt);
-    this.updateSmoke(dt, isSolar);
+    this.updateSmoke(dt, isSolar, finalSmog);
 
     for (let i = this.popTexts.length - 1; i >= 0; i--) {
       const pt = this.popTexts[i];
@@ -348,7 +421,16 @@ export class PowerGridEngine {
         townLoad: this.sliderTownLoad,
         agriPumps: this.sliderAgriPumps,
         voltage: this.sliderVoltage,
-        gridTie: this.sliderGridTie
+        gridTie: this.sliderGridTie,
+        activeSupplyMW,
+        totalDemand,
+        powerDeficit,
+        isTotalBlackout,
+        finalSmog,
+        grade: liveGrade,
+        gradeTitle,
+        gradeTamil,
+        gradeColor
       });
     }
   }
@@ -418,19 +500,22 @@ export class PowerGridEngine {
     return null;
   }
 
-  updateSmoke(dt, isSolar) {
-    if (!isSolar) {
+  updateSmoke(dt, isSolar, finalSmog = 0) {
+    if (!isSolar && this.sliderCoalFire > 5) {
       const plant = this.nodes.get('plant');
-      if (plant && Math.random() < 0.7) {
+      const spawnRate = (this.sliderCoalFire / 100) * 0.9;
+      if (plant && Math.random() < spawnRate) {
+        const isDirty = (finalSmog > 35);
         this.smokePuffs.push({
           x: plant.x + (Math.random() - 0.5) * 35,
           y: plant.y - 75,
-          vx: Math.random() * 32 + 15,
-          vy: -Math.random() * 42 - 20,
-          radius: Math.random() * 12 + 10,
-          alpha: 0.6,
+          vx: Math.random() * 34 + 15,
+          vy: -Math.random() * 45 - 25,
+          radius: Math.random() * (isDirty ? 16 : 8) + 10,
+          colorRGB: isDirty ? '15, 23, 42' : '203, 213, 225',
+          alpha: isDirty ? 0.85 : 0.35,
           life: 0,
-          maxLife: 2.8
+          maxLife: isDirty ? 3.6 : 2.0
         });
       }
     }
@@ -440,8 +525,8 @@ export class PowerGridEngine {
       s.life += dt;
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      s.radius += dt * 14;
-      s.alpha = Math.max(0, 0.6 * (1.0 - s.life / s.maxLife));
+      s.radius += dt * (s.colorRGB === '15, 23, 42' ? 18 : 10);
+      s.currentAlpha = Math.max(0, s.alpha * (1.0 - s.life / s.maxLife));
       if (s.life >= s.maxLife) {
         this.smokePuffs.splice(i, 1);
       }
@@ -851,7 +936,9 @@ export class PowerGridEngine {
     ctx.save();
 
     this.smokePuffs.forEach((s) => {
-      ctx.fillStyle = `rgba(30, 41, 59, ${s.alpha})`;
+      const rgb = s.colorRGB || '30, 41, 59';
+      const a = s.currentAlpha !== undefined ? s.currentAlpha : s.alpha;
+      ctx.fillStyle = `rgba(${rgb}, ${a})`;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
       ctx.fill();

@@ -1151,6 +1151,213 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
+/* ==========================================================================
+   REAL-TIME GRID GRADE BADGE & REPORT CARD MODAL
+   ========================================================================== */
+.grid-rating-badge {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  transition: all 0.3s ease;
+}
+
+.text-orange { color: #f97316 !important; }
+
+@keyframes flashRedAlert {
+  0%, 100% {
+    background: rgba(239, 68, 68, 0.28);
+    border-color: #ef4444;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.65);
+  }
+  50% {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: none;
+  }
+}
+
+.badge-item.alert-blackout {
+  animation: flashRedAlert 0.8s infinite ease-in-out;
+}
+
+.report-card {
+  max-width: 680px;
+  background: #090e1a;
+  border: 2px solid var(--border-glass-bright);
+}
+
+.report-card.grade-a {
+  border-color: #22c55e;
+  box-shadow: 0 0 45px rgba(34, 197, 94, 0.3);
+}
+
+.report-card.grade-b {
+  border-color: #38bdf8;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+}
+
+.report-card.grade-c {
+  border-color: #eab308;
+  box-shadow: 0 0 40px rgba(234, 179, 8, 0.3);
+}
+
+.report-card.grade-d {
+  border-color: #f97316;
+  box-shadow: 0 0 45px rgba(249, 115, 22, 0.35);
+}
+
+.report-card.grade-f {
+  border-color: #ef4444;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.45);
+}
+
+.report-card-header {
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.report-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.report-modal-body {
+  padding: 24px;
+  gap: 20px;
+}
+
+.report-stamp-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.report-stamp-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  height: 90px;
+  border-radius: 12px;
+  border: 3px solid #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+}
+
+.report-stamp-badge.stamp-f {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+}
+
+.report-stamp-badge.stamp-d {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.report-stamp-badge.stamp-c {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+}
+
+.report-stamp-badge.stamp-b {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.report-stamp-letter {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.report-stamp-caption {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.report-hero-summary h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.report-hero-summary p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.report-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 650px) {
+  .report-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .report-stamp-container { flex-direction: column; text-align: center; }
+}
+
+.report-stat-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stat-icon {
+  font-size: 1.1rem;
+}
+
+.stat-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-family);
+}
+
+.stat-name {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.report-verdict-box {
+  background: rgba(30, 41, 59, 0.4);
+  border-left: 4px solid #38bdf8;
+  padding: 14px 18px;
+  border-radius: 0 10px 10px 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.report-modal-footer {
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-top: 1px solid var(--border-glass);
+}
+
 /* Keyframes */
 @keyframes spinFan {
   from { transform: rotate(0deg); }

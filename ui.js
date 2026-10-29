@@ -62,7 +62,29 @@ const elements = {
   fsBtn: document.getElementById('fsBtn'),
   resetBtn: document.getElementById('resetBtn'),
   tickerDot: document.getElementById('tickerDot'),
-  tickerText: document.getElementById('tickerText')
+  tickerText: document.getElementById('tickerText'),
+
+  // Live Rating & Report Card Modal Elements
+  badgeRating: document.getElementById('badgeRating'),
+  gridGrade: document.getElementById('gridGrade'),
+  ratingEmoji: document.getElementById('ratingEmoji'),
+  reportModal: document.getElementById('reportModal'),
+  reportCardWrapper: document.getElementById('reportCardWrapper'),
+  reportStampBadge: document.getElementById('reportStampBadge'),
+  reportStampLetter: document.getElementById('reportStampLetter'),
+  reportStampCaption: document.getElementById('reportStampCaption'),
+  reportTitleText: document.getElementById('reportTitleText'),
+  reportTamilTitleText: document.getElementById('reportTamilTitleText'),
+  repScore: document.getElementById('repScore'),
+  repSolarShare: document.getElementById('repSolarShare'),
+  repAirClean: document.getElementById('repAirClean'),
+  repTownMood: document.getElementById('repTownMood'),
+  repBlackouts: document.getElementById('repBlackouts'),
+  repSmogTime: document.getElementById('repSmogTime'),
+  reportVerdictText: document.getElementById('reportVerdictText'),
+  reportExitBtn: document.getElementById('reportExitBtn'),
+  reportCloseBtn: document.getElementById('reportCloseBtn'),
+  reportResetBtn: document.getElementById('reportResetBtn')
 };
 
 // Web Audio Sound Synthesizer (Permanently Silenced per User Request)
@@ -86,8 +108,19 @@ let challengeRunning = false;
 let challengeTime = 30;
 let challengeTimer = null;
 let currentHwTab = 'solar';
+let lastTelemetry = null;
+let challengeStats = {
+  samples: 0,
+  totalHappiness: 0,
+  totalAir: 0,
+  solarSeconds: 0,
+  blackoutSeconds: 0,
+  smogSeconds: 0
+};
 
 function handleTelemetry(t) {
+  lastTelemetry = t;
+
   // Update Badges
   elements.townHappiness.textContent = `${t.townHappiness}%`;
   elements.townHappiness.className = t.townHappiness >= 80 ? 'badge-stat text-green' : (t.townHappiness >= 50 ? 'badge-stat text-gold' : 'badge-stat text-red');
@@ -100,21 +133,35 @@ function handleTelemetry(t) {
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
 
+  // Update Live Grid Grade Badge
+  if (elements.gridGrade) {
+    elements.gridGrade.textContent = `${t.grade} ${t.gradeTitle.split(' ')[0]}`;
+    elements.gridGrade.className = `badge-stat ${t.grade === 'A+' || t.grade === 'A' ? 'text-green' : (t.grade === 'B' ? 'text-cyan' : (t.grade === 'C' ? 'text-gold' : (t.grade === 'D' ? 'text-orange' : 'text-red')))}`;
+  }
+  if (elements.ratingEmoji) {
+    elements.ratingEmoji.textContent = (t.grade === 'A+' || t.grade === 'A') ? '🏆' : (t.grade === 'B' ? '⚡' : (t.grade === 'C' ? '⚠️' : (t.grade === 'D' ? '🏭' : '💥')));
+  }
+  if (elements.badgeRating) {
+    elements.badgeRating.className = (t.isTotalBlackout || t.grade === 'F') ? 'badge-item grid-rating-badge alert-blackout' : 'badge-item grid-rating-badge';
+  }
+
   // Update Live Exhibition Marquee Ticker
   if (elements.tickerText && elements.tickerDot) {
-    const hours = t.timeMinutes / 60;
-    const isSolarTime = hours >= 7 && hours <= 17;
-    const isBrownout = t.townHappiness < 75;
-
-    if (isBrownout) {
+    if (t.isTotalBlackout || t.grade === 'F') {
+      elements.tickerDot.textContent = '🚨';
+      elements.tickerText.innerHTML = `<strong>🚨 பேரழிவு மின்தடை (GRADE F - TOTAL BLACKOUT):</strong> மின் உற்பத்தி சுழியம் (0 MW)! நகரம் முழுவதும் மின்தடை! உடனே சூரிய மின்சக்தி அல்லது பேட்டரியை இயக்கவும்!`;
+    } else if (t.finalSmog >= 65 || t.grade === 'D') {
+      elements.tickerDot.textContent = '🏭';
+      elements.tickerText.innerHTML = `<strong>🏭 நச்சுப் புகை அபாயம் (GRADE D - TOXIC SMOG):</strong> வடிகட்டி இன்றி நிலக்கரி ஆலை இயங்குகிறது! காற்று மாசடைந்துள்ளது (${t.airCleanliness}%)! வடிகட்டியை (Scrubber) கூட்டவும்!`;
+    } else if (t.brownoutCount >= 2) {
       elements.tickerDot.textContent = '🔴';
-      elements.tickerText.innerHTML = `<strong>⚠️ எச்சரிக்கை (GRID ALERT):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு (Brownout) • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
-    } else if (isSolarTime) {
+      elements.tickerText.innerHTML = `<strong>⚠️ மின் தட்டுப்பாடு (GRID BROWNOUT - GRADE C):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
+    } else if (t.isSolar) {
       elements.tickerDot.textContent = '🟢';
-      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • பள்ளி, மருத்துவமனை உட்பட 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
+      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE - GRADE ${t.grade}):</strong> கமுதி சூரிய பூங்கா ${t.activeSupplyMW} MW • 100% தூய காற்று • 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
     } else {
       elements.tickerDot.textContent = '🏭';
-      elements.tickerText.innerHTML = `<strong>🌙 இரவு உச்ச தேவை (COAL PEAK):</strong> மேட்டூர் அனல் நிலையம் இயங்குகிறது (${engine.sliderCoalFire}%) • வெப்ப இழப்பு ${engine.currentLineLossPct}% • காற்று சுத்தத்தை பராமரிக்க ஸ்க்ரப்பரை 100% வைக்கவும்!`;
+      elements.tickerText.innerHTML = `<strong>🌙 நிலக்கரி இயக்கம் (COAL - GRADE ${t.grade}):</strong> மேட்டூர் அனல் நிலையம் ${t.activeSupplyMW} MW (${engine.sliderCoalFire}%) • இழப்பு ${engine.currentLineLossPct}% • ஸ்க்ரப்பரை 100% வைக்கவும்!`;
     }
   }
 
@@ -316,6 +363,28 @@ function initEvents() {
     elements.guideModal.classList.add('hidden');
   });
 
+  // Report Card Modal Listeners
+  if (elements.reportCloseBtn) {
+    elements.reportCloseBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.reportExitBtn) {
+    elements.reportExitBtn.addEventListener('click', () => {
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.reportResetBtn) {
+    elements.reportResetBtn.addEventListener('click', () => {
+      sfx.playSolarChime();
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+      resetToDefaultBooth();
+    });
+  }
+
   // Canvas Click
   elements.canvas.addEventListener('click', (e) => {
     sfx.playPop();
@@ -397,6 +466,16 @@ function startChallenge() {
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
 
+  // Reset challenge stats
+  challengeStats = {
+    samples: 0,
+    totalHappiness: 0,
+    totalAir: 0,
+    solarSeconds: 0,
+    blackoutSeconds: 0,
+    smogSeconds: 0
+  };
+
   engine.setTime(420); // 07:00 AM Sunrise
   engine.autoAdvanceTime = true; // Advance time during 30s challenge
   engine.isRunning = true;
@@ -407,6 +486,20 @@ function startChallenge() {
     elements.gameTimer.textContent = `${challengeTime}s`;
     engine.setTime(engine.timeMinutes + 25);
 
+    // Sample telemetry
+    if (lastTelemetry) {
+      challengeStats.samples++;
+      challengeStats.totalHappiness += lastTelemetry.townHappiness;
+      challengeStats.totalAir += lastTelemetry.airCleanliness;
+      if (lastTelemetry.isSolar) challengeStats.solarSeconds++;
+      if (lastTelemetry.isTotalBlackout || lastTelemetry.brownoutCount >= 4 || lastTelemetry.townHappiness <= 20) {
+        challengeStats.blackoutSeconds++;
+      }
+      if (lastTelemetry.finalSmog >= 45 || lastTelemetry.airCleanliness <= 35) {
+        challengeStats.smogSeconds++;
+      }
+    }
+
     if (challengeTime <= 0) {
       clearInterval(challengeTimer);
       challengeRunning = false;
@@ -414,13 +507,130 @@ function startChallenge() {
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
 
-      alert(`🎉 30-SECOND GRID CHALLENGE COMPLETE!\n\nFinal Score: ${Math.round(engine.ecoScore)} Eco Points!\nGrade: A+ Clean Energy Master!\n\nYou kept Tamil Nadu powered and proved why solar energy keeps the town happy and the air fresh!`);
+      finishChallenge();
     }
   }, 1000);
 }
 
+function finishChallenge() {
+  const samples = Math.max(1, challengeStats.samples);
+  const avgHappiness = Math.round(challengeStats.totalHappiness / samples);
+  const avgAir = Math.round(challengeStats.totalAir / samples);
+  const solarShare = Math.round((challengeStats.solarSeconds / samples) * 100);
+  const blackoutTime = challengeStats.blackoutSeconds;
+  const smogTime = challengeStats.smogSeconds;
+  const finalScore = Math.round(engine.ecoScore);
+
+  let grade = 'A';
+  let gradeClass = 'grade-a';
+  let stampClass = '';
+  let title = '';
+  let tamilTitle = '';
+  let caption = '';
+  let verdict = '';
+
+  // Rigorous evaluation based on actual user control actions
+  if (blackoutTime >= 8 || avgHappiness < 30 || finalScore <= 350) {
+    grade = 'F';
+    gradeClass = 'grade-f';
+    stampClass = 'stamp-f';
+    caption = 'TOTAL GRID COLLAPSE';
+    title = 'CATASTROPHIC BLACKOUT!';
+    tamilTitle = 'பேரழிவு மின்கட்டமைப்பு வீழ்ச்சி';
+    verdict = `🤦‍♂️ TOTAL SYSTEM FAILURE! The town suffered blackouts for ${blackoutTime} seconds. Power generation failed to meet basic demand, voltage collapsed, and schools & clinics were left in pitch darkness! You cannot earn an A+ with a collapsed grid! Turn on Kamuthi Solar & Battery storage to restore power.`;
+  } else if (smogTime >= 8 || avgAir < 35) {
+    grade = 'D';
+    gradeClass = 'grade-d';
+    stampClass = 'stamp-d';
+    caption = 'TOXIC SMOG DISASTER';
+    title = 'ENVIRONMENTAL CATASTROPHE!';
+    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
+    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot covered the town for ${smogTime} seconds, choking citizens and dropping air quality to ${avgAir}%. Clean solar energy is essential to prevent respiratory disease!`;
+  } else if (blackoutTime >= 3 || avgHappiness < 60) {
+    grade = 'C';
+    gradeClass = 'grade-c';
+    stampClass = 'stamp-c';
+    caption = 'UNSTABLE GRID';
+    title = 'BROWNOUT INSTABILITY';
+    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
+    verdict = `⚠️ UNSTABLE OPERATION! Severe voltage fluctuations and partial brownouts plagued the town. Farm irrigation pumps and appliances were damaged. Boost battery reserves and stabilize transformer voltage at 230V.`;
+  } else if (solarShare < 50) {
+    grade = 'B';
+    gradeClass = 'grade-b';
+    stampClass = 'stamp-b';
+    caption = 'COAL-HEAVY GRID';
+    title = 'PASSABLE, BUT POLLUTED!';
+    tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
+    verdict = `⚡ LIGHTS ON, BUT CARBON HEAVY! You avoided blackouts, but relied too heavily on burning coal (${100 - solarShare}% thermal). Emissions were high. Ramp up solar harvesting and storage for a cleaner footprint!`;
+  } else if (finalScore >= 1350 && solarShare >= 80 && avgAir >= 85 && blackoutTime === 0) {
+    grade = 'A+';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'ELITE MASTER';
+    title = 'OUTSTANDING CLEAN GRID MASTER!';
+    tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
+    verdict = `🌟 MASTERFUL LEADERSHIP! 100% clean solar generation, zero blackouts, pristine mountain air, and high citizen happiness (${avgHappiness}%)! You proved why renewable solar energy is the triumphant choice for Tamil Nadu!`;
+  } else {
+    grade = 'A';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'CLEAN CHAMPION';
+    title = 'CLEAN ENERGY CHAMPION!';
+    tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
+    verdict = `👏 GREAT PERFORMANCE! Solid solar utilization with clean air throughout the test. A few minor grid adjustments will achieve absolute perfection!`;
+  }
+
+  // Populate Report Card Modal
+  if (elements.reportCardWrapper) {
+    elements.reportCardWrapper.className = `modal-card report-card ${gradeClass}`;
+  }
+  if (elements.reportStampBadge) {
+    elements.reportStampBadge.className = `report-stamp-badge ${stampClass}`;
+  }
+  if (elements.reportStampLetter) elements.reportStampLetter.textContent = grade;
+  if (elements.reportStampCaption) elements.reportStampCaption.textContent = caption;
+  if (elements.reportTitleText) elements.reportTitleText.textContent = title;
+  if (elements.reportTamilTitleText) elements.reportTamilTitleText.textContent = tamilTitle;
+  if (elements.repScore) elements.repScore.textContent = finalScore.toLocaleString();
+  if (elements.repSolarShare) elements.repSolarShare.textContent = `${solarShare}%`;
+  if (elements.repAirClean) elements.repAirClean.textContent = `${avgAir}%`;
+  if (elements.repTownMood) elements.repTownMood.textContent = `${avgHappiness}%`;
+  if (elements.repBlackouts) elements.repBlackouts.textContent = `${blackoutTime}s`;
+  if (elements.repSmogTime) elements.repSmogTime.textContent = `${smogTime}s`;
+  if (elements.reportVerdictText) elements.reportVerdictText.textContent = verdict;
+
+  // Reveal Report Card Modal
+  if (elements.reportModal) {
+    elements.reportModal.classList.remove('hidden');
+  }
+
+  // Visual popup banner on canvas
+  if (grade === 'F' || grade === 'D') {
+    engine.popTexts.push({
+      x: engine.canvas.width / (2 * engine.dpr),
+      y: 110,
+      text: `🚨 AUDIT RESULT: GRADE ${grade} (${caption})`,
+      color: '#ef4444',
+      alpha: 1.0,
+      life: 0,
+      maxLife: 3.5
+    });
+  } else {
+    engine.popTexts.push({
+      x: engine.canvas.width / (2 * engine.dpr),
+      y: 110,
+      text: `🎉 AUDIT RESULT: GRADE ${grade}! ${title}`,
+      color: '#34d399',
+      alpha: 1.0,
+      life: 0,
+      maxLife: 3.5
+    });
+  }
+}
+
 function resetToDefaultBooth() {
   engine.setTime(720); // 12:00 PM Noon
+  engine.ecoScore = 1200;
   engine.setSlider('sunshine', 100);
   engine.setSlider('storage', 350);
   engine.setSlider('coalFire', 40);

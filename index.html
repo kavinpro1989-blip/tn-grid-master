@@ -60,6 +60,15 @@
           </div>
         </div>
 
+        <!-- Badge 5: Live Grid Rating -->
+        <div class="badge-item grid-rating-badge" id="badgeRating" title="Real-Time Grid Performance Grade">
+          <span class="badge-emoji" id="ratingEmoji">🏆</span>
+          <div class="badge-meta">
+            <span class="badge-caption">GRID GRADE</span>
+            <span class="badge-stat text-green" id="gridGrade">A+ ELITE</span>
+          </div>
+        </div>
+
         <button class="guide-toggle-btn fs-btn" id="fsBtn" title="Toggle Fullscreen Exhibition Mode">
           <span>📺 Fullscreen</span>
         </button>
@@ -364,6 +373,81 @@
       </div>
       <div class="modal-footer">
         <button class="btn-dismiss" id="guideDismissBtn">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exhibition Grid Audit Report Card Modal -->
+  <div class="modal-backdrop hidden" id="reportModal">
+    <div class="modal-card report-card" id="reportCardWrapper">
+      <div class="modal-header report-card-header">
+        <div class="report-header-titles">
+          <h2 id="reportHeaderTitle">30-SECOND GRID AUDIT REPORT</h2>
+          <p class="report-subtitle" id="reportSubtitle">மின்கட்டமைப்பு செயல்திறன் தணிக்கை</p>
+        </div>
+        <button class="modal-exit" id="reportExitBtn">&times;</button>
+      </div>
+      <div class="modal-body report-modal-body">
+        <!-- Big Stamp Section -->
+        <div class="report-stamp-container">
+          <div class="report-stamp-badge" id="reportStampBadge">
+            <span class="report-stamp-letter" id="reportStampLetter">A+</span>
+            <span class="report-stamp-caption" id="reportStampCaption">ELITE CLEAN GRID</span>
+          </div>
+          <div class="report-hero-summary">
+            <h3 id="reportTitleText">CLEAN ENERGY MASTER!</h3>
+            <p id="reportTamilTitleText">தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்</p>
+          </div>
+        </div>
+
+        <!-- 6-Metric Scorecard Grid -->
+        <div class="report-metrics-grid">
+          <div class="report-stat-card">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-num text-gold" id="repScore">1,850</span>
+            <span class="stat-name">Eco Score</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">☀️</span>
+            <span class="stat-num text-green" id="repSolarShare">100%</span>
+            <span class="stat-name">Clean Solar Share</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">🌿</span>
+            <span class="stat-num text-cyan" id="repAirClean">96%</span>
+            <span class="stat-name">Air Purity</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">😊</span>
+            <span class="stat-num text-green" id="repTownMood">98%</span>
+            <span class="stat-name">Town Satisfaction</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">💡</span>
+            <span class="stat-num text-red" id="repBlackouts">0s</span>
+            <span class="stat-name">Blackout Duration</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">🏭</span>
+            <span class="stat-num text-orange" id="repSmogTime">0s</span>
+            <span class="stat-name">Toxic Smog Time</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Detailed Verdict -->
+        <div class="report-verdict-box" id="reportVerdictBox">
+          <p id="reportVerdictText">
+            You proved that solar energy and battery storage keep Tamil Nadu running smoothly with crystal-clear air!
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer report-modal-footer">
+        <button class="deck-btn reset" id="reportResetBtn">
+          <span>🔄 Reset Booth & Play Again</span>
+        </button>
+        <button class="btn-dismiss" id="reportCloseBtn">
+          <span>Close Report</span>
+        </button>
       </div>
     </div>
   </div>

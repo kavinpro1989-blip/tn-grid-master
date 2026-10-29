@@ -1162,6 +1162,213 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
+/* ==========================================================================
+   REAL-TIME GRID GRADE BADGE & REPORT CARD MODAL
+   ========================================================================== */
+.grid-rating-badge {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  transition: all 0.3s ease;
+}
+
+.text-orange { color: #f97316 !important; }
+
+@keyframes flashRedAlert {
+  0%, 100% {
+    background: rgba(239, 68, 68, 0.28);
+    border-color: #ef4444;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.65);
+  }
+  50% {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: none;
+  }
+}
+
+.badge-item.alert-blackout {
+  animation: flashRedAlert 0.8s infinite ease-in-out;
+}
+
+.report-card {
+  max-width: 680px;
+  background: #090e1a;
+  border: 2px solid var(--border-glass-bright);
+}
+
+.report-card.grade-a {
+  border-color: #22c55e;
+  box-shadow: 0 0 45px rgba(34, 197, 94, 0.3);
+}
+
+.report-card.grade-b {
+  border-color: #38bdf8;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+}
+
+.report-card.grade-c {
+  border-color: #eab308;
+  box-shadow: 0 0 40px rgba(234, 179, 8, 0.3);
+}
+
+.report-card.grade-d {
+  border-color: #f97316;
+  box-shadow: 0 0 45px rgba(249, 115, 22, 0.35);
+}
+
+.report-card.grade-f {
+  border-color: #ef4444;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.45);
+}
+
+.report-card-header {
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.report-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.report-modal-body {
+  padding: 24px;
+  gap: 20px;
+}
+
+.report-stamp-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.report-stamp-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  height: 90px;
+  border-radius: 12px;
+  border: 3px solid #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+}
+
+.report-stamp-badge.stamp-f {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+}
+
+.report-stamp-badge.stamp-d {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.report-stamp-badge.stamp-c {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+}
+
+.report-stamp-badge.stamp-b {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.report-stamp-letter {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.report-stamp-caption {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.report-hero-summary h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.report-hero-summary p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.report-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 650px) {
+  .report-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .report-stamp-container { flex-direction: column; text-align: center; }
+}
+
+.report-stat-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stat-icon {
+  font-size: 1.1rem;
+}
+
+.stat-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-family);
+}
+
+.stat-name {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.report-verdict-box {
+  background: rgba(30, 41, 59, 0.4);
+  border-left: 4px solid #38bdf8;
+  padding: 14px 18px;
+  border-radius: 0 10px 10px 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.report-modal-footer {
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-top: 1px solid var(--border-glass);
+}
+
 /* Keyframes */
 @keyframes spinFan {
   from { transform: rotate(0deg); }
@@ -1247,6 +1454,15 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           <div class="badge-meta">
             <span class="badge-caption">ECO SCORE</span>
             <span class="badge-stat text-gold" id="playerScore">1,200</span>
+          </div>
+        </div>
+
+        <!-- Badge 5: Live Grid Rating -->
+        <div class="badge-item grid-rating-badge" id="badgeRating" title="Real-Time Grid Performance Grade">
+          <span class="badge-emoji" id="ratingEmoji">🏆</span>
+          <div class="badge-meta">
+            <span class="badge-caption">GRID GRADE</span>
+            <span class="badge-stat text-green" id="gridGrade">A+ ELITE</span>
           </div>
         </div>
 
@@ -1557,6 +1773,81 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       </div>
     </div>
   </div>
+
+  <!-- Exhibition Grid Audit Report Card Modal -->
+  <div class="modal-backdrop hidden" id="reportModal">
+    <div class="modal-card report-card" id="reportCardWrapper">
+      <div class="modal-header report-card-header">
+        <div class="report-header-titles">
+          <h2 id="reportHeaderTitle">30-SECOND GRID AUDIT REPORT</h2>
+          <p class="report-subtitle" id="reportSubtitle">மின்கட்டமைப்பு செயல்திறன் தணிக்கை</p>
+        </div>
+        <button class="modal-exit" id="reportExitBtn">&times;</button>
+      </div>
+      <div class="modal-body report-modal-body">
+        <!-- Big Stamp Section -->
+        <div class="report-stamp-container">
+          <div class="report-stamp-badge" id="reportStampBadge">
+            <span class="report-stamp-letter" id="reportStampLetter">A+</span>
+            <span class="report-stamp-caption" id="reportStampCaption">ELITE CLEAN GRID</span>
+          </div>
+          <div class="report-hero-summary">
+            <h3 id="reportTitleText">CLEAN ENERGY MASTER!</h3>
+            <p id="reportTamilTitleText">தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்</p>
+          </div>
+        </div>
+
+        <!-- 6-Metric Scorecard Grid -->
+        <div class="report-metrics-grid">
+          <div class="report-stat-card">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-num text-gold" id="repScore">1,850</span>
+            <span class="stat-name">Eco Score</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">☀️</span>
+            <span class="stat-num text-green" id="repSolarShare">100%</span>
+            <span class="stat-name">Clean Solar Share</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">🌿</span>
+            <span class="stat-num text-cyan" id="repAirClean">96%</span>
+            <span class="stat-name">Air Purity</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">😊</span>
+            <span class="stat-num text-green" id="repTownMood">98%</span>
+            <span class="stat-name">Town Satisfaction</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">💡</span>
+            <span class="stat-num text-red" id="repBlackouts">0s</span>
+            <span class="stat-name">Blackout Duration</span>
+          </div>
+          <div class="report-stat-card">
+            <span class="stat-icon">🏭</span>
+            <span class="stat-num text-orange" id="repSmogTime">0s</span>
+            <span class="stat-name">Toxic Smog Time</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Detailed Verdict -->
+        <div class="report-verdict-box" id="reportVerdictBox">
+          <p id="reportVerdictText">
+            You proved that solar energy and battery storage keep Tamil Nadu running smoothly with crystal-clear air!
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer report-modal-footer">
+        <button class="deck-btn reset" id="reportResetBtn">
+          <span>🔄 Reset Booth & Play Again</span>
+        </button>
+        <button class="btn-dismiss" id="reportCloseBtn">
+          <span>Close Report</span>
+        </button>
+      </div>
+    </div>
+  </div>
   <script>
 /**
  * ============================================================================
@@ -1774,30 +2065,45 @@ export class PowerGridEngine {
     
     // Dynamic Slider Modulation (100% Manual Master Control)
     const effectiveSolar = baseSun * (this.sliderSunshine / 100);
-    const batteryBacking = this.sliderStorage > 50 && effectiveSolar < 0.45;
-    const isSolar = (effectiveSolar > 0.35) || (batteryBacking && this.sliderCoalFire < 45);
+    const solarGenMW = Math.round(effectiveSolar * 648);
+    const batteryDischargeMW = (this.sliderStorage > 10) ? Math.min(300, Math.round(this.sliderStorage * 0.8)) : 0;
+    const coalGenMW = Math.round((this.sliderCoalFire / 100) * 1440);
+    const netGridTie = this.sliderGridTie;
+
+    // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
+    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
+    const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
+    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
+
+    // Operator Mode & Grid Dispatch
+    // Solar is primary if solar + battery can provide clean base and coal isn't heavily forced
+    const cleanPotentialMW = solarGenMW + (effectiveSolar < 0.85 ? batteryDischargeMW : 0);
+    const isSolar = (cleanPotentialMW >= 180 && this.sliderCoalFire < 50) || 
+                    (solarGenMW > coalGenMW && solarGenMW > 120);
 
     const plant = this.nodes.get('plant');
     if (plant) {
       if (isSolar) {
         plant.name = 'Kamuthi Solar Park';
-        plant.role = '648 MW • 100% Clean Solar';
+        plant.role = `${solarGenMW} MW • 100% Clean Solar`;
         plant.icon = '☀️';
       } else {
         plant.name = 'Mettur Thermal Station';
-        plant.role = '1,440 MW • Coal Boiler';
+        plant.role = `${coalGenMW} MW • Coal Boiler`;
         plant.icon = '🏭';
       }
     }
 
-    // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
-    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
-    const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
-    const netGridTie  = this.sliderGridTie; // negative = export, positive = import
-    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
+    // Active Supply vs Demand
+    const activeSupplyMW = isSolar 
+      ? (cleanPotentialMW + Math.max(0, netGridTie)) 
+      : (coalGenMW + Math.max(0, netGridTie));
+
+    const powerDeficit = Math.max(0, totalDemand - activeSupplyMW);
+    const deficitRatio = Math.min(1.0, powerDeficit / totalDemand);
+    const isTotalBlackout = (activeSupplyMW < 50) || (deficitRatio > 0.82);
 
     // Voltage & Line Loss (Joule Heating I^2 R)
-    // 230V is nominal. Low voltage causes brownout; excessive voltage triggers transmission sparks!
     const voltageSagPenalty = Math.max(0, (230 - this.sliderVoltage) / 20.0);
     const voltageOverload   = Math.max(0, (this.sliderVoltage - 238) / 12.0);
     const coalStress = (this.sliderCoalFire / 100) * (totalDemand / 650.0);
@@ -1806,15 +2112,17 @@ export class PowerGridEngine {
       ? Math.round(5 + (1.0 - effectiveSolar) * 5 + voltageOverload * 14) 
       : Math.round(20 + coalStress * 24 + voltageOverload * 18);
     this.currentLineLossPct = lineLossPct;
-    const efficiencyPct = Math.max(25, 100 - lineLossPct);
+    const efficiencyPct = Math.max(20, 100 - lineLossPct);
 
     // Fan RPM: Direct visual consequence of power delivery & voltage
-    let targetRpm = 3600;
+    let targetRpm = 0;
     const voltageRatio = this.sliderVoltage / 230.0;
-    if (isSolar) {
-      targetRpm = Math.round((2800 + (effectiveSolar * 800)) * voltageRatio);
+    if (isTotalBlackout) {
+      targetRpm = 0; // Fans completely dead in blackout!
+    } else if (isSolar) {
+      targetRpm = Math.max(200, Math.round((2800 + (effectiveSolar * 800) - (deficitRatio * 2000)) * voltageRatio));
     } else {
-      targetRpm = Math.max(250, Math.round((2200 - coalStress * 1500 - voltageSagPenalty * 900) * voltageRatio));
+      targetRpm = Math.max(100, Math.round((2200 - coalStress * 1400 - voltageSagPenalty * 900 - deficitRatio * 1500) * voltageRatio));
     }
     this.fanRotation += (targetRpm / 60) * Math.PI * 2 * dt;
 
@@ -1827,19 +2135,32 @@ export class PowerGridEngine {
       if (house) {
         house.flickerPhase += dt * (7 + i * 2);
 
-        // Special logic for Farm (house_3): heavily affected by agri pump demand
         const isFarm = (house.id === 'house_3');
         const farmOverload = isFarm && (this.sliderAgriPumps > 75) && !isSolar;
 
-        if (!house.applianceOn || farmOverload) {
+        if (isTotalBlackout || !house.applianceOn || farmOverload) {
           house.isLit = false;
           house.brownoutLevel = 1.0;
+          brownoutCount++;
+        } else if (deficitRatio > 0.15) {
+          // Deficit causes progressive shedding from farthest nodes
+          const shedThreshold = (7 - i) / 6.0;
+          if (deficitRatio >= shedThreshold * 0.75 || this.sliderVoltage < 205) {
+            house.isLit = false;
+            house.brownoutLevel = 1.0;
+            brownoutCount++;
+          } else {
+            house.isLit = true;
+            house.brownoutLevel = 0.5;
+            brownoutCount++;
+            litCount++;
+          }
         } else if (isSolar && (effectiveSolar >= 0.25 || this.sliderStorage > 40) && this.sliderVoltage >= 205) {
           house.isLit = true;
           house.brownoutLevel = 0.0;
           litCount++;
         } else {
-          // Downstream houses suffer voltage drops under coal load
+          // Coal or low voltage: progressive voltage sag
           const dropRatio = (i / 6.0) * (0.38 + coalStress * 0.60 + voltageSagPenalty * 0.55);
           if (dropRatio > 0.35 || this.sliderVoltage < 205) {
             house.brownoutLevel = Math.min(1.0, (dropRatio - 0.30) * 2.6);
@@ -1855,29 +2176,72 @@ export class PowerGridEngine {
 
     // Smog and Air Quality
     const rawSmog = isSolar ? 0 : (this.sliderCoalFire / 100) * 100;
-    const filterReduction = (this.sliderScrubber / 100) * 0.82;
+    const filterReduction = (this.sliderScrubber / 100) * 0.85;
     const finalSmog = isSolar ? 0 : Math.round(rawSmog * (1.0 - filterReduction));
-    const airCleanliness = Math.max(10, 100 - finalSmog);
+    const airCleanliness = Math.max(5, 100 - finalSmog);
 
-    // Town Happiness
-    const townHappiness = Math.max(10, Math.round(100 - (brownoutCount * 18) - (finalSmog * 0.25)));
+    // Realistic Town Happiness: Penalize Blackout (92%), Smog (up to 65%), and Voltage sag!
+    const smogPenalty = (finalSmog / 100) * 65;
+    const blackoutPenalty = isTotalBlackout ? 92 : (brownoutCount * 14 + deficitRatio * 35);
+    const voltagePenalty = (this.sliderVoltage < 205) ? (205 - this.sliderVoltage) * 1.5 : (this.sliderVoltage > 242 ? (this.sliderVoltage - 242) * 1.5 : 0);
+    const townHappiness = Math.max(5, Math.min(100, Math.round(100 - blackoutPenalty - smogPenalty - voltagePenalty)));
 
     // Eco Score Dynamics
-    if (townHappiness >= 85 && airCleanliness >= 80) {
-      this.ecoScore += dt * 25;
-    } else if (brownoutCount > 1 || airCleanliness < 45) {
-      this.ecoScore = Math.max(0, this.ecoScore - dt * 15);
+    if (isTotalBlackout) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 70); // Rapid crash to 0 in blackout!
+    } else if (finalSmog > 50) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 45); // Heavy smog pollution fine!
+    } else if (brownoutCount > 1 || this.sliderVoltage < 205) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 25); // Brownout instability penalty
+    } else if (isSolar && townHappiness >= 85 && airCleanliness >= 80) {
+      this.ecoScore = Math.min(3000, this.ecoScore + dt * 25); // Clean solar reward
+    } else if (!isSolar && coalGenMW > 0) {
+      this.ecoScore = Math.max(0, this.ecoScore - dt * 10); // Carbon emission burn
     }
 
+    // Live Grid Performance Rating
+    let liveGrade = 'A';
+    let gradeTitle = 'CLEAN ENERGY CHAMPION';
+    let gradeTamil = 'தூய ஆற்றல் சாம்பியன்';
+    let gradeColor = '#4ade80';
+
+    if (isTotalBlackout || brownoutCount >= 5) {
+      liveGrade = 'F';
+      gradeTitle = 'TOTAL BLACKOUT';
+      gradeTamil = 'முழு மின்தடை';
+      gradeColor = '#ef4444';
+    } else if (finalSmog >= 65 || airCleanliness <= 25) {
+      liveGrade = 'D';
+      gradeTitle = 'TOXIC SMOG';
+      gradeTamil = 'நச்சுப் புகை';
+      gradeColor = '#f97316';
+    } else if (brownoutCount >= 2 || townHappiness < 55 || this.sliderVoltage < 205 || this.sliderVoltage > 244) {
+      liveGrade = 'C';
+      gradeTitle = 'UNSTABLE GRID';
+      gradeTamil = 'மின் தட்டுப்பாடு';
+      gradeColor = '#eab308';
+    } else if (!isSolar || this.sliderCoalFire > 35) {
+      liveGrade = 'B';
+      gradeTitle = 'COAL-DEPENDENT';
+      gradeTamil = 'நிலக்கரி சார்பு';
+      gradeColor = '#38bdf8';
+    } else if (this.ecoScore >= 1300 && townHappiness >= 90 && airCleanliness >= 90 && isSolar) {
+      liveGrade = 'A+';
+      gradeTitle = 'ELITE MASTER';
+      gradeTamil = 'தலைசிறந்தது';
+      gradeColor = '#22c55e';
+    }
+
+    // Electrons only flow if there is active generation!
     this.packetTimer += dt;
     const interval = isSolar ? 0.08 : 0.20;
-    if (this.packetTimer >= interval) {
+    if (!isTotalBlackout && activeSupplyMW > 40 && this.packetTimer >= interval) {
       this.packetTimer = 0;
       this.spawnElectron(isSolar, lineLossPct);
     }
 
     this.updatePackets(dt);
-    this.updateSmoke(dt, isSolar);
+    this.updateSmoke(dt, isSolar, finalSmog);
 
     for (let i = this.popTexts.length - 1; i >= 0; i--) {
       const pt = this.popTexts[i];
@@ -1908,7 +2272,16 @@ export class PowerGridEngine {
         townLoad: this.sliderTownLoad,
         agriPumps: this.sliderAgriPumps,
         voltage: this.sliderVoltage,
-        gridTie: this.sliderGridTie
+        gridTie: this.sliderGridTie,
+        activeSupplyMW,
+        totalDemand,
+        powerDeficit,
+        isTotalBlackout,
+        finalSmog,
+        grade: liveGrade,
+        gradeTitle,
+        gradeTamil,
+        gradeColor
       });
     }
   }
@@ -1978,19 +2351,22 @@ export class PowerGridEngine {
     return null;
   }
 
-  updateSmoke(dt, isSolar) {
-    if (!isSolar) {
+  updateSmoke(dt, isSolar, finalSmog = 0) {
+    if (!isSolar && this.sliderCoalFire > 5) {
       const plant = this.nodes.get('plant');
-      if (plant && Math.random() < 0.7) {
+      const spawnRate = (this.sliderCoalFire / 100) * 0.9;
+      if (plant && Math.random() < spawnRate) {
+        const isDirty = (finalSmog > 35);
         this.smokePuffs.push({
           x: plant.x + (Math.random() - 0.5) * 35,
           y: plant.y - 75,
-          vx: Math.random() * 32 + 15,
-          vy: -Math.random() * 42 - 20,
-          radius: Math.random() * 12 + 10,
-          alpha: 0.6,
+          vx: Math.random() * 34 + 15,
+          vy: -Math.random() * 45 - 25,
+          radius: Math.random() * (isDirty ? 16 : 8) + 10,
+          colorRGB: isDirty ? '15, 23, 42' : '203, 213, 225',
+          alpha: isDirty ? 0.85 : 0.35,
           life: 0,
-          maxLife: 2.8
+          maxLife: isDirty ? 3.6 : 2.0
         });
       }
     }
@@ -2000,8 +2376,8 @@ export class PowerGridEngine {
       s.life += dt;
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      s.radius += dt * 14;
-      s.alpha = Math.max(0, 0.6 * (1.0 - s.life / s.maxLife));
+      s.radius += dt * (s.colorRGB === '15, 23, 42' ? 18 : 10);
+      s.currentAlpha = Math.max(0, s.alpha * (1.0 - s.life / s.maxLife));
       if (s.life >= s.maxLife) {
         this.smokePuffs.splice(i, 1);
       }
@@ -2411,7 +2787,9 @@ export class PowerGridEngine {
     ctx.save();
 
     this.smokePuffs.forEach((s) => {
-      ctx.fillStyle = `rgba(30, 41, 59, ${s.alpha})`;
+      const rgb = s.colorRGB || '30, 41, 59';
+      const a = s.currentAlpha !== undefined ? s.currentAlpha : s.alpha;
+      ctx.fillStyle = `rgba(${rgb}, ${a})`;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
       ctx.fill();
@@ -2572,7 +2950,7 @@ export class PowerGridEngine {
  * ============================================================================
  */
 
-import { PowerGridEngine } from './engine.js';
+// PowerGridEngine bundled inline
 
 const elements = {
   canvas: document.getElementById('gameCanvas'),
@@ -2628,7 +3006,29 @@ const elements = {
   fsBtn: document.getElementById('fsBtn'),
   resetBtn: document.getElementById('resetBtn'),
   tickerDot: document.getElementById('tickerDot'),
-  tickerText: document.getElementById('tickerText')
+  tickerText: document.getElementById('tickerText'),
+
+  // Live Rating & Report Card Modal Elements
+  badgeRating: document.getElementById('badgeRating'),
+  gridGrade: document.getElementById('gridGrade'),
+  ratingEmoji: document.getElementById('ratingEmoji'),
+  reportModal: document.getElementById('reportModal'),
+  reportCardWrapper: document.getElementById('reportCardWrapper'),
+  reportStampBadge: document.getElementById('reportStampBadge'),
+  reportStampLetter: document.getElementById('reportStampLetter'),
+  reportStampCaption: document.getElementById('reportStampCaption'),
+  reportTitleText: document.getElementById('reportTitleText'),
+  reportTamilTitleText: document.getElementById('reportTamilTitleText'),
+  repScore: document.getElementById('repScore'),
+  repSolarShare: document.getElementById('repSolarShare'),
+  repAirClean: document.getElementById('repAirClean'),
+  repTownMood: document.getElementById('repTownMood'),
+  repBlackouts: document.getElementById('repBlackouts'),
+  repSmogTime: document.getElementById('repSmogTime'),
+  reportVerdictText: document.getElementById('reportVerdictText'),
+  reportExitBtn: document.getElementById('reportExitBtn'),
+  reportCloseBtn: document.getElementById('reportCloseBtn'),
+  reportResetBtn: document.getElementById('reportResetBtn')
 };
 
 // Web Audio Sound Synthesizer (Permanently Silenced per User Request)
@@ -2652,8 +3052,19 @@ let challengeRunning = false;
 let challengeTime = 30;
 let challengeTimer = null;
 let currentHwTab = 'solar';
+let lastTelemetry = null;
+let challengeStats = {
+  samples: 0,
+  totalHappiness: 0,
+  totalAir: 0,
+  solarSeconds: 0,
+  blackoutSeconds: 0,
+  smogSeconds: 0
+};
 
 function handleTelemetry(t) {
+  lastTelemetry = t;
+
   // Update Badges
   elements.townHappiness.textContent = `${t.townHappiness}%`;
   elements.townHappiness.className = t.townHappiness >= 80 ? 'badge-stat text-green' : (t.townHappiness >= 50 ? 'badge-stat text-gold' : 'badge-stat text-red');
@@ -2666,21 +3077,35 @@ function handleTelemetry(t) {
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
 
+  // Update Live Grid Grade Badge
+  if (elements.gridGrade) {
+    elements.gridGrade.textContent = `${t.grade} ${t.gradeTitle.split(' ')[0]}`;
+    elements.gridGrade.className = `badge-stat ${t.grade === 'A+' || t.grade === 'A' ? 'text-green' : (t.grade === 'B' ? 'text-cyan' : (t.grade === 'C' ? 'text-gold' : (t.grade === 'D' ? 'text-orange' : 'text-red')))}`;
+  }
+  if (elements.ratingEmoji) {
+    elements.ratingEmoji.textContent = (t.grade === 'A+' || t.grade === 'A') ? '🏆' : (t.grade === 'B' ? '⚡' : (t.grade === 'C' ? '⚠️' : (t.grade === 'D' ? '🏭' : '💥')));
+  }
+  if (elements.badgeRating) {
+    elements.badgeRating.className = (t.isTotalBlackout || t.grade === 'F') ? 'badge-item grid-rating-badge alert-blackout' : 'badge-item grid-rating-badge';
+  }
+
   // Update Live Exhibition Marquee Ticker
   if (elements.tickerText && elements.tickerDot) {
-    const hours = t.timeMinutes / 60;
-    const isSolarTime = hours >= 7 && hours <= 17;
-    const isBrownout = t.townHappiness < 75;
-
-    if (isBrownout) {
+    if (t.isTotalBlackout || t.grade === 'F') {
+      elements.tickerDot.textContent = '🚨';
+      elements.tickerText.innerHTML = `<strong>🚨 பேரழிவு மின்தடை (GRADE F - TOTAL BLACKOUT):</strong> மின் உற்பத்தி சுழியம் (0 MW)! நகரம் முழுவதும் மின்தடை! உடனே சூரிய மின்சக்தி அல்லது பேட்டரியை இயக்கவும்!`;
+    } else if (t.finalSmog >= 65 || t.grade === 'D') {
+      elements.tickerDot.textContent = '🏭';
+      elements.tickerText.innerHTML = `<strong>🏭 நச்சுப் புகை அபாயம் (GRADE D - TOXIC SMOG):</strong> வடிகட்டி இன்றி நிலக்கரி ஆலை இயங்குகிறது! காற்று மாசடைந்துள்ளது (${t.airCleanliness}%)! வடிகட்டியை (Scrubber) கூட்டவும்!`;
+    } else if (t.brownoutCount >= 2) {
       elements.tickerDot.textContent = '🔴';
-      elements.tickerText.innerHTML = `<strong>⚠️ எச்சரிக்கை (GRID ALERT):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு (Brownout) • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
-    } else if (isSolarTime) {
+      elements.tickerText.innerHTML = `<strong>⚠️ மின் தட்டுப்பாடு (GRID BROWNOUT - GRADE C):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
+    } else if (t.isSolar) {
       elements.tickerDot.textContent = '🟢';
-      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • பள்ளி, மருத்துவமனை உட்பட 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
+      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE - GRADE ${t.grade}):</strong> கமுதி சூரிய பூங்கா ${t.activeSupplyMW} MW • 100% தூய காற்று • 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
     } else {
       elements.tickerDot.textContent = '🏭';
-      elements.tickerText.innerHTML = `<strong>🌙 இரவு உச்ச தேவை (COAL PEAK):</strong> மேட்டூர் அனல் நிலையம் இயங்குகிறது (${engine.sliderCoalFire}%) • வெப்ப இழப்பு ${engine.currentLineLossPct}% • காற்று சுத்தத்தை பராமரிக்க ஸ்க்ரப்பரை 100% வைக்கவும்!`;
+      elements.tickerText.innerHTML = `<strong>🌙 நிலக்கரி இயக்கம் (COAL - GRADE ${t.grade}):</strong> மேட்டூர் அனல் நிலையம் ${t.activeSupplyMW} MW (${engine.sliderCoalFire}%) • இழப்பு ${engine.currentLineLossPct}% • ஸ்க்ரப்பரை 100% வைக்கவும்!`;
     }
   }
 
@@ -2882,6 +3307,28 @@ function initEvents() {
     elements.guideModal.classList.add('hidden');
   });
 
+  // Report Card Modal Listeners
+  if (elements.reportCloseBtn) {
+    elements.reportCloseBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.reportExitBtn) {
+    elements.reportExitBtn.addEventListener('click', () => {
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.reportResetBtn) {
+    elements.reportResetBtn.addEventListener('click', () => {
+      sfx.playSolarChime();
+      if (elements.reportModal) elements.reportModal.classList.add('hidden');
+      resetToDefaultBooth();
+    });
+  }
+
   // Canvas Click
   elements.canvas.addEventListener('click', (e) => {
     sfx.playPop();
@@ -2963,6 +3410,16 @@ function startChallenge() {
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
 
+  // Reset challenge stats
+  challengeStats = {
+    samples: 0,
+    totalHappiness: 0,
+    totalAir: 0,
+    solarSeconds: 0,
+    blackoutSeconds: 0,
+    smogSeconds: 0
+  };
+
   engine.setTime(420); // 07:00 AM Sunrise
   engine.autoAdvanceTime = true; // Advance time during 30s challenge
   engine.isRunning = true;
@@ -2973,6 +3430,20 @@ function startChallenge() {
     elements.gameTimer.textContent = `${challengeTime}s`;
     engine.setTime(engine.timeMinutes + 25);
 
+    // Sample telemetry
+    if (lastTelemetry) {
+      challengeStats.samples++;
+      challengeStats.totalHappiness += lastTelemetry.townHappiness;
+      challengeStats.totalAir += lastTelemetry.airCleanliness;
+      if (lastTelemetry.isSolar) challengeStats.solarSeconds++;
+      if (lastTelemetry.isTotalBlackout || lastTelemetry.brownoutCount >= 4 || lastTelemetry.townHappiness <= 20) {
+        challengeStats.blackoutSeconds++;
+      }
+      if (lastTelemetry.finalSmog >= 45 || lastTelemetry.airCleanliness <= 35) {
+        challengeStats.smogSeconds++;
+      }
+    }
+
     if (challengeTime <= 0) {
       clearInterval(challengeTimer);
       challengeRunning = false;
@@ -2980,18 +3451,130 @@ function startChallenge() {
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
 
-      alert(`🎉 30-SECOND GRID CHALLENGE COMPLETE!
-
-Final Score: ${Math.round(engine.ecoScore)} Eco Points!
-Grade: A+ Clean Energy Master!
-
-You kept Tamil Nadu powered and proved why solar energy keeps the town happy and the air fresh!`);
+      finishChallenge();
     }
   }, 1000);
 }
 
+function finishChallenge() {
+  const samples = Math.max(1, challengeStats.samples);
+  const avgHappiness = Math.round(challengeStats.totalHappiness / samples);
+  const avgAir = Math.round(challengeStats.totalAir / samples);
+  const solarShare = Math.round((challengeStats.solarSeconds / samples) * 100);
+  const blackoutTime = challengeStats.blackoutSeconds;
+  const smogTime = challengeStats.smogSeconds;
+  const finalScore = Math.round(engine.ecoScore);
+
+  let grade = 'A';
+  let gradeClass = 'grade-a';
+  let stampClass = '';
+  let title = '';
+  let tamilTitle = '';
+  let caption = '';
+  let verdict = '';
+
+  // Rigorous evaluation based on actual user control actions
+  if (blackoutTime >= 8 || avgHappiness < 30 || finalScore <= 350) {
+    grade = 'F';
+    gradeClass = 'grade-f';
+    stampClass = 'stamp-f';
+    caption = 'TOTAL GRID COLLAPSE';
+    title = 'CATASTROPHIC BLACKOUT!';
+    tamilTitle = 'பேரழிவு மின்கட்டமைப்பு வீழ்ச்சி';
+    verdict = `🤦‍♂️ TOTAL SYSTEM FAILURE! The town suffered blackouts for ${blackoutTime} seconds. Power generation failed to meet basic demand, voltage collapsed, and schools & clinics were left in pitch darkness! You cannot earn an A+ with a collapsed grid! Turn on Kamuthi Solar & Battery storage to restore power.`;
+  } else if (smogTime >= 8 || avgAir < 35) {
+    grade = 'D';
+    gradeClass = 'grade-d';
+    stampClass = 'stamp-d';
+    caption = 'TOXIC SMOG DISASTER';
+    title = 'ENVIRONMENTAL CATASTROPHE!';
+    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
+    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot covered the town for ${smogTime} seconds, choking citizens and dropping air quality to ${avgAir}%. Clean solar energy is essential to prevent respiratory disease!`;
+  } else if (blackoutTime >= 3 || avgHappiness < 60) {
+    grade = 'C';
+    gradeClass = 'grade-c';
+    stampClass = 'stamp-c';
+    caption = 'UNSTABLE GRID';
+    title = 'BROWNOUT INSTABILITY';
+    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
+    verdict = `⚠️ UNSTABLE OPERATION! Severe voltage fluctuations and partial brownouts plagued the town. Farm irrigation pumps and appliances were damaged. Boost battery reserves and stabilize transformer voltage at 230V.`;
+  } else if (solarShare < 50) {
+    grade = 'B';
+    gradeClass = 'grade-b';
+    stampClass = 'stamp-b';
+    caption = 'COAL-HEAVY GRID';
+    title = 'PASSABLE, BUT POLLUTED!';
+    tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
+    verdict = `⚡ LIGHTS ON, BUT CARBON HEAVY! You avoided blackouts, but relied too heavily on burning coal (${100 - solarShare}% thermal). Emissions were high. Ramp up solar harvesting and storage for a cleaner footprint!`;
+  } else if (finalScore >= 1350 && solarShare >= 80 && avgAir >= 85 && blackoutTime === 0) {
+    grade = 'A+';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'ELITE MASTER';
+    title = 'OUTSTANDING CLEAN GRID MASTER!';
+    tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
+    verdict = `🌟 MASTERFUL LEADERSHIP! 100% clean solar generation, zero blackouts, pristine mountain air, and high citizen happiness (${avgHappiness}%)! You proved why renewable solar energy is the triumphant choice for Tamil Nadu!`;
+  } else {
+    grade = 'A';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'CLEAN CHAMPION';
+    title = 'CLEAN ENERGY CHAMPION!';
+    tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
+    verdict = `👏 GREAT PERFORMANCE! Solid solar utilization with clean air throughout the test. A few minor grid adjustments will achieve absolute perfection!`;
+  }
+
+  // Populate Report Card Modal
+  if (elements.reportCardWrapper) {
+    elements.reportCardWrapper.className = `modal-card report-card ${gradeClass}`;
+  }
+  if (elements.reportStampBadge) {
+    elements.reportStampBadge.className = `report-stamp-badge ${stampClass}`;
+  }
+  if (elements.reportStampLetter) elements.reportStampLetter.textContent = grade;
+  if (elements.reportStampCaption) elements.reportStampCaption.textContent = caption;
+  if (elements.reportTitleText) elements.reportTitleText.textContent = title;
+  if (elements.reportTamilTitleText) elements.reportTamilTitleText.textContent = tamilTitle;
+  if (elements.repScore) elements.repScore.textContent = finalScore.toLocaleString();
+  if (elements.repSolarShare) elements.repSolarShare.textContent = `${solarShare}%`;
+  if (elements.repAirClean) elements.repAirClean.textContent = `${avgAir}%`;
+  if (elements.repTownMood) elements.repTownMood.textContent = `${avgHappiness}%`;
+  if (elements.repBlackouts) elements.repBlackouts.textContent = `${blackoutTime}s`;
+  if (elements.repSmogTime) elements.repSmogTime.textContent = `${smogTime}s`;
+  if (elements.reportVerdictText) elements.reportVerdictText.textContent = verdict;
+
+  // Reveal Report Card Modal
+  if (elements.reportModal) {
+    elements.reportModal.classList.remove('hidden');
+  }
+
+  // Visual popup banner on canvas
+  if (grade === 'F' || grade === 'D') {
+    engine.popTexts.push({
+      x: engine.canvas.width / (2 * engine.dpr),
+      y: 110,
+      text: `🚨 AUDIT RESULT: GRADE ${grade} (${caption})`,
+      color: '#ef4444',
+      alpha: 1.0,
+      life: 0,
+      maxLife: 3.5
+    });
+  } else {
+    engine.popTexts.push({
+      x: engine.canvas.width / (2 * engine.dpr),
+      y: 110,
+      text: `🎉 AUDIT RESULT: GRADE ${grade}! ${title}`,
+      color: '#34d399',
+      alpha: 1.0,
+      life: 0,
+      maxLife: 3.5
+    });
+  }
+}
+
 function resetToDefaultBooth() {
   engine.setTime(720); // 12:00 PM Noon
+  engine.ecoScore = 1200;
   engine.setSlider('sunshine', 100);
   engine.setSlider('storage', 350);
   engine.setSlider('coalFire', 40);
