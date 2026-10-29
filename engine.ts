@@ -18,7 +18,6 @@ export interface GridNode {
   isLit: boolean;
   brownoutLevel: number; // 0.0 (full light) to 1.0 (blackout)
   flickerPhase: number;
-  applianceOn: boolean;
 }
 
 export interface ElectronPacket {
@@ -127,8 +126,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 2. High-Voltage Transmission Pylon 1
@@ -143,8 +141,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 3. Connected Fan Station (From old project load model)
@@ -159,8 +156,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 4. TANTRANSCO Main Grid Substation
@@ -175,8 +171,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 5. Six Friendly Town Buildings
@@ -201,8 +196,7 @@ export class PowerGridEngine {
         y: 0,
         isLit: true,
         brownoutLevel: 0,
-        flickerPhase: Math.random() * Math.PI,
-        applianceOn: true
+        flickerPhase: Math.random() * Math.PI
       });
     });
 
@@ -294,10 +288,7 @@ export class PowerGridEngine {
       if (house) {
         house.flickerPhase += dt * (7 + i * 2);
 
-        if (!house.applianceOn) {
-          house.isLit = false;
-          house.brownoutLevel = 1.0;
-        } else if (isSolar) {
+        if (isSolar) {
           house.isLit = true;
           house.brownoutLevel = 0.0;
           litCount++;
@@ -769,7 +760,7 @@ export class PowerGridEngine {
 
     // Windows
     let windowColor = '#facc15';
-    if (!n.applianceOn || n.brownoutLevel >= 0.8) {
+    if (n.brownoutLevel >= 0.8 || !isLit) {
       windowColor = '#0f172a';
     } else if (isBrownout) {
       const flicker = Math.sin(n.flickerPhase) > 0;
@@ -788,7 +779,7 @@ export class PowerGridEngine {
     // Status Icon & Emoji
     ctx.font = '12px Fredoka';
     ctx.textAlign = 'center';
-    const moodEmoji = !n.applianceOn ? '💤' : (isBrownout ? '😰' : '😃');
+    const moodEmoji = isBrownout ? '😰' : '😃';
     ctx.fillText(`${n.icon} ${moodEmoji}`, 0, -32);
 
     ctx.fillStyle = isBrownout ? '#f87171' : '#cbd5e1';
@@ -860,15 +851,15 @@ export class PowerGridEngine {
       const dy = mouseY - node.y;
       if (Math.sqrt(dx * dx + dy * dy) < 36) {
         if (node.id.startsWith('house_')) {
-          node.applianceOn = !node.applianceOn;
+          const isPowered = node.isLit && node.brownoutLevel < 0.5;
           this.popTexts.push({
             x: node.x,
             y: node.y - 42,
-            text: node.applianceOn ? '💡 Lights & Fans ON!' : '💤 Switched OFF',
-            color: node.applianceOn ? '#4ade80' : '#94a3b8',
+            text: isPowered ? `⚡ ${node.name}: 230V Active` : `⚠️ ${node.name}: Low Power`,
+            color: isPowered ? '#4ade80' : '#ef4444',
             alpha: 1.0,
             life: 0,
-            maxLife: 1.2
+            maxLife: 1.4
           });
         } else if (node.id === 'plant') {
           const isSolar = node.name.includes('Solar');

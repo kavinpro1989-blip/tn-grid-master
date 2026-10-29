@@ -77,8 +77,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 2. High-Voltage Transmission Pylon 1
@@ -93,8 +92,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 3. Connected Fan Station (Load unit)
@@ -109,8 +107,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 4. TANTRANSCO Main Grid Substation
@@ -125,8 +122,7 @@ export class PowerGridEngine {
       y: 0,
       isLit: true,
       brownoutLevel: 0,
-      flickerPhase: 0,
-      applianceOn: true
+      flickerPhase: 0
     });
 
     // 5. Six Friendly Town Buildings (Bilingual Tamil & English)
@@ -151,8 +147,7 @@ export class PowerGridEngine {
         y: 0,
         isLit: true,
         brownoutLevel: 0,
-        flickerPhase: Math.random() * Math.PI,
-        applianceOn: true
+        flickerPhase: Math.random() * Math.PI
       });
     });
 
@@ -346,7 +341,7 @@ export class PowerGridEngine {
         const isFarm = (house.id === 'house_3');
         const farmOverload = isFarm && (this.sliderAgriPumps > 75) && !isSolar;
 
-        if (isTotalBlackout || !house.applianceOn || farmOverload) {
+        if (isTotalBlackout || farmOverload) {
           house.isLit = false;
           house.brownoutLevel = 1.0;
           brownoutCount++;
@@ -937,7 +932,7 @@ export class PowerGridEngine {
     ctx.fill();
 
     let windowColor = '#facc15';
-    if (!n.applianceOn || n.brownoutLevel >= 0.8) {
+    if (n.brownoutLevel >= 0.8 || !isLit) {
       windowColor = '#0f172a';
     } else if (isBrownout) {
       const flicker = Math.sin(n.flickerPhase) > 0;
@@ -955,7 +950,7 @@ export class PowerGridEngine {
 
     ctx.font = '12px Fredoka, sans-serif';
     ctx.textAlign = 'center';
-    const moodEmoji = !n.applianceOn ? '💤' : (isBrownout ? '😰' : '😃');
+    const moodEmoji = isBrownout ? '😰' : '😃';
     ctx.fillText(`${n.icon} ${moodEmoji}`, 0, -32);
 
     ctx.fillStyle = isBrownout ? '#f87171' : '#cbd5e1';
@@ -1033,21 +1028,41 @@ export class PowerGridEngine {
 
     if (clickedNode) {
       if (clickedNode.id.startsWith('house_')) {
-        clickedNode.applianceOn = !clickedNode.applianceOn;
+        const isPowered = clickedNode.isLit && clickedNode.brownoutLevel < 0.5;
         this.ripples.push({
           x: clickedNode.x,
           y: clickedNode.y,
           radius: 8,
           maxRadius: 70,
           speed: 120,
-          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          color: isPowered ? '#4ade80' : '#ef4444',
           alpha: 1.0
         });
         this.popTexts.push({
           x: clickedNode.x,
           y: clickedNode.y - 42,
-          text: clickedNode.applianceOn ? '💡 Lights & Fans ON! (இயங்குகிறது)' : '💤 Switched OFF (நிறுத்தப்பட்டது)',
-          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          text: isPowered ? `⚡ ${clickedNode.name}: 230V Active` : `⚠️ ${clickedNode.name}: Low Power`,
+          color: isPowered ? '#4ade80' : '#ef4444',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      } else if (clickedNode.id === 'fanStation') {
+        const isSpinning = this.fanRotation > 0;
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 8,
+          maxRadius: 65,
+          speed: 110,
+          color: '#38bdf8',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: `🌀 Town Cooling Fan Station`,
+          color: '#38bdf8',
           alpha: 1.0,
           life: 0,
           maxLife: 1.4

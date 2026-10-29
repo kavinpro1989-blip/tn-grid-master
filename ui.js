@@ -688,11 +688,6 @@ function resetToDefaultBooth() {
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
 
-  // Ensure all appliances are switched ON
-  for (const node of engine.nodes.values()) {
-    node.applianceOn = true;
-  }
-
   engine.popTexts.push({
     x: engine.canvas.width / (2 * engine.dpr),
     y: 120,
