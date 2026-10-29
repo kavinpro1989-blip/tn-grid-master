@@ -354,17 +354,17 @@ export class PowerGridEngine {
     let gradeTamil = 'தூய ஆற்றல் சாம்பியன்';
     let gradeColor = '#4ade80';
 
-    if (isTotalBlackout || brownoutCount >= 5) {
+    if (isTotalBlackout || (brownoutCount >= 5 && totalDemand > 0) || this.sliderVoltage < 100) {
       liveGrade = 'F';
       gradeTitle = 'TOTAL BLACKOUT';
       gradeTamil = 'முழு மின்தடை';
       gradeColor = '#ef4444';
-    } else if (finalSmog >= 65 || airCleanliness <= 25) {
+    } else if (finalSmog >= 60 || airCleanliness <= 30) {
       liveGrade = 'D';
       gradeTitle = 'TOXIC SMOG';
       gradeTamil = 'நச்சுப் புகை';
       gradeColor = '#f97316';
-    } else if (brownoutCount >= 2 || townHappiness < 55 || this.sliderVoltage < 205 || this.sliderVoltage > 244) {
+    } else if (brownoutCount >= 2 || townHappiness < 60 || this.sliderVoltage < 205 || this.sliderVoltage > 244) {
       liveGrade = 'C';
       gradeTitle = 'UNSTABLE GRID';
       gradeTamil = 'மின் தட்டுப்பாடு';
@@ -374,7 +374,7 @@ export class PowerGridEngine {
       gradeTitle = 'COAL-DEPENDENT';
       gradeTamil = 'நிலக்கரி சார்பு';
       gradeColor = '#38bdf8';
-    } else if (this.ecoScore >= 1300 && townHappiness >= 90 && airCleanliness >= 90 && isSolar) {
+    } else if (townHappiness >= 80 && airCleanliness >= 80 && isSolar && this.sliderVoltage >= 215 && this.sliderVoltage <= 245) {
       liveGrade = 'A+';
       gradeTitle = 'ELITE MASTER';
       gradeTamil = 'தலைசிறந்தது';

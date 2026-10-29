@@ -450,15 +450,16 @@ function startChallenge() {
     smogSeconds: 0
   };
 
-  engine.setTime(420); // 07:00 AM Sunrise
-  engine.autoAdvanceTime = true; // Advance time during 30s challenge
+  // Start at peak daytime (10:30 AM) so solar harvesting is optimal!
+  engine.setTime(630); // 10:30 AM Peak Daytime
+  engine.autoAdvanceTime = true; // Advance time smoothly through the daytime
   engine.isRunning = true;
 
   if (challengeTimer) clearInterval(challengeTimer);
   challengeTimer = setInterval(() => {
     challengeTime--;
     elements.gameTimer.textContent = `${challengeTime}s`;
-    engine.setTime(engine.timeMinutes + 25);
+    engine.setTime(engine.timeMinutes + 10); // +10 min/s: runs from 10:30 AM to 03:30 PM (prime sunny day!)
 
     // Sample telemetry
     if (lastTelemetry) {
@@ -466,7 +467,8 @@ function startChallenge() {
       challengeStats.totalHappiness += lastTelemetry.townHappiness;
       challengeStats.totalAir += lastTelemetry.airCleanliness;
       if (lastTelemetry.isSolar) challengeStats.solarSeconds++;
-      if (lastTelemetry.isTotalBlackout || lastTelemetry.brownoutCount >= 4 || lastTelemetry.townHappiness <= 20) {
+      // Count genuine blackout (when supply cannot meet demand or substation is off)
+      if (lastTelemetry.isTotalBlackout || (lastTelemetry.housesLitCount <= 1 && lastTelemetry.totalDemand > 0)) {
         challengeStats.blackoutSeconds++;
       }
       if (lastTelemetry.finalSmog >= 45 || lastTelemetry.airCleanliness <= 35) {
@@ -495,6 +497,19 @@ function finishChallenge() {
   const smogTime = challengeStats.smogSeconds;
   const finalScore = Math.round(engine.ecoScore);
 
+  // Performance Index (0 to 100)
+  // 1. Solar Clean Energy: up to 35 pts
+  const solarPts = (solarShare / 100) * 35;
+  // 2. Air Purity: up to 25 pts
+  const airPts = (avgAir / 100) * 25;
+  // 3. Town Satisfaction & Power Uptime: up to 30 pts
+  const uptimeRatio = Math.max(0, 1.0 - (blackoutTime / samples));
+  const townPts = ((avgHappiness * 0.5 + uptimeRatio * 100 * 0.5) / 100) * 30;
+  // 4. Eco Points: up to 10 pts
+  const scorePts = Math.min(10, (finalScore / 300) * 10);
+
+  const totalGridScore = Math.round(solarPts + airPts + townPts + scorePts);
+
   let grade = 'A';
   let gradeClass = 'grade-a';
   let stampClass = '';
@@ -503,55 +518,56 @@ function finishChallenge() {
   let caption = '';
   let verdict = '';
 
-  // Rigorous evaluation based on actual user control actions
-  if (blackoutTime >= 8 || avgHappiness < 30 || finalScore <= 350) {
-    grade = 'F';
-    gradeClass = 'grade-f';
-    stampClass = 'stamp-f';
-    caption = 'TOTAL GRID COLLAPSE';
-    title = 'CATASTROPHIC BLACKOUT!';
-    tamilTitle = 'பேரழிவு மின்கட்டமைப்பு வீழ்ச்சி';
-    verdict = `🤦‍♂️ TOTAL SYSTEM FAILURE! The town suffered blackouts for ${blackoutTime} seconds. Power generation failed to meet basic demand, voltage collapsed, and schools & clinics were left in pitch darkness! You cannot earn an A+ with a collapsed grid! Turn on Kamuthi Solar & Battery storage to restore power.`;
-  } else if (smogTime >= 8 || avgAir < 35) {
-    grade = 'D';
-    gradeClass = 'grade-d';
-    stampClass = 'stamp-d';
-    caption = 'TOXIC SMOG DISASTER';
-    title = 'ENVIRONMENTAL CATASTROPHE!';
-    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
-    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot covered the town for ${smogTime} seconds, choking citizens and dropping air quality to ${avgAir}%. Clean solar energy is essential to prevent respiratory disease!`;
-  } else if (blackoutTime >= 3 || avgHappiness < 60) {
-    grade = 'C';
-    gradeClass = 'grade-c';
-    stampClass = 'stamp-c';
-    caption = 'UNSTABLE GRID';
-    title = 'BROWNOUT INSTABILITY';
-    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
-    verdict = `⚠️ UNSTABLE OPERATION! Severe voltage fluctuations and partial brownouts plagued the town. Farm irrigation pumps and appliances were damaged. Boost battery reserves and stabilize transformer voltage at 230V.`;
-  } else if (solarShare < 50) {
-    grade = 'B';
-    gradeClass = 'grade-b';
-    stampClass = 'stamp-b';
-    caption = 'COAL-HEAVY GRID';
-    title = 'PASSABLE, BUT POLLUTED!';
-    tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
-    verdict = `⚡ LIGHTS ON, BUT CARBON HEAVY! You avoided blackouts, but relied too heavily on burning coal (${100 - solarShare}% thermal). Emissions were high. Ramp up solar harvesting and storage for a cleaner footprint!`;
-  } else if (finalScore >= 1350 && solarShare >= 80 && avgAir >= 85 && blackoutTime === 0) {
+  // Fair, achievable, and educational grading
+  if (totalGridScore >= 80 || (solarShare >= 85 && avgAir >= 85 && blackoutTime <= 8)) {
     grade = 'A+';
     gradeClass = 'grade-a';
     stampClass = '';
     caption = 'ELITE MASTER';
     title = 'OUTSTANDING CLEAN GRID MASTER!';
     tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
-    verdict = `🌟 MASTERFUL LEADERSHIP! 100% clean solar generation, zero blackouts, pristine mountain air, and high citizen happiness (${avgHappiness}%)! You proved why renewable solar energy is the triumphant choice for Tamil Nadu!`;
-  } else {
+    verdict = `🌟 MASTERFUL LEADERSHIP! You scored ${totalGridScore}/100! With ${solarShare}% clean solar energy, crystal-clear air (${avgAir}%), and strong town satisfaction, you proved that renewable solar energy is the triumphant choice for Tamil Nadu!`;
+  } else if (totalGridScore >= 65 || (solarShare >= 60 && avgAir >= 70 && blackoutTime <= 12)) {
     grade = 'A';
     gradeClass = 'grade-a';
     stampClass = '';
     caption = 'CLEAN CHAMPION';
     title = 'CLEAN ENERGY CHAMPION!';
     tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
-    verdict = `👏 GREAT PERFORMANCE! Solid solar utilization with clean air throughout the test. A few minor grid adjustments will achieve absolute perfection!`;
+    verdict = `👏 EXCELLENT PERFORMANCE! You scored ${totalGridScore}/100! Strong solar delivery kept the town energized with clean air. A few minor grid adjustments will achieve absolute perfection!`;
+  } else if (smogTime >= 10 && avgAir < 40) {
+    grade = 'D';
+    gradeClass = 'grade-d';
+    stampClass = 'stamp-d';
+    caption = 'TOXIC SMOG DISASTER';
+    title = 'ENVIRONMENTAL CATASTROPHE!';
+    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
+    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot covered the town for ${smogTime} seconds, choking citizens and dropping air quality to ${avgAir}%. Turn on chimney scrubbers or switch to Kamuthi Solar!`;
+  } else if (totalGridScore >= 45 || solarShare >= 40) {
+    grade = 'B';
+    gradeClass = 'grade-b';
+    stampClass = 'stamp-b';
+    caption = 'PASSABLE GRID';
+    title = 'LIGHTS ON, BUT COULD BE CLEANER!';
+    tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
+    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100! You kept the town powered, but relied on thermal coal (${100 - solarShare}%). Increase solar harvesting to cut carbon emissions!`;
+  } else if (totalGridScore >= 25 || blackoutTime < 22) {
+    grade = 'C';
+    gradeClass = 'grade-c';
+    stampClass = 'stamp-c';
+    caption = 'UNSTABLE GRID';
+    title = 'BROWNOUT INSTABILITY';
+    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
+    verdict = `⚠️ UNSTABLE GRID! You scored ${totalGridScore}/100. Frequent brownouts and voltage dips interrupted power to homes and farms. Tune substation voltage to 230V and keep solar harvest balanced!`;
+  } else {
+    // Only true abandonment / total failure triggers Grade F!
+    grade = 'F';
+    gradeClass = 'grade-f';
+    stampClass = 'stamp-f';
+    caption = 'TOTAL GRID COLLAPSE';
+    title = 'CATASTROPHIC BLACKOUT!';
+    tamilTitle = 'பேரழிவு மின்கட்டமைப்பு வீழ்ச்சி';
+    verdict = `🤦‍♂️ TOTAL SYSTEM FAILURE! The town was left in complete blackout for ${blackoutTime} seconds (${totalGridScore}/100). Zero power was delivered to schools and clinics. Turn on Substation voltage (230V) and Solar power to energize Tamil Nadu!`;
   }
 
   // Populate Report Card Modal
