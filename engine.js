@@ -19,19 +19,19 @@ export class PowerGridEngine {
     this.timeMinutes = 720; // Default: 12:00 Noon
     this.isRunning = true;
     this.autoAdvanceTime = false; // 🛑 Time locked! Sun never moves on its own
-    this.ecoScore = 1200;
+    this.ecoScore = 0;
     this.fanRotation = 0;
 
-    // 🎛️ 8 Master of Control Levers (Full Grid Authority)
-    this.sliderSunshine   = 100; // 0 - 100% (Solar PV harvest)
-    this.sliderStorage    = 350; // 0 - 500 MWh (Battery reserve buffer)
-    this.sliderCoalFire   = 40;  // 0 - 100% (Thermal boiler burn rate)
-    this.sliderScrubber   = 80;  // 0 - 100% (Chimney soot precipitator)
-    this.sliderTownLoad   = 2;   // 1 (Eco), 2 (Normal), 3 (Heavy), 4 (Peak)
-    this.sliderAgriPumps  = 50;  // 0 - 100% (Agricultural irrigation motors)
-    this.sliderVoltage    = 230; // 190V - 250V (Substation transformer tap)
-    this.sliderGridTie    = 0;   // -200 MW (Export) to +200 MW (Import)
-    this.currentLineLossPct = 5;
+    // 🎛️ 8 Master of Control Levers (Full Grid Authority) - All 0% on Game Start!
+    this.sliderSunshine   = 0; // 0% (Solar PV harvest)
+    this.sliderStorage    = 0; // 0 MWh (Battery reserve buffer)
+    this.sliderCoalFire   = 0; // 0% (Thermal boiler burn rate)
+    this.sliderScrubber   = 0; // 0% (Chimney soot precipitator)
+    this.sliderTownLoad   = 0; // 0 (0% Off to 100% Peak)
+    this.sliderAgriPumps  = 0; // 0% (Agricultural irrigation motors)
+    this.sliderVoltage    = 0; // 0V (Substation transformer tap: 0V Off to 250V)
+    this.sliderGridTie    = 0; // 0 MW
+    this.currentLineLossPct = 0;
 
     // Grid Graph
     this.nodes = new Map();
@@ -220,9 +220,9 @@ export class PowerGridEngine {
     const netGridTie = this.sliderGridTie;
 
     // Total Demand: Homes Demand + Agri Irrigation Motors - Grid Tie Support
-    const homesDemand = (this.sliderTownLoad / 2.0) * 550; // 275 - 1100 MW
+    const homesDemand = (this.sliderTownLoad / 4.0) * 1100; // 0 to 1100 MW (0 = Off)
     const agriDemand  = (this.sliderAgriPumps / 100) * 320; // 0 - 320 MW
-    const totalDemand = Math.max(180, homesDemand + agriDemand - netGridTie);
+    const totalDemand = Math.max(0, homesDemand + agriDemand - netGridTie);
 
     // Operator Mode & Grid Dispatch
     // Solar is primary if solar + battery can provide clean base and coal isn't heavily forced
@@ -249,8 +249,8 @@ export class PowerGridEngine {
       : (coalGenMW + Math.max(0, netGridTie));
 
     const powerDeficit = Math.max(0, totalDemand - activeSupplyMW);
-    const deficitRatio = Math.min(1.0, powerDeficit / totalDemand);
-    const isTotalBlackout = (activeSupplyMW < 50) || (deficitRatio > 0.82);
+    const deficitRatio = totalDemand > 0 ? Math.min(1.0, powerDeficit / totalDemand) : 0;
+    const isTotalBlackout = (this.sliderVoltage < 100) || (activeSupplyMW < 50 && totalDemand > 0) || (deficitRatio > 0.82) || (activeSupplyMW === 0);
 
     // Voltage & Line Loss (Joule Heating I^2 R)
     const voltageSagPenalty = Math.max(0, (230 - this.sliderVoltage) / 20.0);
@@ -440,9 +440,9 @@ export class PowerGridEngine {
     if (name === 'storage')   this.sliderStorage   = Math.max(0, Math.min(500, value));
     if (name === 'coalFire')  this.sliderCoalFire  = Math.max(0, Math.min(100, value));
     if (name === 'scrubber')  this.sliderScrubber  = Math.max(0, Math.min(100, value));
-    if (name === 'townLoad')  this.sliderTownLoad  = Math.max(1, Math.min(4, value));
+    if (name === 'townLoad')  this.sliderTownLoad  = Math.max(0, Math.min(4, value));
     if (name === 'agriPumps') this.sliderAgriPumps = Math.max(0, Math.min(100, value));
-    if (name === 'voltage')   this.sliderVoltage   = Math.max(190, Math.min(250, value));
+    if (name === 'voltage')   this.sliderVoltage   = Math.max(0, Math.min(250, value));
     if (name === 'gridTie')   this.sliderGridTie   = Math.max(-200, Math.min(200, value));
   }
 

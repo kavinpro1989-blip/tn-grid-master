@@ -19,8 +19,6 @@ const elements = {
   challengeAlert: document.getElementById('challengeAlert'),
   gameTimer: document.getElementById('gameTimer'),
   inspectBtn: document.getElementById('inspectBtn'),
-  btnSolarNoon: document.getElementById('btnSolarNoon'),
-  btnCoalPeak: document.getElementById('btnCoalPeak'),
   townHappiness: document.getElementById('townHappiness'),
   townEmoji: document.getElementById('townEmoji'),
   airQuality: document.getElementById('airQuality'),
@@ -189,28 +187,18 @@ function updateClock(totalMinutes) {
   if (hours24 >= 8 && hours24 < 16) {
     body.className = 'theme-solar';
     phase = 'Peak Solar Noon (Kamuthi)';
-    elements.btnSolarNoon.classList.add('active');
-    elements.btnCoalPeak.classList.remove('active');
   } else if (hours24 >= 16 && hours24 < 18) {
     body.className = 'theme-dusk';
     phase = 'Sunset / Thermal Ramp';
-    elements.btnSolarNoon.classList.remove('active');
-    elements.btnCoalPeak.classList.remove('active');
   } else if (hours24 >= 18 && hours24 < 22) {
     body.className = 'theme-coal';
     phase = 'Evening Peak Coal (Mettur)';
-    elements.btnCoalPeak.classList.add('active');
-    elements.btnSolarNoon.classList.remove('active');
   } else if (hours24 >= 22 || hours24 < 5) {
     body.className = 'theme-night';
     phase = 'Night Baseload';
-    elements.btnSolarNoon.classList.remove('active');
-    elements.btnCoalPeak.classList.remove('active');
   } else {
     body.className = 'theme-dawn';
     phase = 'Sunrise Awakening';
-    elements.btnSolarNoon.classList.remove('active');
-    elements.btnCoalPeak.classList.remove('active');
   }
 
   elements.clockLabel.textContent = `${phase}${engine.autoAdvanceTime ? '' : ' • 🔒 Locked'}`;
@@ -290,20 +278,6 @@ function initEvents() {
       resetToDefaultBooth();
     });
   }
-
-  // Hero Button 1: Solar Noon
-  elements.btnSolarNoon.addEventListener('click', () => {
-    sfx.playSolarChime();
-    engine.setTime(720);
-    updateClock(720);
-  });
-
-  // Hero Button 2: Coal Evening
-  elements.btnCoalPeak.addEventListener('click', () => {
-    sfx.playCoalRumble();
-    engine.setTime(1170);
-    updateClock(1170);
-  });
 
   // Time Slider
   elements.timeRange.addEventListener('input', (e) => {
@@ -425,10 +399,10 @@ function initEvents() {
   }
 
   if (elements.sliderTownLoad) {
-    const loadLabels = ['', 'Eco (Low)', 'Normal', 'Heavy', 'Peak Demand'];
+    const loadLabels = ['0% (Off)', '25% (Eco)', '50% (Normal)', '75% (Heavy)', '100% (Peak)'];
     elements.sliderTownLoad.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      elements.valTownLoad.textContent = loadLabels[val] || 'Normal';
+      elements.valTownLoad.textContent = loadLabels[val] || '0% (Off)';
       engine.setSlider('townLoad', val);
     });
   }
@@ -444,7 +418,7 @@ function initEvents() {
   if (elements.sliderVoltage) {
     elements.sliderVoltage.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      elements.valVoltage.textContent = `${val}V`;
+      elements.valVoltage.textContent = val === 0 ? '0V (Off)' : `${val}V`;
       engine.setSlider('voltage', val);
     });
   }
@@ -630,31 +604,31 @@ function finishChallenge() {
 
 function resetToDefaultBooth() {
   engine.setTime(720); // 12:00 PM Noon
-  engine.ecoScore = 1200;
-  engine.setSlider('sunshine', 100);
-  engine.setSlider('storage', 350);
-  engine.setSlider('coalFire', 40);
-  engine.setSlider('scrubber', 80);
-  engine.setSlider('townLoad', 2);
-  engine.setSlider('agriPumps', 50);
-  engine.setSlider('voltage', 230);
+  engine.ecoScore = 0;
+  engine.setSlider('sunshine', 0);
+  engine.setSlider('storage', 0);
+  engine.setSlider('coalFire', 0);
+  engine.setSlider('scrubber', 0);
+  engine.setSlider('townLoad', 0);
+  engine.setSlider('agriPumps', 0);
+  engine.setSlider('voltage', 0);
   engine.setSlider('gridTie', 0);
 
-  // Sync UI sliders
-  if (elements.sliderSunshine) elements.sliderSunshine.value = 100;
-  if (elements.valSunshine) elements.valSunshine.textContent = '100%';
-  if (elements.sliderStorage) elements.sliderStorage.value = 350;
-  if (elements.valStorage) elements.valStorage.textContent = '350 MWh';
-  if (elements.sliderCoalFire) elements.sliderCoalFire.value = 40;
-  if (elements.valCoalFire) elements.valCoalFire.textContent = '40%';
-  if (elements.sliderScrubber) elements.sliderScrubber.value = 80;
-  if (elements.valScrubber) elements.valScrubber.textContent = '80%';
-  if (elements.sliderTownLoad) elements.sliderTownLoad.value = 2;
-  if (elements.valTownLoad) elements.valTownLoad.textContent = 'Normal';
-  if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 50;
-  if (elements.valAgriPumps) elements.valAgriPumps.textContent = '50%';
-  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
-  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
+  // Sync UI sliders to 0%
+  if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
+  if (elements.valSunshine) elements.valSunshine.textContent = '0%';
+  if (elements.sliderStorage) elements.sliderStorage.value = 0;
+  if (elements.valStorage) elements.valStorage.textContent = '0 MWh';
+  if (elements.sliderCoalFire) elements.sliderCoalFire.value = 0;
+  if (elements.valCoalFire) elements.valCoalFire.textContent = '0%';
+  if (elements.sliderScrubber) elements.sliderScrubber.value = 0;
+  if (elements.valScrubber) elements.valScrubber.textContent = '0%';
+  if (elements.sliderTownLoad) elements.sliderTownLoad.value = 0;
+  if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
+  if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
+  if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
+  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
 
@@ -666,8 +640,8 @@ function resetToDefaultBooth() {
   engine.popTexts.push({
     x: engine.canvas.width / (2 * engine.dpr),
     y: 120,
-    text: '🔄 BOOTH RESET: 12:00 PM Clean Solar Ready! (மீட்டமைக்கப்பட்டது)',
-    color: '#34d399',
+    text: '🔄 BOOTH RESET: All settings at 0% (அனைத்தும் சுழியம்)!',
+    color: '#38bdf8',
     alpha: 1.0,
     life: 0,
     maxLife: 2.0
@@ -679,6 +653,7 @@ function resetToDefaultBooth() {
 function bootGame() {
   initEvents();
   engine.autoAdvanceTime = false;
+  resetToDefaultBooth(); // Guarantee all 8 sliders start at 0%
   engine.start();
   updateClock(engine.timeMinutes);
 }
