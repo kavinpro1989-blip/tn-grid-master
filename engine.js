@@ -38,6 +38,7 @@ export class PowerGridEngine {
     this.packets = [];
     this.smokePuffs = [];
     this.popTexts = [];
+    this.ripples = [];
     this.nextPacketId = 1;
     this.packetTimer = 0;
 
@@ -128,14 +129,14 @@ export class PowerGridEngine {
       applianceOn: true
     });
 
-    // 5. Six Friendly Town Buildings
+    // 5. Six Friendly Town Buildings (Bilingual Tamil & English)
     const houseList = [
-      { id: 'house_1', name: 'Primary School', role: 'Classrooms & Labs', icon: '🏫', x: 0.77, y: 0.44 },
-      { id: 'house_2', name: 'Town Clinic', role: 'Medical Care', icon: '🏥', x: 0.86, y: 0.42 },
-      { id: 'house_3', name: 'Farm House', role: 'Pumps & Motors', icon: '🏡', x: 0.95, y: 0.40 },
-      { id: 'house_4', name: 'Suburban Villa', role: 'AC & Fans', icon: '🏠', x: 0.77, y: 0.76 },
-      { id: 'house_5', name: 'Family Cottage', role: 'Lights & TV', icon: '🏘️', x: 0.86, y: 0.78 },
-      { id: 'house_6', name: 'Village Library', role: 'Terminal Node', icon: '📚', x: 0.95, y: 0.80 }
+      { id: 'house_1', name: 'School (பள்ளி)', role: 'Classrooms & Labs', icon: '🏫', x: 0.77, y: 0.44 },
+      { id: 'house_2', name: 'Clinic (மருத்துவமனை)', role: 'Medical Care', icon: '🏥', x: 0.86, y: 0.42 },
+      { id: 'house_3', name: 'Farm Pump (விவசாயம்)', role: 'Pumps & Motors', icon: '🏡', x: 0.95, y: 0.40 },
+      { id: 'house_4', name: 'Villa (குடியிருப்பு)', role: 'AC & Fans', icon: '🏠', x: 0.77, y: 0.76 },
+      { id: 'house_5', name: 'Cottage (இல்லம்)', role: 'Lights & TV', icon: '🏘️', x: 0.86, y: 0.78 },
+      { id: 'house_6', name: 'Library (நூலகம்)', role: 'Terminal Node', icon: '📚', x: 0.95, y: 0.80 }
     ];
 
     houseList.forEach((h) => {
@@ -445,6 +446,16 @@ export class PowerGridEngine {
         this.smokePuffs.splice(i, 1);
       }
     }
+
+    // Update animated touch ripples
+    for (let i = this.ripples.length - 1; i >= 0; i--) {
+      const r = this.ripples[i];
+      r.radius += r.speed * dt;
+      r.alpha = Math.max(0, 1.0 - (r.radius / r.maxRadius));
+      if (r.radius >= r.maxRadius || r.alpha <= 0) {
+        this.ripples.splice(i, 1);
+      }
+    }
   }
 
   renderCanvas() {
@@ -458,9 +469,24 @@ export class PowerGridEngine {
 
     this.drawLandscape(w, h, isSolarTime);
     this.drawPowerLines();
+    this.drawRipples();
     this.drawInfrastructure(isSolarTime);
     this.drawElectrons();
     this.drawPuffsAndPopups();
+  }
+
+  drawRipples() {
+    const ctx = this.ctx;
+    ctx.save();
+    this.ripples.forEach((r) => {
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 2.5;
+      ctx.globalAlpha = r.alpha;
+      ctx.stroke();
+    });
+    ctx.restore();
   }
 
   drawLandscape(w, h, isSolar) {
@@ -847,60 +873,132 @@ export class PowerGridEngine {
     const mouseX = clientX - rect.left;
     const mouseY = clientY - rect.top;
 
+    let clickedNode = null;
     for (const node of this.nodes.values()) {
       const dx = mouseX - node.x;
       const dy = mouseY - node.y;
-      if (Math.sqrt(dx * dx + dy * dy) < 36) {
-        if (node.id.startsWith('house_')) {
-          node.applianceOn = !node.applianceOn;
-          this.popTexts.push({
-            x: node.x,
-            y: node.y - 42,
-            text: node.applianceOn ? '💡 Lights & Fans ON!' : '💤 Switched OFF',
-            color: node.applianceOn ? '#4ade80' : '#94a3b8',
-            alpha: 1.0,
-            life: 0,
-            maxLife: 1.2
-          });
-        } else if (node.id === 'plant') {
-          const isSolar = node.name.includes('Solar');
-          if (isSolar) {
-            this.ecoScore += 100;
-            this.popTexts.push({
-              x: node.x,
-              y: node.y - 42,
-              text: '⭐ SOLAR BOOST +100!',
-              color: '#facc15',
-              alpha: 1.0,
-              life: 0,
-              maxLife: 1.4
-            });
-          } else {
-            this.ecoScore = Math.max(0, this.ecoScore - 20);
-            this.popTexts.push({
-              x: node.x,
-              y: node.y - 42,
-              text: '💨 COUGH! -20 SMOG PENALTY',
-              color: '#ef4444',
-              alpha: 1.0,
-              life: 0,
-              maxLife: 1.4
-            });
-          }
-        } else if (node.id === 'fanStation') {
-          this.popTexts.push({
-            x: node.x,
-            y: node.y - 42,
-            text: '🌀 FANS SPINNING FAST!',
-            color: '#38bdf8',
-            alpha: 1.0,
-            life: 0,
-            maxLife: 1.2
-          });
-        }
-        return node;
+      if (Math.sqrt(dx * dx + dy * dy) < 38) {
+        clickedNode = node;
+        break;
       }
     }
-    return null;
+
+    if (clickedNode) {
+      if (clickedNode.id.startsWith('house_')) {
+        clickedNode.applianceOn = !clickedNode.applianceOn;
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 8,
+          maxRadius: 70,
+          speed: 120,
+          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: clickedNode.applianceOn ? '💡 Lights & Fans ON! (இயங்குகிறது)' : '💤 Switched OFF (நிறுத்தப்பட்டது)',
+          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      } else if (clickedNode.id === 'plant') {
+        const isSolar = clickedNode.name.includes('Solar');
+        if (isSolar) {
+          this.ecoScore += 100;
+          this.ripples.push({
+            x: clickedNode.x,
+            y: clickedNode.y,
+            radius: 12,
+            maxRadius: 90,
+            speed: 130,
+            color: '#facc15',
+            alpha: 1.0
+          });
+          this.popTexts.push({
+            x: clickedNode.x,
+            y: clickedNode.y - 42,
+            text: '⭐ SOLAR BOOST +100! (சூரிய ஆற்றல்)',
+            color: '#facc15',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.6
+          });
+        } else {
+          this.ecoScore = Math.max(0, this.ecoScore - 20);
+          this.ripples.push({
+            x: clickedNode.x,
+            y: clickedNode.y,
+            radius: 12,
+            maxRadius: 80,
+            speed: 100,
+            color: '#ef4444',
+            alpha: 1.0
+          });
+          this.popTexts.push({
+            x: clickedNode.x,
+            y: clickedNode.y - 42,
+            text: '💨 COUGH! -20 SMOG PENALTY (புகை மாசு)',
+            color: '#ef4444',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.6
+          });
+        }
+      } else if (clickedNode.id === 'fanStation') {
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 10,
+          maxRadius: 75,
+          speed: 130,
+          color: '#38bdf8',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: '🌀 FANS SPINNING FAST! (குளிர்விப்பான்)',
+          color: '#38bdf8',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      } else if (clickedNode.id === 'substation') {
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 10,
+          maxRadius: 80,
+          speed: 120,
+          color: '#eab308',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: '⚡ SUBSTATION: 230V BALANCED! (துணை நிலையம்)',
+          color: '#eab308',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      }
+      return clickedNode;
+    } else {
+      // Gentle ripple feedback even when clicking open grid landscape
+      this.ripples.push({
+        x: mouseX,
+        y: mouseY,
+        radius: 6,
+        maxRadius: 45,
+        speed: 90,
+        color: 'rgba(56, 189, 248, 0.5)',
+        alpha: 0.7
+      });
+      return null;
+    }
   }
 }

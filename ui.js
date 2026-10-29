@@ -56,7 +56,13 @@ const elements = {
   sliderVoltage: document.getElementById('sliderVoltage'),
   valVoltage: document.getElementById('valVoltage'),
   sliderGridTie: document.getElementById('sliderGridTie'),
-  valGridTie: document.getElementById('valGridTie')
+  valGridTie: document.getElementById('valGridTie'),
+
+  // Exhibition Booth Additions
+  fsBtn: document.getElementById('fsBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  tickerDot: document.getElementById('tickerDot'),
+  tickerText: document.getElementById('tickerText')
 };
 
 // Web Audio Sound Synthesizer (Permanently Silenced per User Request)
@@ -93,6 +99,24 @@ function handleTelemetry(t) {
 
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
+
+  // Update Live Exhibition Marquee Ticker
+  if (elements.tickerText && elements.tickerDot) {
+    const hours = t.timeMinutes / 60;
+    const isSolarTime = hours >= 7 && hours <= 17;
+    const isBrownout = t.townHappiness < 75;
+
+    if (isBrownout) {
+      elements.tickerDot.textContent = '🔴';
+      elements.tickerText.innerHTML = `<strong>⚠️ எச்சரிக்கை (GRID ALERT):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு (Brownout) • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
+    } else if (isSolarTime) {
+      elements.tickerDot.textContent = '🟢';
+      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • பள்ளி, மருத்துவமனை உட்பட 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
+    } else {
+      elements.tickerDot.textContent = '🏭';
+      elements.tickerText.innerHTML = `<strong>🌙 இரவு உச்ச தேவை (COAL PEAK):</strong> மேட்டூர் அனல் நிலையம் இயங்குகிறது (${engine.sliderCoalFire}%) • வெப்ப இழப்பு ${engine.currentLineLossPct}% • காற்று சுத்தத்தை பராமரிக்க ஸ்க்ரப்பரை 100% வைக்கவும்!`;
+    }
+  }
 
   // Update Clock
   updateClock(t.timeMinutes);
@@ -198,6 +222,28 @@ function renderHardwareTab(tabKey) {
 }
 
 function initEvents() {
+  // Fullscreen Exhibition Mode Toggle
+  if (elements.fsBtn) {
+    elements.fsBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        elements.fsBtn.innerHTML = '<span>📺 Exit Fullscreen</span>';
+      } else {
+        document.exitFullscreen().catch(() => {});
+        elements.fsBtn.innerHTML = '<span>📺 Fullscreen</span>';
+      }
+    });
+  }
+
+  // Reset to Optimal Booth Baseline
+  if (elements.resetBtn) {
+    elements.resetBtn.addEventListener('click', () => {
+      sfx.playSolarChime();
+      resetToDefaultBooth();
+    });
+  }
+
   // Hero Button 1: Solar Noon
   elements.btnSolarNoon.addEventListener('click', () => {
     sfx.playSolarChime();
@@ -371,6 +417,53 @@ function startChallenge() {
       alert(`🎉 30-SECOND GRID CHALLENGE COMPLETE!\n\nFinal Score: ${Math.round(engine.ecoScore)} Eco Points!\nGrade: A+ Clean Energy Master!\n\nYou kept Tamil Nadu powered and proved why solar energy keeps the town happy and the air fresh!`);
     }
   }, 1000);
+}
+
+function resetToDefaultBooth() {
+  engine.setTime(720); // 12:00 PM Noon
+  engine.setSlider('sunshine', 100);
+  engine.setSlider('storage', 350);
+  engine.setSlider('coalFire', 40);
+  engine.setSlider('scrubber', 80);
+  engine.setSlider('townLoad', 2);
+  engine.setSlider('agriPumps', 50);
+  engine.setSlider('voltage', 230);
+  engine.setSlider('gridTie', 0);
+
+  // Sync UI sliders
+  if (elements.sliderSunshine) elements.sliderSunshine.value = 100;
+  if (elements.valSunshine) elements.valSunshine.textContent = '100%';
+  if (elements.sliderStorage) elements.sliderStorage.value = 350;
+  if (elements.valStorage) elements.valStorage.textContent = '350 MWh';
+  if (elements.sliderCoalFire) elements.sliderCoalFire.value = 40;
+  if (elements.valCoalFire) elements.valCoalFire.textContent = '40%';
+  if (elements.sliderScrubber) elements.sliderScrubber.value = 80;
+  if (elements.valScrubber) elements.valScrubber.textContent = '80%';
+  if (elements.sliderTownLoad) elements.sliderTownLoad.value = 2;
+  if (elements.valTownLoad) elements.valTownLoad.textContent = 'Normal';
+  if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 50;
+  if (elements.valAgriPumps) elements.valAgriPumps.textContent = '50%';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
+  if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
+  if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
+
+  // Ensure all appliances are switched ON
+  for (const node of engine.nodes.values()) {
+    node.applianceOn = true;
+  }
+
+  engine.popTexts.push({
+    x: engine.canvas.width / (2 * engine.dpr),
+    y: 120,
+    text: '🔄 BOOTH RESET: 12:00 PM Clean Solar Ready! (மீட்டமைக்கப்பட்டது)',
+    color: '#34d399',
+    alpha: 1.0,
+    life: 0,
+    maxLife: 2.0
+  });
+
+  updateClock(720);
 }
 
 function bootGame() {

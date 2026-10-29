@@ -17,8 +17,8 @@
       <div class="brand">
         <span class="brand-icon">⚡</span>
         <div>
-          <h1 class="brand-title">TN GRID MASTER</h1>
-          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Edition</p>
+          <h1 class="brand-title">TN GRID MASTER • தமிழ்நாடு மின் கட்டமைப்பு</h1>
+          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Exhibition Edition</p>
         </div>
       </div>
 
@@ -60,6 +60,9 @@
           </div>
         </div>
 
+        <button class="guide-toggle-btn fs-btn" id="fsBtn" title="Toggle Fullscreen Exhibition Mode">
+          <span>📺 Fullscreen</span>
+        </button>
         <button class="guide-toggle-btn" id="guideBtn" title="How to Play & Teacher Guide">
           <span>🎓 Guide</span>
         </button>
@@ -117,18 +120,26 @@
       </div>
     </main>
 
+    <!-- Live Exhibition Status Marquee Ticker -->
+    <div class="booth-ticker" id="boothTicker">
+      <span class="ticker-dot" id="tickerDot">🟢</span>
+      <span class="ticker-text" id="tickerText">
+        <strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன
+      </span>
+    </div>
+
     <!-- Bottom Controls Deck -->
     <footer class="deck-controls">
-      <!-- Big Hero Comparison Buttons (Perfect for Classroom Demo) -->
+      <!-- Big Hero Comparison Buttons (Perfect for Classroom & Exhibition Demo) -->
       <div class="hero-selector">
         <button class="hero-card solar active" id="btnSolarNoon">
           <span class="hero-icon">☀️</span>
           <div class="hero-info">
             <div class="hero-title-row">
-              <strong>12:00 NOON SOLAR PEAK</strong>
+              <strong>12:00 NOON SOLAR PEAK • கமுதி சூரிய பூங்கா</strong>
               <span class="tag-clean">100% CLEAN</span>
             </div>
-            <p>Kamuthi Solar Park • 95% Efficiency • 0g Pollution • All Homes Lit</p>
+            <p>Kamuthi Solar Park (Ramanathapuram) • 95% Efficiency • 0g CO₂ • All Homes Lit</p>
           </div>
         </button>
 
@@ -138,20 +149,20 @@
           <span class="hero-icon">🏭</span>
           <div class="hero-info">
             <div class="hero-title-row">
-              <strong>19:30 EVENING COAL PEAK</strong>
+              <strong>19:30 EVENING COAL PEAK • மேட்டூர் அனல் நிலையம்</strong>
               <span class="tag-dirty">DIRTY & LOSS-PRONE</span>
             </div>
-            <p>Mettur Coal Station • 32% Heat Loss • High Smog • Brownouts</p>
+            <p>Mettur Coal Station (Salem) • 32% Heat Loss • High Smog • Voltage Brownouts</p>
           </div>
         </button>
       </div>
 
-      <!-- 🎛️ 5-Slider Multi-Tuning Console: Master of Control (100% Manual Authority) -->
+      <!-- 🎛️ 8-Slider Multi-Tuning Console: Master of Control (100% Manual Authority) -->
       <section class="dispatcher-tuning-deck" id="tuningDeck">
         <div class="deck-header">
           <div class="deck-title-group">
             <span class="tuning-badge">⚡ MASTER OF CONTROL</span>
-            <span class="tuning-sub">Full Manual Grid Authority • No Auto-Assists • You Decide Every Watt & Filter</span>
+            <span class="tuning-sub">முழுமையான நேரடி கட்டுப்பாடு • Full Manual Authority • 8 Levers • You Balance Every Watt</span>
           </div>
 
           <div class="control-status">
@@ -292,6 +303,9 @@
         </div>
 
         <div class="deck-actions">
+          <button class="deck-btn reset" id="resetBtn" title="Reset all 8 levers to optimal 12:00 PM noon setup">
+            <span>🔄 Reset Booth</span>
+          </button>
           <button class="deck-btn play" id="playToggleBtn" title="Lock or Auto-Advance Clock">
             <span id="playIcon">🔒 Clock Locked</span>
           </button>

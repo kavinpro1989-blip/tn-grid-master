@@ -518,6 +518,42 @@ body.theme-solar .stars-layer {
   gap: 8px;
 }
 
+/* Live Exhibition Marquee Ticker */
+.booth-ticker {
+  background: rgba(10, 15, 26, 0.98);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 7px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.82rem;
+  font-family: var(--font-family);
+  color: #cbd5e1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.ticker-dot {
+  font-size: 0.95rem;
+  display: inline-block;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.75; }
+}
+
+.ticker-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticker-text strong {
+  color: #ffffff;
+}
+
 /* ==========================================================================
    BOTTOM CONTROLS DECK: MASTER OF CONTROL
    ========================================================================== */
@@ -966,6 +1002,27 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
   border: 1px solid var(--border-glass-bright);
 }
 
+.deck-btn.reset {
+  background: rgba(30, 41, 59, 0.85);
+  color: #ffffff;
+  border: 1px solid var(--border-glass-bright);
+}
+
+.deck-btn.reset:hover {
+  background: rgba(51, 65, 85, 1);
+  border-color: #38bdf8;
+}
+
+.fs-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid var(--border-glass);
+}
+
+.fs-btn:hover {
+  background: rgba(51, 65, 85, 1);
+  border-color: #38bdf8;
+}
+
 .deck-btn.challenge {
   background: linear-gradient(135deg, #f59e0b, #ef4444);
   color: #ffffff;
@@ -1150,8 +1207,8 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       <div class="brand">
         <span class="brand-icon">⚡</span>
         <div>
-          <h1 class="brand-title">TN GRID MASTER</h1>
-          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Edition</p>
+          <h1 class="brand-title">TN GRID MASTER • தமிழ்நாடு மின் கட்டமைப்பு</h1>
+          <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Exhibition Edition</p>
         </div>
       </div>
 
@@ -1193,6 +1250,9 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           </div>
         </div>
 
+        <button class="guide-toggle-btn fs-btn" id="fsBtn" title="Toggle Fullscreen Exhibition Mode">
+          <span>📺 Fullscreen</span>
+        </button>
         <button class="guide-toggle-btn" id="guideBtn" title="How to Play & Teacher Guide">
           <span>🎓 Guide</span>
         </button>
@@ -1250,18 +1310,26 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       </div>
     </main>
 
+    <!-- Live Exhibition Status Marquee Ticker -->
+    <div class="booth-ticker" id="boothTicker">
+      <span class="ticker-dot" id="tickerDot">🟢</span>
+      <span class="ticker-text" id="tickerText">
+        <strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன
+      </span>
+    </div>
+
     <!-- Bottom Controls Deck -->
     <footer class="deck-controls">
-      <!-- Big Hero Comparison Buttons (Perfect for Classroom Demo) -->
+      <!-- Big Hero Comparison Buttons (Perfect for Classroom & Exhibition Demo) -->
       <div class="hero-selector">
         <button class="hero-card solar active" id="btnSolarNoon">
           <span class="hero-icon">☀️</span>
           <div class="hero-info">
             <div class="hero-title-row">
-              <strong>12:00 NOON SOLAR PEAK</strong>
+              <strong>12:00 NOON SOLAR PEAK • கமுதி சூரிய பூங்கா</strong>
               <span class="tag-clean">100% CLEAN</span>
             </div>
-            <p>Kamuthi Solar Park • 95% Efficiency • 0g Pollution • All Homes Lit</p>
+            <p>Kamuthi Solar Park (Ramanathapuram) • 95% Efficiency • 0g CO₂ • All Homes Lit</p>
           </div>
         </button>
 
@@ -1271,20 +1339,20 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           <span class="hero-icon">🏭</span>
           <div class="hero-info">
             <div class="hero-title-row">
-              <strong>19:30 EVENING COAL PEAK</strong>
+              <strong>19:30 EVENING COAL PEAK • மேட்டூர் அனல் நிலையம்</strong>
               <span class="tag-dirty">DIRTY & LOSS-PRONE</span>
             </div>
-            <p>Mettur Coal Station • 32% Heat Loss • High Smog • Brownouts</p>
+            <p>Mettur Coal Station (Salem) • 32% Heat Loss • High Smog • Voltage Brownouts</p>
           </div>
         </button>
       </div>
 
-      <!-- 🎛️ 5-Slider Multi-Tuning Console: Master of Control (100% Manual Authority) -->
+      <!-- 🎛️ 8-Slider Multi-Tuning Console: Master of Control (100% Manual Authority) -->
       <section class="dispatcher-tuning-deck" id="tuningDeck">
         <div class="deck-header">
           <div class="deck-title-group">
             <span class="tuning-badge">⚡ MASTER OF CONTROL</span>
-            <span class="tuning-sub">Full Manual Grid Authority • No Auto-Assists • You Decide Every Watt & Filter</span>
+            <span class="tuning-sub">முழுமையான நேரடி கட்டுப்பாடு • Full Manual Authority • 8 Levers • You Balance Every Watt</span>
           </div>
 
           <div class="control-status">
@@ -1425,6 +1493,9 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
         </div>
 
         <div class="deck-actions">
+          <button class="deck-btn reset" id="resetBtn" title="Reset all 8 levers to optimal 12:00 PM noon setup">
+            <span>🔄 Reset Booth</span>
+          </button>
           <button class="deck-btn play" id="playToggleBtn" title="Lock or Auto-Advance Clock">
             <span id="playIcon">🔒 Clock Locked</span>
           </button>
@@ -1527,6 +1598,7 @@ export class PowerGridEngine {
     this.packets = [];
     this.smokePuffs = [];
     this.popTexts = [];
+    this.ripples = [];
     this.nextPacketId = 1;
     this.packetTimer = 0;
 
@@ -1617,14 +1689,14 @@ export class PowerGridEngine {
       applianceOn: true
     });
 
-    // 5. Six Friendly Town Buildings
+    // 5. Six Friendly Town Buildings (Bilingual Tamil & English)
     const houseList = [
-      { id: 'house_1', name: 'Primary School', role: 'Classrooms & Labs', icon: '🏫', x: 0.77, y: 0.44 },
-      { id: 'house_2', name: 'Town Clinic', role: 'Medical Care', icon: '🏥', x: 0.86, y: 0.42 },
-      { id: 'house_3', name: 'Farm House', role: 'Pumps & Motors', icon: '🏡', x: 0.95, y: 0.40 },
-      { id: 'house_4', name: 'Suburban Villa', role: 'AC & Fans', icon: '🏠', x: 0.77, y: 0.76 },
-      { id: 'house_5', name: 'Family Cottage', role: 'Lights & TV', icon: '🏘️', x: 0.86, y: 0.78 },
-      { id: 'house_6', name: 'Village Library', role: 'Terminal Node', icon: '📚', x: 0.95, y: 0.80 }
+      { id: 'house_1', name: 'School (பள்ளி)', role: 'Classrooms & Labs', icon: '🏫', x: 0.77, y: 0.44 },
+      { id: 'house_2', name: 'Clinic (மருத்துவமனை)', role: 'Medical Care', icon: '🏥', x: 0.86, y: 0.42 },
+      { id: 'house_3', name: 'Farm Pump (விவசாயம்)', role: 'Pumps & Motors', icon: '🏡', x: 0.95, y: 0.40 },
+      { id: 'house_4', name: 'Villa (குடியிருப்பு)', role: 'AC & Fans', icon: '🏠', x: 0.77, y: 0.76 },
+      { id: 'house_5', name: 'Cottage (இல்லம்)', role: 'Lights & TV', icon: '🏘️', x: 0.86, y: 0.78 },
+      { id: 'house_6', name: 'Library (நூலகம்)', role: 'Terminal Node', icon: '📚', x: 0.95, y: 0.80 }
     ];
 
     houseList.forEach((h) => {
@@ -1934,6 +2006,16 @@ export class PowerGridEngine {
         this.smokePuffs.splice(i, 1);
       }
     }
+
+    // Update animated touch ripples
+    for (let i = this.ripples.length - 1; i >= 0; i--) {
+      const r = this.ripples[i];
+      r.radius += r.speed * dt;
+      r.alpha = Math.max(0, 1.0 - (r.radius / r.maxRadius));
+      if (r.radius >= r.maxRadius || r.alpha <= 0) {
+        this.ripples.splice(i, 1);
+      }
+    }
   }
 
   renderCanvas() {
@@ -1947,9 +2029,24 @@ export class PowerGridEngine {
 
     this.drawLandscape(w, h, isSolarTime);
     this.drawPowerLines();
+    this.drawRipples();
     this.drawInfrastructure(isSolarTime);
     this.drawElectrons();
     this.drawPuffsAndPopups();
+  }
+
+  drawRipples() {
+    const ctx = this.ctx;
+    ctx.save();
+    this.ripples.forEach((r) => {
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 2.5;
+      ctx.globalAlpha = r.alpha;
+      ctx.stroke();
+    });
+    ctx.restore();
   }
 
   drawLandscape(w, h, isSolar) {
@@ -2336,61 +2433,133 @@ export class PowerGridEngine {
     const mouseX = clientX - rect.left;
     const mouseY = clientY - rect.top;
 
+    let clickedNode = null;
     for (const node of this.nodes.values()) {
       const dx = mouseX - node.x;
       const dy = mouseY - node.y;
-      if (Math.sqrt(dx * dx + dy * dy) < 36) {
-        if (node.id.startsWith('house_')) {
-          node.applianceOn = !node.applianceOn;
-          this.popTexts.push({
-            x: node.x,
-            y: node.y - 42,
-            text: node.applianceOn ? '💡 Lights & Fans ON!' : '💤 Switched OFF',
-            color: node.applianceOn ? '#4ade80' : '#94a3b8',
-            alpha: 1.0,
-            life: 0,
-            maxLife: 1.2
-          });
-        } else if (node.id === 'plant') {
-          const isSolar = node.name.includes('Solar');
-          if (isSolar) {
-            this.ecoScore += 100;
-            this.popTexts.push({
-              x: node.x,
-              y: node.y - 42,
-              text: '⭐ SOLAR BOOST +100!',
-              color: '#facc15',
-              alpha: 1.0,
-              life: 0,
-              maxLife: 1.4
-            });
-          } else {
-            this.ecoScore = Math.max(0, this.ecoScore - 20);
-            this.popTexts.push({
-              x: node.x,
-              y: node.y - 42,
-              text: '💨 COUGH! -20 SMOG PENALTY',
-              color: '#ef4444',
-              alpha: 1.0,
-              life: 0,
-              maxLife: 1.4
-            });
-          }
-        } else if (node.id === 'fanStation') {
-          this.popTexts.push({
-            x: node.x,
-            y: node.y - 42,
-            text: '🌀 FANS SPINNING FAST!',
-            color: '#38bdf8',
-            alpha: 1.0,
-            life: 0,
-            maxLife: 1.2
-          });
-        }
-        return node;
+      if (Math.sqrt(dx * dx + dy * dy) < 38) {
+        clickedNode = node;
+        break;
       }
     }
-    return null;
+
+    if (clickedNode) {
+      if (clickedNode.id.startsWith('house_')) {
+        clickedNode.applianceOn = !clickedNode.applianceOn;
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 8,
+          maxRadius: 70,
+          speed: 120,
+          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: clickedNode.applianceOn ? '💡 Lights & Fans ON! (இயங்குகிறது)' : '💤 Switched OFF (நிறுத்தப்பட்டது)',
+          color: clickedNode.applianceOn ? '#4ade80' : '#94a3b8',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      } else if (clickedNode.id === 'plant') {
+        const isSolar = clickedNode.name.includes('Solar');
+        if (isSolar) {
+          this.ecoScore += 100;
+          this.ripples.push({
+            x: clickedNode.x,
+            y: clickedNode.y,
+            radius: 12,
+            maxRadius: 90,
+            speed: 130,
+            color: '#facc15',
+            alpha: 1.0
+          });
+          this.popTexts.push({
+            x: clickedNode.x,
+            y: clickedNode.y - 42,
+            text: '⭐ SOLAR BOOST +100! (சூரிய ஆற்றல்)',
+            color: '#facc15',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.6
+          });
+        } else {
+          this.ecoScore = Math.max(0, this.ecoScore - 20);
+          this.ripples.push({
+            x: clickedNode.x,
+            y: clickedNode.y,
+            radius: 12,
+            maxRadius: 80,
+            speed: 100,
+            color: '#ef4444',
+            alpha: 1.0
+          });
+          this.popTexts.push({
+            x: clickedNode.x,
+            y: clickedNode.y - 42,
+            text: '💨 COUGH! -20 SMOG PENALTY (புகை மாசு)',
+            color: '#ef4444',
+            alpha: 1.0,
+            life: 0,
+            maxLife: 1.6
+          });
+        }
+      } else if (clickedNode.id === 'fanStation') {
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 10,
+          maxRadius: 75,
+          speed: 130,
+          color: '#38bdf8',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: '🌀 FANS SPINNING FAST! (குளிர்விப்பான்)',
+          color: '#38bdf8',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      } else if (clickedNode.id === 'substation') {
+        this.ripples.push({
+          x: clickedNode.x,
+          y: clickedNode.y,
+          radius: 10,
+          maxRadius: 80,
+          speed: 120,
+          color: '#eab308',
+          alpha: 1.0
+        });
+        this.popTexts.push({
+          x: clickedNode.x,
+          y: clickedNode.y - 42,
+          text: '⚡ SUBSTATION: 230V BALANCED! (துணை நிலையம்)',
+          color: '#eab308',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 1.4
+        });
+      }
+      return clickedNode;
+    } else {
+      // Gentle ripple feedback even when clicking open grid landscape
+      this.ripples.push({
+        x: mouseX,
+        y: mouseY,
+        radius: 6,
+        maxRadius: 45,
+        speed: 90,
+        color: 'rgba(56, 189, 248, 0.5)',
+        alpha: 0.7
+      });
+      return null;
+    }
   }
 }
 
@@ -2453,7 +2622,13 @@ const elements = {
   sliderVoltage: document.getElementById('sliderVoltage'),
   valVoltage: document.getElementById('valVoltage'),
   sliderGridTie: document.getElementById('sliderGridTie'),
-  valGridTie: document.getElementById('valGridTie')
+  valGridTie: document.getElementById('valGridTie'),
+
+  // Exhibition Booth Additions
+  fsBtn: document.getElementById('fsBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  tickerDot: document.getElementById('tickerDot'),
+  tickerText: document.getElementById('tickerText')
 };
 
 // Web Audio Sound Synthesizer (Permanently Silenced per User Request)
@@ -2490,6 +2665,24 @@ function handleTelemetry(t) {
 
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
+
+  // Update Live Exhibition Marquee Ticker
+  if (elements.tickerText && elements.tickerDot) {
+    const hours = t.timeMinutes / 60;
+    const isSolarTime = hours >= 7 && hours <= 17;
+    const isBrownout = t.townHappiness < 75;
+
+    if (isBrownout) {
+      elements.tickerDot.textContent = '🔴';
+      elements.tickerText.innerHTML = `<strong>⚠️ எச்சரிக்கை (GRID ALERT):</strong> மின்னழுத்தம் குறைந்துள்ளது (${engine.sliderVoltage}V)! வீடுகளில் மின்வெட்டு (Brownout) • சோலார் அல்லது பேட்டரி அளவை உயர்த்தவும்!`;
+    } else if (isSolarTime) {
+      elements.tickerDot.textContent = '🟢';
+      elements.tickerText.innerHTML = `<strong>☀️ நேரடி நிலை (LIVE):</strong> கமுதி சூரிய பூங்கா 648 MW • 100% தூய காற்று • பள்ளி, மருத்துவமனை உட்பட 6 பிரிவுகளும் 230V முழு மின்சாரத்தில் இயங்குகின்றன!`;
+    } else {
+      elements.tickerDot.textContent = '🏭';
+      elements.tickerText.innerHTML = `<strong>🌙 இரவு உச்ச தேவை (COAL PEAK):</strong> மேட்டூர் அனல் நிலையம் இயங்குகிறது (${engine.sliderCoalFire}%) • வெப்ப இழப்பு ${engine.currentLineLossPct}% • காற்று சுத்தத்தை பராமரிக்க ஸ்க்ரப்பரை 100% வைக்கவும்!`;
+    }
+  }
 
   // Update Clock
   updateClock(t.timeMinutes);
@@ -2595,6 +2788,28 @@ function renderHardwareTab(tabKey) {
 }
 
 function initEvents() {
+  // Fullscreen Exhibition Mode Toggle
+  if (elements.fsBtn) {
+    elements.fsBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        elements.fsBtn.innerHTML = '<span>📺 Exit Fullscreen</span>';
+      } else {
+        document.exitFullscreen().catch(() => {});
+        elements.fsBtn.innerHTML = '<span>📺 Fullscreen</span>';
+      }
+    });
+  }
+
+  // Reset to Optimal Booth Baseline
+  if (elements.resetBtn) {
+    elements.resetBtn.addEventListener('click', () => {
+      sfx.playSolarChime();
+      resetToDefaultBooth();
+    });
+  }
+
   // Hero Button 1: Solar Noon
   elements.btnSolarNoon.addEventListener('click', () => {
     sfx.playSolarChime();
@@ -2773,6 +2988,53 @@ Grade: A+ Clean Energy Master!
 You kept Tamil Nadu powered and proved why solar energy keeps the town happy and the air fresh!`);
     }
   }, 1000);
+}
+
+function resetToDefaultBooth() {
+  engine.setTime(720); // 12:00 PM Noon
+  engine.setSlider('sunshine', 100);
+  engine.setSlider('storage', 350);
+  engine.setSlider('coalFire', 40);
+  engine.setSlider('scrubber', 80);
+  engine.setSlider('townLoad', 2);
+  engine.setSlider('agriPumps', 50);
+  engine.setSlider('voltage', 230);
+  engine.setSlider('gridTie', 0);
+
+  // Sync UI sliders
+  if (elements.sliderSunshine) elements.sliderSunshine.value = 100;
+  if (elements.valSunshine) elements.valSunshine.textContent = '100%';
+  if (elements.sliderStorage) elements.sliderStorage.value = 350;
+  if (elements.valStorage) elements.valStorage.textContent = '350 MWh';
+  if (elements.sliderCoalFire) elements.sliderCoalFire.value = 40;
+  if (elements.valCoalFire) elements.valCoalFire.textContent = '40%';
+  if (elements.sliderScrubber) elements.sliderScrubber.value = 80;
+  if (elements.valScrubber) elements.valScrubber.textContent = '80%';
+  if (elements.sliderTownLoad) elements.sliderTownLoad.value = 2;
+  if (elements.valTownLoad) elements.valTownLoad.textContent = 'Normal';
+  if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 50;
+  if (elements.valAgriPumps) elements.valAgriPumps.textContent = '50%';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
+  if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
+  if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
+
+  // Ensure all appliances are switched ON
+  for (const node of engine.nodes.values()) {
+    node.applianceOn = true;
+  }
+
+  engine.popTexts.push({
+    x: engine.canvas.width / (2 * engine.dpr),
+    y: 120,
+    text: '🔄 BOOTH RESET: 12:00 PM Clean Solar Ready! (மீட்டமைக்கப்பட்டது)',
+    color: '#34d399',
+    alpha: 1.0,
+    life: 0,
+    maxLife: 2.0
+  });
+
+  updateClock(720);
 }
 
 function bootGame() {
