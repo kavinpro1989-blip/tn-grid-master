@@ -3539,12 +3539,52 @@ function startChallenge() {
   const timelineRow = document.querySelector('.timeline-row');
   if (timelineRow) timelineRow.style.display = 'none';
 
+  // GUARANTEE EVERY VALUE STARTS FROM 0% WHEN THE GAME STARTS!
+  engine.setSlider('sunshine', 0);
+  engine.setSlider('storage', 0);
+  engine.setSlider('coalFire', 0);
+  engine.setSlider('scrubber', 0);
+  engine.setSlider('townLoad', 0);
+  engine.setSlider('agriPumps', 0);
+  engine.setSlider('voltage', 0);
+  engine.setSlider('gridTie', 0);
+  engine.ecoScore = 0;
+
+  // Sync all UI inputs and displays to 0%
+  if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
+  if (elements.valSunshine) elements.valSunshine.textContent = '0%';
+  if (elements.sliderStorage) elements.sliderStorage.value = 0;
+  if (elements.valStorage) elements.valStorage.textContent = '0 MWh';
+  if (elements.sliderCoalFire) elements.sliderCoalFire.value = 0;
+  if (elements.valCoalFire) elements.valCoalFire.textContent = '0%';
+  if (elements.sliderScrubber) elements.sliderScrubber.value = 0;
+  if (elements.valScrubber) elements.valScrubber.textContent = '0%';
+  if (elements.sliderTownLoad) elements.sliderTownLoad.value = 0;
+  if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
+  if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
+  if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
+  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
+  if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
+  if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
+  if (elements.playerScore) elements.playerScore.textContent = '0';
+
   // Lock storage slider during challenge so player cannot cheat free energy into a dead battery!
   if (elements.sliderStorage) elements.sliderStorage.disabled = true;
 
   elements.challengeAlert.classList.remove('hidden');
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
+
+  engine.popTexts.push({
+    x: engine.canvas.width / (2 * engine.dpr),
+    y: 110,
+    text: '⚡ COLD START: All settings start at 0%! Energize the grid!',
+    color: '#38bdf8',
+    alpha: 1.0,
+    life: 0,
+    maxLife: 2.2
+  });
 
   // Reset challenge stats
   challengeStats = {
@@ -3576,8 +3616,8 @@ function startChallenge() {
     engine.setTime(currentMin);
     updateClock(currentMin);
 
-    // Sample telemetry
-    if (lastTelemetry) {
+    // Sample telemetry (allow 2-second startup grace period for cold-start dispatching):
+    if (lastTelemetry && challengeTime < 29) {
       challengeStats.samples++;
       challengeStats.totalHappiness += lastTelemetry.townHappiness;
       challengeStats.totalAir += lastTelemetry.airCleanliness;
