@@ -2055,13 +2055,13 @@ class PowerGridEngine {
     let batteryMode = 'idle';
     let batteryFlowMW = 0;
 
-    if (this.sliderSunshine > 0 && solarGenMW > totalDemand && totalDemand > 0) {
+    if (this.sliderSunshine > 0 && solarGenMW > totalDemand) {
       // ☀️ SURPLUS SOLAR: Excess clean electricity charges the battery!
       const surplusSolarMW = solarGenMW - totalDemand;
       batteryChargeMW = Math.min(250, surplusSolarMW);
       if (this.sliderStorage < 500) {
-        // Fast, satisfying charge rate: +20 MWh/s at 200 MW surplus
-        const chargeDelta = (batteryChargeMW / 10.0) * dt;
+        // Fast, satisfying charge rate: +25 to +29 MWh/s at 200+ MW surplus
+        const chargeDelta = (batteryChargeMW / 8.5) * dt;
         this.sliderStorage = Math.min(500, this.sliderStorage + chargeDelta);
         batteryMode = 'charging';
         batteryFlowMW = batteryChargeMW;
@@ -3616,14 +3616,24 @@ function startChallenge() {
     engine.setTime(currentMin);
     updateClock(currentMin);
 
-    // Sample telemetry (allow 2-second startup grace period for cold-start dispatching):
-    if (lastTelemetry && challengeTime < 29) {
+    // Sample telemetry (allow 5-second startup grace period for cold-start dispatching):
+    // All 8 sliders start at 0%; students need 4-5 seconds to dial sunshine, voltage, and load.
+    const isColdStartGrace = challengeTime > 25;
+    if (lastTelemetry && !isColdStartGrace) {
       challengeStats.samples++;
       challengeStats.totalHappiness += lastTelemetry.townHappiness;
       challengeStats.totalAir += lastTelemetry.airCleanliness;
       if (lastTelemetry.isSolar) challengeStats.solarSeconds++;
-      // Count genuine blackout (when supply cannot meet demand or substation is off)
-      if (lastTelemetry.isTotalBlackout || (lastTelemetry.housesLitCount <= 1 && lastTelemetry.totalDemand > 0)) {
+
+      // Count genuine blackout: when town demand exists (>50 MW) and supply cannot meet it or voltage is collapsed
+      const isBlackout = (lastTelemetry.totalDemand > 50) && (
+        lastTelemetry.isTotalBlackout || 
+        lastTelemetry.housesLitCount <= 1 || 
+        lastTelemetry.substationVoltage < 160 || 
+        (lastTelemetry.activeSupplyMW < lastTelemetry.totalDemand * 0.70)
+      );
+
+      if (isBlackout) {
         challengeStats.blackoutSeconds++;
       }
       if (lastTelemetry.finalSmog >= 45 || lastTelemetry.airCleanliness <= 35) {
@@ -3680,8 +3690,8 @@ function finishChallenge() {
   let verdict = '';
 
   // Strict, realistic, uncheatable grading criteria:
-  // 1. Catastrophic Blackout: 7+ seconds of blackout OR total score < 35
-  if (blackoutTime >= 7 || totalGridScore < 35) {
+  // 1. Catastrophic Blackout: 10+ seconds of blackout OR total score < 30
+  if (blackoutTime >= 10 || totalGridScore < 30) {
     grade = 'F';
     gradeClass = 'grade-f';
     stampClass = 'stamp-f';
@@ -3691,7 +3701,7 @@ function finishChallenge() {
     verdict = `🤦‍♂️ CATASTROPHIC GRID COLLAPSE! The town suffered ${blackoutTime} seconds of pitch-black blackout (${totalGridScore}/100)! Batteries ran dry without backup power, leaving schools, clinics, and homes in the dark. An elite dispatcher never abandons the grid to collapse!`;
   }
   // 2. Toxic Smog Disaster: coal fired without scrubbers
-  else if (smogTime >= 7 && avgAir < 50) {
+  else if (smogTime >= 6 && avgAir < 50) {
     grade = 'D';
     gradeClass = 'grade-d';
     stampClass = 'stamp-d';
@@ -3700,8 +3710,8 @@ function finishChallenge() {
     tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
     verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot blanketed the town for ${smogTime} seconds, dropping air quality to ${avgAir}%. Turn on chimney scrubbers or harvest Kamuthi Solar!`;
   }
-  // 3. Unstable Grid / Brownouts & Deficit: 3-6s blackout drops you to Grade C!
-  else if (blackoutTime >= 3 || totalGridScore < 55) {
+  // 3. Unstable Grid / Brownouts & Deficit: 5-9s blackout drops you to Grade C!
+  else if (blackoutTime >= 5 || totalGridScore < 50) {
     grade = 'C';
     gradeClass = 'grade-c';
     stampClass = 'stamp-c';
@@ -3710,27 +3720,27 @@ function finishChallenge() {
     tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
     verdict = `⚠️ UNSTABLE GRID! The town suffered ${blackoutTime} seconds of blackout and voltage drops (${totalGridScore}/100). The battery died and could not sustain night demand. You cannot earn an A or A+ with a failing grid! Store more solar at noon or engage clean backup!`;
   }
-  // 4. Solid Operation / Minor Dips or Heavy Coal: 1-2s blackout drops you to Grade B!
-  else if (blackoutTime >= 1 || solarShare < 60 || totalGridScore < 75) {
+  // 4. Solid Operation / Minor Dips: 2-4s blackout drops you to Grade B!
+  else if (blackoutTime >= 2 || solarShare < 60 || totalGridScore < 72) {
     grade = 'B';
     gradeClass = 'grade-b';
     stampClass = 'stamp-b';
     caption = 'PASSABLE GRID';
-    title = 'SOLID OPERATION, BUT NOT ELITE';
+    title = 'SOLID OPERATION, MINOR DEFICITS';
     tamilTitle = 'செயல்பாட்டு மின்கட்டமைப்பு';
-    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100. ${blackoutTime > 0 ? `The town experienced ${blackoutTime}s of power dip when battery ran low. ` : ''}You kept the lights on, but relied on thermal coal (${100 - solarShare}%) or had voltage dips. Zero blackouts and cleaner solar storage are required for an A or A+!`;
+    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100. ${blackoutTime > 0 ? `The town experienced ${blackoutTime}s of power dip when battery ran low. ` : ''}You kept the lights on, but relied on thermal coal (${100 - solarShare}%) or had minor deficits. Zero blackouts and cleaner solar storage are required for an A or A+!`;
   }
-  // 5. Clean Energy Champion (A): ZERO blackouts, strong solar/battery, clean air!
-  else if (totalGridScore < 88 || solarShare < 80 || avgAir < 90) {
+  // 5. Clean Energy Champion (A): <= 1s blackout, strong solar/battery, clean air!
+  else if (totalGridScore < 85 || solarShare < 75 || avgAir < 85) {
     grade = 'A';
     gradeClass = 'grade-a';
     stampClass = '';
     caption = 'CLEAN CHAMPION';
     title = 'CLEAN ENERGY CHAMPION!';
     tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
-    verdict = `👏 EXCELLENT DISPATCHING! You scored ${totalGridScore}/100 with ZERO blackouts! Strong solar and clean battery delivery powered the town through sunset and into the night with ${avgAir}% air purity! Reach 80%+ clean solar share to claim the ultimate A+!`;
+    verdict = `👏 EXCELLENT DISPATCHING! You scored ${totalGridScore}/100 with virtually uninterrupted power (${blackoutTime}s dip)! Strong solar and clean battery delivery powered the town through sunset and into the night with ${avgAir}% air purity! Reach 75%+ clean solar share and 85+ score to claim the ultimate A+!`;
   }
-  // 6. Elite Clean Grid Master (A+): ZERO blackouts, 88+ score, 80%+ clean solar share, 90%+ air purity!
+  // 6. Elite Clean Grid Master (A+): <= 1s blackout, 85+ score, 75%+ clean solar share, 85%+ air purity!
   else {
     grade = 'A+';
     gradeClass = 'grade-a';

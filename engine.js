@@ -235,13 +235,13 @@ export class PowerGridEngine {
     let batteryMode = 'idle';
     let batteryFlowMW = 0;
 
-    if (this.sliderSunshine > 0 && solarGenMW > totalDemand && totalDemand > 0) {
+    if (this.sliderSunshine > 0 && solarGenMW > totalDemand) {
       // ☀️ SURPLUS SOLAR: Excess clean electricity charges the battery!
       const surplusSolarMW = solarGenMW - totalDemand;
       batteryChargeMW = Math.min(250, surplusSolarMW);
       if (this.sliderStorage < 500) {
-        // Fast, satisfying charge rate: +20 MWh/s at 200 MW surplus
-        const chargeDelta = (batteryChargeMW / 10.0) * dt;
+        // Fast, satisfying charge rate: +25 to +29 MWh/s at 200+ MW surplus
+        const chargeDelta = (batteryChargeMW / 8.5) * dt;
         this.sliderStorage = Math.min(500, this.sliderStorage + chargeDelta);
         batteryMode = 'charging';
         batteryFlowMW = batteryChargeMW;
