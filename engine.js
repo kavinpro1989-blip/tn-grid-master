@@ -238,9 +238,10 @@ export class PowerGridEngine {
     if (this.sliderSunshine > 0 && solarGenMW > totalDemand && totalDemand > 0) {
       // ☀️ SURPLUS SOLAR: Excess clean electricity charges the battery!
       const surplusSolarMW = solarGenMW - totalDemand;
-      batteryChargeMW = Math.min(220, surplusSolarMW);
+      batteryChargeMW = Math.min(250, surplusSolarMW);
       if (this.sliderStorage < 500) {
-        const chargeDelta = (batteryChargeMW / 40.0) * dt;
+        // Fast, satisfying charge rate: +20 MWh/s at 200 MW surplus
+        const chargeDelta = (batteryChargeMW / 10.0) * dt;
         this.sliderStorage = Math.min(500, this.sliderStorage + chargeDelta);
         batteryMode = 'charging';
         batteryFlowMW = batteryChargeMW;
@@ -249,13 +250,15 @@ export class PowerGridEngine {
         batteryFlowMW = 0;
       }
     } else if (solarGenMW < totalDemand && this.sliderStorage > 0.5) {
-      // 🌙 DEFICIT / NIGHT: Battery discharges to power the town and actively drains!
+      // 🌙 DEFICIT / SUNSET / NIGHT: Battery discharges to power the town and actively drains!
       const solarDeficitMW = totalDemand - solarGenMW;
-      const maxDeliverableMW = Math.min(300, this.sliderStorage * 2.2);
+      const maxDeliverableMW = Math.min(360, this.sliderStorage * 2.8);
       batteryDischargeMW = Math.min(maxDeliverableMW, solarDeficitMW);
 
-      // Battery actively drains (MWh decreases over time)
-      const drainDelta = (batteryDischargeMW / 32.0) * dt;
+      // Fast, realistic, responsive drain rate:
+      // At 250 MW discharge, drains ~23 MWh per second (250 / 11.0 = 22.7 MWh/s)
+      // Even on smaller deficits, maintains minimum noticeable active drain
+      const drainDelta = Math.max(3.5 * dt, (batteryDischargeMW / 11.0) * dt);
       this.sliderStorage = Math.max(0, this.sliderStorage - drainDelta);
       batteryMode = 'discharging';
       batteryFlowMW = batteryDischargeMW;

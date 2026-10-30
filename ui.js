@@ -132,6 +132,11 @@ function handleTelemetry(t) {
   elements.airQuality.className = t.airCleanliness >= 80 ? 'badge-stat text-green' : (t.airCleanliness >= 40 ? 'badge-stat text-gold' : 'badge-stat text-red');
   elements.airEmoji.textContent = t.airCleanliness >= 80 ? '🌿' : (t.airCleanliness >= 40 ? '⛅' : '🏭');
 
+  const smogOverlay = document.getElementById('smogOverlay');
+  if (smogOverlay) {
+    smogOverlay.style.opacity = (t.finalSmog / 100).toFixed(2);
+  }
+
   elements.fanRpm.textContent = `${t.fanRpm} RPM`;
   elements.playerScore.textContent = t.ecoScore.toLocaleString();
 
@@ -226,33 +231,67 @@ function updateClock(totalMinutes) {
 
   const body = document.body;
   let phase = '';
+  let theme = '';
 
   if (hours24 >= 8 && hours24 < 16) {
-    body.className = 'theme-solar';
+    theme = 'theme-solar';
     phase = 'Peak Solar Noon (Kamuthi)';
   } else if (hours24 >= 16 && hours24 < 18) {
-    body.className = 'theme-dusk';
+    theme = 'theme-dusk';
     phase = 'Sunset / Thermal Ramp';
   } else if (hours24 >= 18 && hours24 < 22) {
-    body.className = 'theme-coal';
-    phase = 'Evening Peak Coal (Mettur)';
+    theme = 'theme-night';
+    phase = 'Evening Peak & Night (Mettur)';
   } else if (hours24 >= 22 || hours24 < 5) {
-    body.className = 'theme-night';
+    theme = 'theme-night';
     phase = 'Night Baseload';
   } else {
-    body.className = 'theme-dawn';
+    theme = 'theme-dawn';
     phase = 'Sunrise Awakening';
   }
 
+  // Preserve 'game-playing' so timeline bar remains hidden during the game
+  const isPlaying = challengeRunning;
+  body.className = `${theme}${isPlaying ? ' game-playing' : ''}`;
+
   elements.clockLabel.textContent = `${phase}${engine.autoAdvanceTime ? '' : ' • 🔒 Locked'}`;
 
-  // Move Sun across sky
+  // Update live clock pill in challenge banner if challenge is running
+  const liveClockEl = document.getElementById('challengeLiveClock');
+  if (liveClockEl) {
+    liveClockEl.textContent = `🕒 ${hours12}:${padMin} ${meridiem} • ${phase.split('(')[0].trim()}`;
+  }
+
+  // Also enforce hiding/showing timeline-row element directly
+  const timelineRow = document.querySelector('.timeline-row');
+  if (timelineRow) {
+    timelineRow.style.display = isPlaying ? 'none' : '';
+  }
+
+  // Move Sun across sky (06:00 to 18:00)
   if (hours24 >= 6 && hours24 <= 18) {
     const dayProgress = (totalMinutes - 360) / 720;
     const sunLeft = 10 + dayProgress * 75;
     const sunTop = 45 - Math.sin(dayProgress * Math.PI) * 35;
     elements.sunDisc.style.left = `${sunLeft}%`;
     elements.sunDisc.style.top = `${sunTop}%`;
+    elements.sunDisc.style.display = 'block';
+    elements.sunDisc.style.opacity = '1';
+    if (elements.moonDisc) elements.moonDisc.style.opacity = '0';
+  } else {
+    elements.sunDisc.style.opacity = '0';
+    elements.sunDisc.style.display = 'none';
+    if (elements.moonDisc) {
+      elements.moonDisc.style.display = 'block';
+      elements.moonDisc.style.opacity = '1';
+      // Smoothly move moon across night sky (18:00 to 06:00 = 720 min)
+      const nightMinutes = hours24 >= 18 ? (totalMinutes - 1080) : (totalMinutes + 360);
+      const nightProgress = nightMinutes / 720;
+      const moonLeft = 15 + nightProgress * 70;
+      const moonTop = 40 - Math.sin(nightProgress * Math.PI) * 25;
+      elements.moonDisc.style.left = `${moonLeft}%`;
+      elements.moonDisc.style.top = `${moonTop}%`;
+    }
   }
 }
 
@@ -480,6 +519,9 @@ function startChallenge() {
   challengeRunning = true;
   challengeTime = 30;
   if (document.body) document.body.classList.add('game-playing');
+  const timelineRow = document.querySelector('.timeline-row');
+  if (timelineRow) timelineRow.style.display = 'none';
+
   elements.challengeAlert.classList.remove('hidden');
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
@@ -494,16 +536,25 @@ function startChallenge() {
     smogSeconds: 0
   };
 
-  // Start at peak daytime (10:30 AM) so solar harvesting is optimal!
-  engine.setTime(630); // 10:30 AM Peak Daytime
-  engine.autoAdvanceTime = true; // Advance time smoothly through the daytime
+  // Start at peak midday (12:00 PM Noon):
+  // Over 30 seconds, advance by 20 minutes every second (total = 600 minutes):
+  // 12:00 PM (720 min) -> 06:00 PM Sunset (1080 min at 18s) -> 10:00 PM Night (1320 min at 30s)!
+  // Players experience full day, sunset, and 12 intense seconds of night grid management!
+  engine.setTime(720); // 12:00 PM Noon
+  engine.autoAdvanceTime = true;
   engine.isRunning = true;
+  updateClock(720);
 
   if (challengeTimer) clearInterval(challengeTimer);
   challengeTimer = setInterval(() => {
     challengeTime--;
     elements.gameTimer.textContent = `${challengeTime}s`;
-    engine.setTime(engine.timeMinutes + 10); // +10 min/s: runs from 10:30 AM to 03:30 PM (prime sunny day!)
+    
+    // Deterministic progression from 12:00 PM (720 min) to 10:00 PM (1320 min)
+    const elapsedSeconds = 30 - challengeTime;
+    const currentMin = 720 + elapsedSeconds * 20;
+    engine.setTime(currentMin);
+    updateClock(currentMin);
 
     // Sample telemetry
     if (lastTelemetry) {
@@ -524,6 +575,9 @@ function startChallenge() {
       clearInterval(challengeTimer);
       challengeRunning = false;
       if (document.body) document.body.classList.remove('game-playing');
+      const timelineRow = document.querySelector('.timeline-row');
+      if (timelineRow) timelineRow.style.display = '';
+
       engine.autoAdvanceTime = false; // Lock time again after challenge
       elements.challengeAlert.classList.add('hidden');
       sfx.playSolarChime();
@@ -564,22 +618,22 @@ function finishChallenge() {
   let verdict = '';
 
   // Fair, achievable, and educational grading
-  if (totalGridScore >= 80 || (solarShare >= 85 && avgAir >= 85 && blackoutTime <= 8)) {
+  if (totalGridScore >= 80 || (solarShare >= 80 && avgAir >= 85 && blackoutTime <= 8)) {
     grade = 'A+';
     gradeClass = 'grade-a';
     stampClass = '';
     caption = 'ELITE MASTER';
     title = 'OUTSTANDING CLEAN GRID MASTER!';
     tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
-    verdict = `🌟 MASTERFUL LEADERSHIP! You scored ${totalGridScore}/100! With ${solarShare}% clean solar energy, crystal-clear air (${avgAir}%), and strong town satisfaction, you proved that renewable solar energy is the triumphant choice for Tamil Nadu!`;
-  } else if (totalGridScore >= 65 || (solarShare >= 60 && avgAir >= 70 && blackoutTime <= 12)) {
+    verdict = `🌟 MASTERFUL DISPATCHER! You scored ${totalGridScore}/100! You captured abundant Kamuthi solar at noon, stored surplus energy in battery reserves, and successfully powered Tamil Nadu clean through the night without blackouts (${avgAir}% air purity)!`;
+  } else if (totalGridScore >= 65 || (solarShare >= 55 && avgAir >= 70 && blackoutTime <= 12)) {
     grade = 'A';
     gradeClass = 'grade-a';
     stampClass = '';
     caption = 'CLEAN CHAMPION';
     title = 'CLEAN ENERGY CHAMPION!';
     tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
-    verdict = `👏 EXCELLENT PERFORMANCE! You scored ${totalGridScore}/100! Strong solar delivery kept the town energized with clean air. A few minor grid adjustments will achieve absolute perfection!`;
+    verdict = `👏 EXCELLENT PERFORMANCE! You scored ${totalGridScore}/100! Strong solar and battery delivery kept the town energized with clean air through sunset and into the night!`;
   } else if (smogTime >= 10 && avgAir < 40) {
     grade = 'D';
     gradeClass = 'grade-d';
@@ -595,7 +649,7 @@ function finishChallenge() {
     caption = 'PASSABLE GRID';
     title = 'LIGHTS ON, BUT COULD BE CLEANER!';
     tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
-    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100! You kept the town powered, but relied on thermal coal (${100 - solarShare}%). Increase solar harvesting to cut carbon emissions!`;
+    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100! You kept the town powered through the night, but relied on thermal coal (${100 - solarShare}%). Increase solar harvesting and battery reserves to cut carbon emissions!`;
   } else if (totalGridScore >= 25 || blackoutTime < 22) {
     grade = 'C';
     gradeClass = 'grade-c';
@@ -603,7 +657,7 @@ function finishChallenge() {
     caption = 'UNSTABLE GRID';
     title = 'BROWNOUT INSTABILITY';
     tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
-    verdict = `⚠️ UNSTABLE GRID! You scored ${totalGridScore}/100. Frequent brownouts and voltage dips interrupted power to homes and farms. Tune substation voltage to 230V and keep solar harvest balanced!`;
+    verdict = `⚠️ UNSTABLE GRID! You scored ${totalGridScore}/100. Frequent brownouts and voltage dips interrupted power to homes and farms as night fell. Tune substation voltage to 230V and keep battery storage charged!`;
   } else {
     // Only true abandonment / total failure triggers Grade F!
     grade = 'F';
