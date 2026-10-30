@@ -458,6 +458,20 @@ function initEvents() {
 
   if (elements.sliderStorage) {
     elements.sliderStorage.addEventListener('input', (e) => {
+      if (challengeRunning) {
+        // Strict anti-cheat: Cannot magically inject free energy into a dead battery during active challenge!
+        elements.sliderStorage.value = Math.round(engine.sliderStorage);
+        engine.popTexts.push({
+          x: engine.canvas.width / (2 * engine.dpr),
+          y: 110,
+          text: '⚠️ Cannot inject free energy! Batteries only charge via Solar Surplus!',
+          color: '#f87171',
+          alpha: 1.0,
+          life: 0,
+          maxLife: 2.0
+        });
+        return;
+      }
       const val = parseInt(e.target.value, 10);
       elements.valStorage.textContent = `${val} MWh`;
       engine.setSlider('storage', val);
@@ -522,6 +536,9 @@ function startChallenge() {
   const timelineRow = document.querySelector('.timeline-row');
   if (timelineRow) timelineRow.style.display = 'none';
 
+  // Lock storage slider during challenge so player cannot cheat free energy into a dead battery!
+  if (elements.sliderStorage) elements.sliderStorage.disabled = true;
+
   elements.challengeAlert.classList.remove('hidden');
   elements.gameTimer.textContent = `${challengeTime}s`;
   sfx.playSolarChime();
@@ -577,6 +594,7 @@ function startChallenge() {
       if (document.body) document.body.classList.remove('game-playing');
       const timelineRow = document.querySelector('.timeline-row');
       if (timelineRow) timelineRow.style.display = '';
+      if (elements.sliderStorage) elements.sliderStorage.disabled = false;
 
       engine.autoAdvanceTime = false; // Lock time again after challenge
       elements.challengeAlert.classList.add('hidden');
@@ -588,6 +606,7 @@ function startChallenge() {
 }
 
 function finishChallenge() {
+  if (elements.sliderStorage) elements.sliderStorage.disabled = false;
   const samples = Math.max(1, challengeStats.samples);
   const avgHappiness = Math.round(challengeStats.totalHappiness / samples);
   const avgAir = Math.round(challengeStats.totalAir / samples);
@@ -601,7 +620,7 @@ function finishChallenge() {
   const solarPts = (solarShare / 100) * 35;
   // 2. Air Purity: up to 25 pts
   const airPts = (avgAir / 100) * 25;
-  // 3. Town Satisfaction & Power Uptime: up to 30 pts
+  // 3. Town Satisfaction & Power Uptime: up to 30 pts (heavily penalized by blackouts)
   const uptimeRatio = Math.max(0, 1.0 - (blackoutTime / samples));
   const townPts = ((avgHappiness * 0.5 + uptimeRatio * 100 * 0.5) / 100) * 30;
   // 4. Eco Points: up to 10 pts
@@ -617,56 +636,66 @@ function finishChallenge() {
   let caption = '';
   let verdict = '';
 
-  // Fair, achievable, and educational grading
-  if (totalGridScore >= 80 || (solarShare >= 80 && avgAir >= 85 && blackoutTime <= 8)) {
-    grade = 'A+';
-    gradeClass = 'grade-a';
-    stampClass = '';
-    caption = 'ELITE MASTER';
-    title = 'OUTSTANDING CLEAN GRID MASTER!';
-    tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
-    verdict = `🌟 MASTERFUL DISPATCHER! You scored ${totalGridScore}/100! You captured abundant Kamuthi solar at noon, stored surplus energy in battery reserves, and successfully powered Tamil Nadu clean through the night without blackouts (${avgAir}% air purity)!`;
-  } else if (totalGridScore >= 65 || (solarShare >= 55 && avgAir >= 70 && blackoutTime <= 12)) {
-    grade = 'A';
-    gradeClass = 'grade-a';
-    stampClass = '';
-    caption = 'CLEAN CHAMPION';
-    title = 'CLEAN ENERGY CHAMPION!';
-    tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
-    verdict = `👏 EXCELLENT PERFORMANCE! You scored ${totalGridScore}/100! Strong solar and battery delivery kept the town energized with clean air through sunset and into the night!`;
-  } else if (smogTime >= 10 && avgAir < 40) {
-    grade = 'D';
-    gradeClass = 'grade-d';
-    stampClass = 'stamp-d';
-    caption = 'TOXIC SMOG DISASTER';
-    title = 'ENVIRONMENTAL CATASTROPHE!';
-    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
-    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot covered the town for ${smogTime} seconds, choking citizens and dropping air quality to ${avgAir}%. Turn on chimney scrubbers or switch to Kamuthi Solar!`;
-  } else if (totalGridScore >= 45 || solarShare >= 40) {
-    grade = 'B';
-    gradeClass = 'grade-b';
-    stampClass = 'stamp-b';
-    caption = 'PASSABLE GRID';
-    title = 'LIGHTS ON, BUT COULD BE CLEANER!';
-    tamilTitle = 'நிலக்கரி சார்ந்த மின் உற்பத்தி';
-    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100! You kept the town powered through the night, but relied on thermal coal (${100 - solarShare}%). Increase solar harvesting and battery reserves to cut carbon emissions!`;
-  } else if (totalGridScore >= 25 || blackoutTime < 22) {
-    grade = 'C';
-    gradeClass = 'grade-c';
-    stampClass = 'stamp-c';
-    caption = 'UNSTABLE GRID';
-    title = 'BROWNOUT INSTABILITY';
-    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
-    verdict = `⚠️ UNSTABLE GRID! You scored ${totalGridScore}/100. Frequent brownouts and voltage dips interrupted power to homes and farms as night fell. Tune substation voltage to 230V and keep battery storage charged!`;
-  } else {
-    // Only true abandonment / total failure triggers Grade F!
+  // Strict, realistic, uncheatable grading criteria:
+  // 1. Catastrophic Blackout: 7+ seconds of blackout OR total score < 35
+  if (blackoutTime >= 7 || totalGridScore < 35) {
     grade = 'F';
     gradeClass = 'grade-f';
     stampClass = 'stamp-f';
     caption = 'TOTAL GRID COLLAPSE';
     title = 'CATASTROPHIC BLACKOUT!';
     tamilTitle = 'பேரழிவு மின்கட்டமைப்பு வீழ்ச்சி';
-    verdict = `🤦‍♂️ TOTAL SYSTEM FAILURE! The town was left in complete blackout for ${blackoutTime} seconds (${totalGridScore}/100). Zero power was delivered to schools and clinics. Turn on Substation voltage (230V) and Solar power to energize Tamil Nadu!`;
+    verdict = `🤦‍♂️ CATASTROPHIC GRID COLLAPSE! The town suffered ${blackoutTime} seconds of pitch-black blackout (${totalGridScore}/100)! Batteries ran dry without backup power, leaving schools, clinics, and homes in the dark. An elite dispatcher never abandons the grid to collapse!`;
+  }
+  // 2. Toxic Smog Disaster: coal fired without scrubbers
+  else if (smogTime >= 7 && avgAir < 50) {
+    grade = 'D';
+    gradeClass = 'grade-d';
+    stampClass = 'stamp-d';
+    caption = 'TOXIC SMOG DISASTER';
+    title = 'ENVIRONMENTAL CATASTROPHE!';
+    tamilTitle = 'நச்சுப் புகை சுற்றுச்சூழல் பேரழிவு';
+    verdict = `🏭 SEVERE POLLUTION DISASTER! You ran the thermal coal plant at full blast without scrubbers! Toxic soot blanketed the town for ${smogTime} seconds, dropping air quality to ${avgAir}%. Turn on chimney scrubbers or harvest Kamuthi Solar!`;
+  }
+  // 3. Unstable Grid / Brownouts & Deficit: 3-6s blackout drops you to Grade C!
+  else if (blackoutTime >= 3 || totalGridScore < 55) {
+    grade = 'C';
+    gradeClass = 'grade-c';
+    stampClass = 'stamp-c';
+    caption = 'UNSTABLE GRID';
+    title = 'BROWNOUT & DEFICIT INSTABILITY';
+    tamilTitle = 'மின் தட்டுப்பாடு மற்றும் குறைந்த மின்னழுத்தம்';
+    verdict = `⚠️ UNSTABLE GRID! The town suffered ${blackoutTime} seconds of blackout and voltage drops (${totalGridScore}/100). The battery died and could not sustain night demand. You cannot earn an A or A+ with a failing grid! Store more solar at noon or engage clean backup!`;
+  }
+  // 4. Solid Operation / Minor Dips or Heavy Coal: 1-2s blackout drops you to Grade B!
+  else if (blackoutTime >= 1 || solarShare < 60 || totalGridScore < 75) {
+    grade = 'B';
+    gradeClass = 'grade-b';
+    stampClass = 'stamp-b';
+    caption = 'PASSABLE GRID';
+    title = 'SOLID OPERATION, BUT NOT ELITE';
+    tamilTitle = 'செயல்பாட்டு மின்கட்டமைப்பு';
+    verdict = `⚡ SOLID OPERATION! You scored ${totalGridScore}/100. ${blackoutTime > 0 ? `The town experienced ${blackoutTime}s of power dip when battery ran low. ` : ''}You kept the lights on, but relied on thermal coal (${100 - solarShare}%) or had voltage dips. Zero blackouts and cleaner solar storage are required for an A or A+!`;
+  }
+  // 5. Clean Energy Champion (A): ZERO blackouts, strong solar/battery, clean air!
+  else if (totalGridScore < 88 || solarShare < 80 || avgAir < 90) {
+    grade = 'A';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'CLEAN CHAMPION';
+    title = 'CLEAN ENERGY CHAMPION!';
+    tamilTitle = 'தூய ஆற்றல் சாம்பியன்';
+    verdict = `👏 EXCELLENT DISPATCHING! You scored ${totalGridScore}/100 with ZERO blackouts! Strong solar and clean battery delivery powered the town through sunset and into the night with ${avgAir}% air purity! Reach 80%+ clean solar share to claim the ultimate A+!`;
+  }
+  // 6. Elite Clean Grid Master (A+): ZERO blackouts, 88+ score, 80%+ clean solar share, 90%+ air purity!
+  else {
+    grade = 'A+';
+    gradeClass = 'grade-a';
+    stampClass = '';
+    caption = 'ELITE MASTER';
+    title = 'OUTSTANDING CLEAN GRID MASTER!';
+    tamilTitle = 'தலைசிறந்த தூய மின் கட்டமைப்பு சாதனையாளர்';
+    verdict = `🌟 FLAWLESS LEADERSHIP! You scored ${totalGridScore}/100 with ZERO blackouts! You captured Kamuthi solar at noon, stored surplus energy in battery reserves, and flawlessly powered Tamil Nadu clean through the night (${avgAir}% air purity)!`;
   }
 
   // Populate Report Card Modal
@@ -721,6 +750,9 @@ function resetToDefaultBooth() {
   if (challengeTimer) clearInterval(challengeTimer);
   challengeRunning = false;
   if (document.body) document.body.classList.remove('game-playing');
+  if (elements.sliderStorage) elements.sliderStorage.disabled = false;
+  const timelineRow = document.querySelector('.timeline-row');
+  if (timelineRow) timelineRow.style.display = '';
   if (elements.challengeAlert) elements.challengeAlert.classList.add('hidden');
   engine.setTime(720); // 12:00 PM Noon
   engine.ecoScore = 0;

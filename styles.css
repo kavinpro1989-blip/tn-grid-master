@@ -901,6 +901,12 @@ body.game-playing .timeline-row {
   display: none !important;
 }
 
+/* Storage Slider Locked During Active Challenge (Prevents Conjuring Free Energy) */
+body.game-playing #sliderStorage {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
 .clock-display {
   display: flex;
   flex-direction: column;
