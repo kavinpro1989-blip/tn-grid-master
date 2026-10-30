@@ -1387,9 +1387,259 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
   100% { transform: translateY(0); }
 }
 
+/* ==========================================================================
+   EXHIBITION INFOGRAPHIC MODAL STYLING
+   ========================================================================== */
+.infographic-modal-card {
+  max-width: 860px !important;
+  width: 95% !important;
+  background: linear-gradient(175deg, #0f172a 0%, #0a0e1a 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15) !important;
+}
+
+.info-btn {
+  background: rgba(56, 189, 248, 0.18) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  color: #38bdf8 !important;
+}
+
+.info-btn:hover {
+  background: rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4) !important;
+}
+
+.deck-btn.info-action-btn {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(56, 189, 248, 0.15));
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.deck-btn.info-action-btn:hover {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.4), rgba(56, 189, 248, 0.25));
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+
+.infographic-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.infographic-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-big-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infographic-showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.info-card {
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.info-card.clean {
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: inset 0 0 20px rgba(52, 211, 153, 0.06);
+}
+
+.info-card.thermal {
+  border-color: rgba(248, 113, 113, 0.35);
+  box-shadow: inset 0 0 20px rgba(248, 113, 113, 0.06);
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.info-icon {
+  font-size: 1.8rem;
+}
+
+.info-card-header h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 4px;
+}
+
+.badge-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.badge-tag.clean-tag {
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.badge-tag.dirty-tag {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+.info-card p {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.info-bullets {
+  padding-left: 18px;
+  margin: 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.info-bullets li {
+  margin-bottom: 6px;
+}
+
+.info-bullets strong {
+  color: #e2e8f0;
+}
+
+.infographic-flow-section {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.infographic-flow-section h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 14px;
+}
+
+.flow-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.flow-step {
+  display: flex;
+  gap: 10px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-content strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.step-content p {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.infographic-links-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.canva-link-btn, .figma-link-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.canva-link-btn {
+  background: linear-gradient(135deg, #00c4cc, #7d2ae8);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(125, 42, 232, 0.35);
+}
+
+.canva-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(125, 42, 232, 0.5);
+}
+
+.figma-link-btn {
+  background: linear-gradient(135deg, #0acf83, #0284c7);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+}
+
+.figma-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+}
+
 /* Responsiveness */
 @media (max-width: 1200px) {
   .sliders-grid { grid-template-columns: repeat(2, 1fr); }
+  .infographic-showcase-grid { grid-template-columns: 1fr; }
+  .flow-steps { grid-template-columns: 1fr; }
+  .infographic-banner { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 900px) {
@@ -1467,6 +1717,9 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           </div>
         </div>
 
+        <button class="guide-toggle-btn info-btn" id="infographicBtn" title="Exhibition Infographic Poster">
+          <span>📊 Infographic</span>
+        </button>
         <button class="guide-toggle-btn fs-btn" id="fsBtn" title="Toggle Fullscreen Exhibition Mode">
           <span>📺 Fullscreen</span>
         </button>
@@ -1690,6 +1943,9 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           <button class="deck-btn inspect" id="inspectBtn">
             <span>🔬 Inspect Tech</span>
           </button>
+          <button class="deck-btn info-action-btn" id="deckInfoBtn" title="Exhibition Infographic Poster">
+            <span>📊 Infographic</span>
+          </button>
         </div>
       </div>
     </footer>
@@ -1739,6 +1995,112 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       </div>
       <div class="modal-footer">
         <button class="btn-dismiss" id="guideDismissBtn">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exhibition Visual Infographic Modal -->
+  <div class="modal-backdrop hidden" id="infographicModal">
+    <div class="modal-card infographic-modal-card">
+      <div class="modal-header">
+        <div class="report-header-titles">
+          <h2>📊 TAMIL NADU POWER GRID EXHIBITION INFOGRAPHIC</h2>
+          <p class="report-subtitle">கமுதி சூரிய பூங்கா vs மேட்டூர் அனல் நிலையம் • முழுமையான விளக்கப்படம்</p>
+        </div>
+        <button class="modal-exit" id="infographicCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body infographic-body">
+        <div class="infographic-banner">
+          <div class="infographic-stat">
+            <span class="info-big-num text-amber">648 MW</span>
+            <span class="info-label">Kamuthi Solar Peak</span>
+          </div>
+          <div class="infographic-stat">
+            <span class="info-big-num text-green">500 MWh</span>
+            <span class="info-label">BESS Battery Reserves</span>
+          </div>
+          <div class="infographic-stat">
+            <span class="info-big-num text-cyan">230 V</span>
+            <span class="info-label">Sinusoidal AC Stability</span>
+          </div>
+          <div class="infographic-stat">
+            <span class="info-big-num text-gold">0g CO₂</span>
+            <span class="info-label">Clean Energy Emissions</span>
+          </div>
+        </div>
+
+        <div class="infographic-showcase-grid">
+          <div class="info-card clean">
+            <div class="info-card-header">
+              <span class="info-icon">☀️</span>
+              <div>
+                <h4>Kamuthi Solar Park (Ramanathapuram)</h4>
+                <span class="badge-tag clean-tag">100% CLEAN ENERGY</span>
+              </div>
+            </div>
+            <p>One of the largest operational single-location solar parks in the world, covering 2,500 acres with 2.5 million solar panels.</p>
+            <ul class="info-bullets">
+              <li><strong>Zero Carbon Footprint:</strong> Displaces over 1.5 million metric tons of CO₂ per year.</li>
+              <li><strong>Direct 400kV HV Connection:</strong> Delivers clean electricity at 95% transmission efficiency.</li>
+              <li><strong>Daytime Water Pumping:</strong> Energizes 320 MW of rural farm irrigation motors at zero fuel cost.</li>
+            </ul>
+          </div>
+
+          <div class="info-card thermal">
+            <div class="info-card-header">
+              <span class="info-icon">🏭</span>
+              <div>
+                <h4>Mettur Thermal Power Station (Salem)</h4>
+                <span class="badge-tag dirty-tag">DIRTY & LOSS-PRONE</span>
+              </div>
+            </div>
+            <p>Sub-critical coal-fired thermal generation providing baseline power, but with heavy environmental and electrical penalties.</p>
+            <ul class="info-bullets">
+              <li><strong>High Air Pollution:</strong> Requires chimney scrubbers to avoid choking the township in sulfur soot.</li>
+              <li><strong>32% Thermal Heat Waste:</strong> Massive thermodynamic losses inside steam boilers and cooling towers.</li>
+              <li><strong>Line Loss & Voltage Sag:</strong> Causes downstream brownouts when pushed without solar/storage balancing.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="infographic-flow-section">
+          <h4>🔄 Solar Power Day-to-Night Transition Cycle</h4>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <strong>12:00 PM Midday Solar Peak</strong>
+                <p>Kamuthi generates 648 MW. Town demand is 275 MW. 373 MW clean surplus charges the battery at +29 MWh/s.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <strong>18:00 Sunset Handover</strong>
+                <p>Solar radiation drops to 0 MW. BESS instantaneously takes over without a single millisecond of voltage drop.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <strong>20:00 - 22:00 Night Endurance</strong>
+                <p>Stored noon photons power schools, homes, and clinics through the night with 100% clean air and zero smog!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="infographic-links-bar">
+          <a href="https://canva.link/8cp4ilaa1n0fg41" target="_blank" rel="noopener" class="canva-link-btn">
+            🎨 Open Editable Poster in Canva
+          </a>
+          <a href="https://www.figma.com/board/H7Dm4NtymOBodbu1NKM0jp" target="_blank" rel="noopener" class="figma-link-btn">
+            📐 Open FigJam Architecture Board
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-dismiss" id="infographicDismissBtn">Back to Grid Command</button>
       </div>
     </div>
   </div>
@@ -3032,6 +3394,11 @@ const elements = {
   guideModal: document.getElementById('guideModal'),
   guideCloseBtn: document.getElementById('guideCloseBtn'),
   guideDismissBtn: document.getElementById('guideDismissBtn'),
+  infographicBtn: document.getElementById('infographicBtn'),
+  deckInfoBtn: document.getElementById('deckInfoBtn'),
+  infographicModal: document.getElementById('infographicModal'),
+  infographicCloseBtn: document.getElementById('infographicCloseBtn'),
+  infographicDismissBtn: document.getElementById('infographicDismissBtn'),
   sunDisc: document.getElementById('sunDisc'),
   hardwareCard: document.getElementById('hardwareCard'),
   hwIcon: document.getElementById('hwIcon'),
@@ -3421,6 +3788,38 @@ function initEvents() {
     sfx.playPop();
     elements.guideModal.classList.add('hidden');
   });
+
+  // Exhibition Infographic Modal Listeners
+  if (elements.infographicBtn) {
+    elements.infographicBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
+    });
+  }
+  if (elements.deckInfoBtn) {
+    elements.deckInfoBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
+    });
+  }
+  if (elements.infographicCloseBtn) {
+    elements.infographicCloseBtn.addEventListener('click', () => {
+      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
+    });
+  }
+  if (elements.infographicDismissBtn) {
+    elements.infographicDismissBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
+    });
+  }
+  if (elements.infographicModal) {
+    elements.infographicModal.addEventListener('click', (e) => {
+      if (e.target === elements.infographicModal) {
+        elements.infographicModal.classList.add('hidden');
+      }
+    });
+  }
 
   // Report Card Modal Listeners
   if (elements.reportCloseBtn) {

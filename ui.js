@@ -29,6 +29,11 @@ const elements = {
   guideModal: document.getElementById('guideModal'),
   guideCloseBtn: document.getElementById('guideCloseBtn'),
   guideDismissBtn: document.getElementById('guideDismissBtn'),
+  infographicBtn: document.getElementById('infographicBtn'),
+  deckInfoBtn: document.getElementById('deckInfoBtn'),
+  infographicModal: document.getElementById('infographicModal'),
+  infographicCloseBtn: document.getElementById('infographicCloseBtn'),
+  infographicDismissBtn: document.getElementById('infographicDismissBtn'),
   sunDisc: document.getElementById('sunDisc'),
   hardwareCard: document.getElementById('hardwareCard'),
   hwIcon: document.getElementById('hwIcon'),
@@ -418,6 +423,38 @@ function initEvents() {
     sfx.playPop();
     elements.guideModal.classList.add('hidden');
   });
+
+  // Exhibition Infographic Modal Listeners
+  if (elements.infographicBtn) {
+    elements.infographicBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
+    });
+  }
+  if (elements.deckInfoBtn) {
+    elements.deckInfoBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
+    });
+  }
+  if (elements.infographicCloseBtn) {
+    elements.infographicCloseBtn.addEventListener('click', () => {
+      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
+    });
+  }
+  if (elements.infographicDismissBtn) {
+    elements.infographicDismissBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
+    });
+  }
+  if (elements.infographicModal) {
+    elements.infographicModal.addEventListener('click', (e) => {
+      if (e.target === elements.infographicModal) {
+        elements.infographicModal.classList.add('hidden');
+      }
+    });
+  }
 
   // Report Card Modal Listeners
   if (elements.reportCloseBtn) {
