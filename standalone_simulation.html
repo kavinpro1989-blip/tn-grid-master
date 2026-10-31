@@ -1717,9 +1717,6 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           </div>
         </div>
 
-        <button class="guide-toggle-btn info-btn" id="infographicBtn" title="Exhibition Infographic Poster">
-          <span>📊 Infographic</span>
-        </button>
         <button class="guide-toggle-btn fs-btn" id="fsBtn" title="Toggle Fullscreen Exhibition Mode">
           <span>📺 Fullscreen</span>
         </button>
@@ -1940,12 +1937,6 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
           <button class="deck-btn challenge" id="challengeBtn">
             <span>🎮 Start 30s Game</span>
           </button>
-          <button class="deck-btn inspect" id="inspectBtn">
-            <span>🔬 Inspect Tech</span>
-          </button>
-          <button class="deck-btn info-action-btn" id="deckInfoBtn" title="Exhibition Infographic Poster">
-            <span>📊 Infographic</span>
-          </button>
         </div>
       </div>
     </footer>
@@ -1995,112 +1986,6 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
       </div>
       <div class="modal-footer">
         <button class="btn-dismiss" id="guideDismissBtn">Let's Play!</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Exhibition Visual Infographic Modal -->
-  <div class="modal-backdrop hidden" id="infographicModal">
-    <div class="modal-card infographic-modal-card">
-      <div class="modal-header">
-        <div class="report-header-titles">
-          <h2>📊 TAMIL NADU POWER GRID EXHIBITION INFOGRAPHIC</h2>
-          <p class="report-subtitle">கமுதி சூரிய பூங்கா vs மேட்டூர் அனல் நிலையம் • முழுமையான விளக்கப்படம்</p>
-        </div>
-        <button class="modal-exit" id="infographicCloseBtn">&times;</button>
-      </div>
-      <div class="modal-body infographic-body">
-        <div class="infographic-banner">
-          <div class="infographic-stat">
-            <span class="info-big-num text-amber">648 MW</span>
-            <span class="info-label">Kamuthi Solar Peak</span>
-          </div>
-          <div class="infographic-stat">
-            <span class="info-big-num text-green">500 MWh</span>
-            <span class="info-label">BESS Battery Reserves</span>
-          </div>
-          <div class="infographic-stat">
-            <span class="info-big-num text-cyan">230 V</span>
-            <span class="info-label">Sinusoidal AC Stability</span>
-          </div>
-          <div class="infographic-stat">
-            <span class="info-big-num text-gold">0g CO₂</span>
-            <span class="info-label">Clean Energy Emissions</span>
-          </div>
-        </div>
-
-        <div class="infographic-showcase-grid">
-          <div class="info-card clean">
-            <div class="info-card-header">
-              <span class="info-icon">☀️</span>
-              <div>
-                <h4>Kamuthi Solar Park (Ramanathapuram)</h4>
-                <span class="badge-tag clean-tag">100% CLEAN ENERGY</span>
-              </div>
-            </div>
-            <p>One of the largest operational single-location solar parks in the world, covering 2,500 acres with 2.5 million solar panels.</p>
-            <ul class="info-bullets">
-              <li><strong>Zero Carbon Footprint:</strong> Displaces over 1.5 million metric tons of CO₂ per year.</li>
-              <li><strong>Direct 400kV HV Connection:</strong> Delivers clean electricity at 95% transmission efficiency.</li>
-              <li><strong>Daytime Water Pumping:</strong> Energizes 320 MW of rural farm irrigation motors at zero fuel cost.</li>
-            </ul>
-          </div>
-
-          <div class="info-card thermal">
-            <div class="info-card-header">
-              <span class="info-icon">🏭</span>
-              <div>
-                <h4>Mettur Thermal Power Station (Salem)</h4>
-                <span class="badge-tag dirty-tag">DIRTY & LOSS-PRONE</span>
-              </div>
-            </div>
-            <p>Sub-critical coal-fired thermal generation providing baseline power, but with heavy environmental and electrical penalties.</p>
-            <ul class="info-bullets">
-              <li><strong>High Air Pollution:</strong> Requires chimney scrubbers to avoid choking the township in sulfur soot.</li>
-              <li><strong>32% Thermal Heat Waste:</strong> Massive thermodynamic losses inside steam boilers and cooling towers.</li>
-              <li><strong>Line Loss & Voltage Sag:</strong> Causes downstream brownouts when pushed without solar/storage balancing.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="infographic-flow-section">
-          <h4>🔄 Solar Power Day-to-Night Transition Cycle</h4>
-          <div class="flow-steps">
-            <div class="flow-step">
-              <div class="step-num">1</div>
-              <div class="step-content">
-                <strong>12:00 PM Midday Solar Peak</strong>
-                <p>Kamuthi generates 648 MW. Town demand is 275 MW. 373 MW clean surplus charges the battery at +29 MWh/s.</p>
-              </div>
-            </div>
-            <div class="flow-step">
-              <div class="step-num">2</div>
-              <div class="step-content">
-                <strong>18:00 Sunset Handover</strong>
-                <p>Solar radiation drops to 0 MW. BESS instantaneously takes over without a single millisecond of voltage drop.</p>
-              </div>
-            </div>
-            <div class="flow-step">
-              <div class="step-num">3</div>
-              <div class="step-content">
-                <strong>20:00 - 22:00 Night Endurance</strong>
-                <p>Stored noon photons power schools, homes, and clinics through the night with 100% clean air and zero smog!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="infographic-links-bar">
-          <a href="https://canva.link/8cp4ilaa1n0fg41" target="_blank" rel="noopener" class="canva-link-btn">
-            🎨 Open Editable Poster in Canva
-          </a>
-          <a href="https://www.figma.com/board/H7Dm4NtymOBodbu1NKM0jp" target="_blank" rel="noopener" class="figma-link-btn">
-            📐 Open FigJam Architecture Board
-          </a>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-dismiss" id="infographicDismissBtn">Back to Grid Command</button>
       </div>
     </div>
   </div>
@@ -3400,11 +3285,6 @@ const elements = {
   guideModal: document.getElementById('guideModal'),
   guideCloseBtn: document.getElementById('guideCloseBtn'),
   guideDismissBtn: document.getElementById('guideDismissBtn'),
-  infographicBtn: document.getElementById('infographicBtn'),
-  deckInfoBtn: document.getElementById('deckInfoBtn'),
-  infographicModal: document.getElementById('infographicModal'),
-  infographicCloseBtn: document.getElementById('infographicCloseBtn'),
-  infographicDismissBtn: document.getElementById('infographicDismissBtn'),
   sunDisc: document.getElementById('sunDisc'),
   hardwareCard: document.getElementById('hardwareCard'),
   hwIcon: document.getElementById('hwIcon'),
@@ -3764,13 +3644,15 @@ function initEvents() {
   });
 
   // Hardware Inspector
-  elements.inspectBtn.addEventListener('click', () => {
-    sfx.playPop();
-    renderHardwareTab('solar');
-    elements.hardwareCard.style.left = '30px';
-    elements.hardwareCard.style.top = '70px';
-    elements.hardwareCard.classList.remove('hidden');
-  });
+  if (elements.inspectBtn) {
+    elements.inspectBtn.addEventListener('click', () => {
+      sfx.playPop();
+      renderHardwareTab('solar');
+      elements.hardwareCard.style.left = '30px';
+      elements.hardwareCard.style.top = '70px';
+      elements.hardwareCard.classList.remove('hidden');
+    });
+  }
 
   elements.hwCloseBtn.addEventListener('click', () => {
     elements.hardwareCard.classList.add('hidden');
@@ -3800,38 +3682,6 @@ function initEvents() {
     sfx.playPop();
     elements.guideModal.classList.add('hidden');
   });
-
-  // Exhibition Infographic Modal Listeners
-  if (elements.infographicBtn) {
-    elements.infographicBtn.addEventListener('click', () => {
-      sfx.playPop();
-      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
-    });
-  }
-  if (elements.deckInfoBtn) {
-    elements.deckInfoBtn.addEventListener('click', () => {
-      sfx.playPop();
-      if (elements.infographicModal) elements.infographicModal.classList.remove('hidden');
-    });
-  }
-  if (elements.infographicCloseBtn) {
-    elements.infographicCloseBtn.addEventListener('click', () => {
-      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
-    });
-  }
-  if (elements.infographicDismissBtn) {
-    elements.infographicDismissBtn.addEventListener('click', () => {
-      sfx.playPop();
-      if (elements.infographicModal) elements.infographicModal.classList.add('hidden');
-    });
-  }
-  if (elements.infographicModal) {
-    elements.infographicModal.addEventListener('click', (e) => {
-      if (e.target === elements.infographicModal) {
-        elements.infographicModal.classList.add('hidden');
-      }
-    });
-  }
 
   // Report Card Modal Listeners
   if (elements.reportCloseBtn) {
