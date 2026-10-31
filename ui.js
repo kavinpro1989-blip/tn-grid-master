@@ -184,6 +184,12 @@ function handleTelemetry(t) {
     }
   }
 
+  // Sync Substation Voltage UI (Nominal 230V auto-regulation)
+  if (elements.sliderVoltage && document.activeElement !== elements.sliderVoltage && Math.abs(parseInt(elements.sliderVoltage.value, 10) - t.voltage) > 2) {
+    elements.sliderVoltage.value = t.voltage;
+    elements.valVoltage.textContent = t.voltage === 0 ? '0V (Off)' : `${t.voltage}V`;
+  }
+
   // Update Live Grid Grade Badge
   if (elements.gridGrade) {
     elements.gridGrade.textContent = `${t.grade} ${t.gradeTitle.split(' ')[0]}`;
@@ -580,11 +586,11 @@ function startChallenge() {
   engine.setSlider('scrubber', 0);
   engine.setSlider('townLoad', 0);
   engine.setSlider('agriPumps', 0);
-  engine.setSlider('voltage', 0);
+  engine.setSlider('voltage', 230); // Nominal 230V grid operational
   engine.setSlider('gridTie', 0);
   engine.ecoScore = 0;
 
-  // Sync all UI inputs and displays to 0%
+  // Sync all UI inputs and displays (generation & load start at 0%, voltage at nominal 230V)
   if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
   if (elements.valSunshine) elements.valSunshine.textContent = '0%';
   if (elements.sliderStorage) elements.sliderStorage.value = 0;
@@ -597,8 +603,8 @@ function startChallenge() {
   if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
   if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
   if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
-  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
-  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
   if (elements.playerScore) elements.playerScore.textContent = '0';
@@ -849,10 +855,10 @@ function resetToDefaultBooth() {
   engine.setSlider('scrubber', 0);
   engine.setSlider('townLoad', 0);
   engine.setSlider('agriPumps', 0);
-  engine.setSlider('voltage', 0);
+  engine.setSlider('voltage', 230); // 230V Nominal
   engine.setSlider('gridTie', 0);
 
-  // Sync UI sliders to 0%
+  // Sync UI sliders (Generation & Loads at 0%, Voltage at 230V)
   if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
   if (elements.valSunshine) elements.valSunshine.textContent = '0%';
   if (elements.sliderStorage) elements.sliderStorage.value = 0;
@@ -865,8 +871,8 @@ function resetToDefaultBooth() {
   if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
   if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
   if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
-  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
-  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
 

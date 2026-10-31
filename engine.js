@@ -29,7 +29,7 @@ export class PowerGridEngine {
     this.sliderScrubber   = 0; // 0% (Chimney soot precipitator)
     this.sliderTownLoad   = 0; // 0 (0% Off to 100% Peak)
     this.sliderAgriPumps  = 0; // 0% (Agricultural irrigation motors)
-    this.sliderVoltage    = 0; // 0V (Substation transformer tap: 0V Off to 250V)
+    this.sliderVoltage    = 230; // 230V Nominal Grid Voltage (Transformer operational)
     this.sliderGridTie    = 0; // 0 MW
     this.currentLineLossPct = 0;
 
@@ -219,6 +219,11 @@ export class PowerGridEngine {
     }
     
     // Dynamic Slider Modulation (100% Manual Master Control)
+    // Auto-energize Substation transformer to nominal 230V if generation is active and voltage was left at 0V
+    if (this.sliderVoltage === 0 && (this.sliderSunshine > 0 || this.sliderCoalFire > 0 || this.sliderStorage > 0)) {
+      this.sliderVoltage = 230;
+    }
+
     const effectiveSolar = baseSun * (this.sliderSunshine / 100);
     const solarGenMW = Math.round(effectiveSolar * 648);
     const coalGenMW = Math.round((this.sliderCoalFire / 100) * 1440);
@@ -253,7 +258,8 @@ export class PowerGridEngine {
       // 🌙 DEFICIT / SUNSET / NIGHT: Battery discharges to power the town and actively drains!
       const solarDeficitMW = totalDemand - solarGenMW;
       const maxDeliverableMW = Math.min(360, this.sliderStorage * 2.8);
-      batteryDischargeMW = Math.min(maxDeliverableMW, solarDeficitMW);
+      // Circuit must have voltage >= 100V to deliver power across lines to town
+      batteryDischargeMW = (this.sliderVoltage >= 100) ? Math.min(maxDeliverableMW, solarDeficitMW) : 0;
 
       // Fast, realistic, responsive drain rate:
       // At 250 MW discharge, drains ~23 MWh per second (250 / 11.0 = 22.7 MWh/s)

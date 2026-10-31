@@ -1885,8 +1885,8 @@ input[type="range"]#timeRange::-webkit-slider-thumb:hover {
             </div>
             <div class="slider-desc">Grid transformer tap (0V Off to 250V nominal 230V)</div>
             <div class="slider-input-row">
-              <input type="range" id="sliderVoltage" min="0" max="250" value="0" class="game-slider range-gold">
-              <span class="slider-val" id="valVoltage">0V (Off)</span>
+              <input type="range" id="sliderVoltage" min="0" max="250" value="230" class="game-slider range-gold">
+              <span class="slider-val" id="valVoltage">230V</span>
             </div>
           </div>
 
@@ -2211,7 +2211,7 @@ class PowerGridEngine {
     this.sliderScrubber   = 0; // 0% (Chimney soot precipitator)
     this.sliderTownLoad   = 0; // 0 (0% Off to 100% Peak)
     this.sliderAgriPumps  = 0; // 0% (Agricultural irrigation motors)
-    this.sliderVoltage    = 0; // 0V (Substation transformer tap: 0V Off to 250V)
+    this.sliderVoltage    = 230; // 230V Nominal Grid Voltage (Transformer operational)
     this.sliderGridTie    = 0; // 0 MW
     this.currentLineLossPct = 0;
 
@@ -2401,6 +2401,11 @@ class PowerGridEngine {
     }
     
     // Dynamic Slider Modulation (100% Manual Master Control)
+    // Auto-energize Substation transformer to nominal 230V if generation is active and voltage was left at 0V
+    if (this.sliderVoltage === 0 && (this.sliderSunshine > 0 || this.sliderCoalFire > 0 || this.sliderStorage > 0)) {
+      this.sliderVoltage = 230;
+    }
+
     const effectiveSolar = baseSun * (this.sliderSunshine / 100);
     const solarGenMW = Math.round(effectiveSolar * 648);
     const coalGenMW = Math.round((this.sliderCoalFire / 100) * 1440);
@@ -2435,7 +2440,8 @@ class PowerGridEngine {
       // 🌙 DEFICIT / SUNSET / NIGHT: Battery discharges to power the town and actively drains!
       const solarDeficitMW = totalDemand - solarGenMW;
       const maxDeliverableMW = Math.min(360, this.sliderStorage * 2.8);
-      batteryDischargeMW = Math.min(maxDeliverableMW, solarDeficitMW);
+      // Circuit must have voltage >= 100V to deliver power across lines to town
+      batteryDischargeMW = (this.sliderVoltage >= 100) ? Math.min(maxDeliverableMW, solarDeficitMW) : 0;
 
       // Fast, realistic, responsive drain rate:
       // At 250 MW discharge, drains ~23 MWh per second (250 / 11.0 = 22.7 MWh/s)
@@ -3549,6 +3555,12 @@ function handleTelemetry(t) {
     }
   }
 
+  // Sync Substation Voltage UI (Nominal 230V auto-regulation)
+  if (elements.sliderVoltage && document.activeElement !== elements.sliderVoltage && Math.abs(parseInt(elements.sliderVoltage.value, 10) - t.voltage) > 2) {
+    elements.sliderVoltage.value = t.voltage;
+    elements.valVoltage.textContent = t.voltage === 0 ? '0V (Off)' : `${t.voltage}V`;
+  }
+
   // Update Live Grid Grade Badge
   if (elements.gridGrade) {
     elements.gridGrade.textContent = `${t.grade} ${t.gradeTitle.split(' ')[0]}`;
@@ -3945,11 +3957,11 @@ function startChallenge() {
   engine.setSlider('scrubber', 0);
   engine.setSlider('townLoad', 0);
   engine.setSlider('agriPumps', 0);
-  engine.setSlider('voltage', 0);
+  engine.setSlider('voltage', 230); // Nominal 230V grid operational
   engine.setSlider('gridTie', 0);
   engine.ecoScore = 0;
 
-  // Sync all UI inputs and displays to 0%
+  // Sync all UI inputs and displays (generation & load start at 0%, voltage at nominal 230V)
   if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
   if (elements.valSunshine) elements.valSunshine.textContent = '0%';
   if (elements.sliderStorage) elements.sliderStorage.value = 0;
@@ -3962,8 +3974,8 @@ function startChallenge() {
   if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
   if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
   if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
-  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
-  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
   if (elements.playerScore) elements.playerScore.textContent = '0';
@@ -4214,10 +4226,10 @@ function resetToDefaultBooth() {
   engine.setSlider('scrubber', 0);
   engine.setSlider('townLoad', 0);
   engine.setSlider('agriPumps', 0);
-  engine.setSlider('voltage', 0);
+  engine.setSlider('voltage', 230); // 230V Nominal
   engine.setSlider('gridTie', 0);
 
-  // Sync UI sliders to 0%
+  // Sync UI sliders (Generation & Loads at 0%, Voltage at 230V)
   if (elements.sliderSunshine) elements.sliderSunshine.value = 0;
   if (elements.valSunshine) elements.valSunshine.textContent = '0%';
   if (elements.sliderStorage) elements.sliderStorage.value = 0;
@@ -4230,8 +4242,8 @@ function resetToDefaultBooth() {
   if (elements.valTownLoad) elements.valTownLoad.textContent = '0% (Off)';
   if (elements.sliderAgriPumps) elements.sliderAgriPumps.value = 0;
   if (elements.valAgriPumps) elements.valAgriPumps.textContent = '0%';
-  if (elements.sliderVoltage) elements.sliderVoltage.value = 0;
-  if (elements.valVoltage) elements.valVoltage.textContent = '0V (Off)';
+  if (elements.sliderVoltage) elements.sliderVoltage.value = 230;
+  if (elements.valVoltage) elements.valVoltage.textContent = '230V';
   if (elements.sliderGridTie) elements.sliderGridTie.value = 0;
   if (elements.valGridTie) elements.valGridTie.textContent = '0 MW';
 
