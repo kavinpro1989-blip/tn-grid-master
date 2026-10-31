@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TN Grid Master - Live Digiboard Widget</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    /* Digiboard Widget Container */
+    .grid-widget {
+      width: 100%;
+      max-width: 440px;
+      background: linear-gradient(135deg, rgba(13, 20, 36, 0.95) 0%, rgba(7, 11, 22, 0.98) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: #e2e8f0;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 240, 255, 0.12);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Glowing top accent line */
+    .grid-widget::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f0ff, #00ff88, transparent);
+      border-radius: 2px;
+    }
+
+    /* Header */
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #00f0ff, #0077b6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+
+    .brand-text h1 {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 255, 136, 0.12);
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #00ff88;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff88;
+      animation: pulse-dot 1.4s infinite ease-in-out;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.4; }
+    }
+
+    /* Dynamic Grid Visualization Canvas */
+    .vis-box {
+      width: 100%;
+      height: 110px;
+      background: rgba(10, 16, 30, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      position: relative;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    canvas#gridCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Live Telemetry KPI Metrics */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 6px 4px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .metric-card:hover {
+      background: rgba(0, 240, 255, 0.06);
+      border-color: rgba(0, 240, 255, 0.2);
+    }
+
+    .metric-label {
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+
+    .metric-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+    }
+
+    .val-freq { color: #00f0ff; }
+    .val-gen { color: #00ff88; }
+    .val-bess { color: #ffb703; }
+    .val-v { color: #38bdf8; }
+
+    /* Interactive Simulation Preset Buttons */
+    .preset-section {
+      margin-bottom: 12px;
+    }
+
+    .preset-title {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .preset-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      padding: 6px 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #cbd5e1;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .preset-btn.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 255, 136, 0.2));
+      border-color: #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Footer Action Button */
+    .widget-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .launch-btn {
+      flex: 1;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #00f0ff 0%, #0077b6 100%);
+      color: #04101e;
+      font-weight: 800;
+      font-size: 11px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(0, 240, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .launch-btn:hover {
+      background: linear-gradient(135deg, #38bdf8 0%, #0096c7 100%);
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.6);
+      transform: translateY(-1px);
+      color: #000000;
+    }
+
+    .fullscreen-icon {
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CANDYPOP DIGIBOARD WIDGET -->
+  <div class="grid-widget">
+    <!-- Header -->
+    <div class="widget-header">
+      <div class="brand-title">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>TN Grid Master</h1>
+          <span>TNEB • Smart Grid Digital Twin</span>
+        </div>
+      </div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>Live</span>
+      </div>
+    </div>
+
+    <!-- Live Animated Grid Visualizer -->
+    <div class="vis-box">
+      <canvas id="gridCanvas" width="400" height="110"></canvas>
+    </div>
+
+    <!-- Live Metrics Grid -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Freq</div>
+        <div class="metric-val val-freq" id="valFreq">50.01 Hz</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Solar+Wind</div>
+        <div class="metric-val val-gen" id="valGen">12.4 GW</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">BESS Batt</div>
+        <div class="metric-val val-bess" id="valBess">86%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Voltage</div>
+        <div class="metric-val val-v" id="valVoltage">230 V</div>
+      </div>
+    </div>
+
+    <!-- Interactive Digiboard Scenarios -->
+    <div class="preset-section">
+      <div class="preset-title">
+        <span>Interactive Scenarios</span>
+        <span style="color:#00ff88; font-weight:600;" id="statusScenario">☀️ High Solar</span>
+      </div>
+      <div class="preset-buttons">
+        <button class="preset-btn active" id="btnSolar" onclick="setScenario('solar')">
+          <span>☀️</span> Solar Peak
+        </button>
+        <button class="preset-btn" id="btnWind" onclick="setScenario('wind')">
+          <span>💨</span> Wind Surge
+        </button>
+        <button class="preset-btn" id="btnPeak" onclick="setScenario('peak')">
+          <span>🌆</span> Night Peak
+        </button>
+      </div>
+    </div>
+
+    <!-- Direct Launch Button -->
+    <div class="widget-footer">
+      <a href="https://kavinpro1989-blip.github.io/tn-grid-master/" target="_blank" rel="noopener noreferrer" class="launch-btn">
+        <span>⚡ Launch Full Grid Simulation</span>
+        <span class="fullscreen-icon">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Live Animated Mini Grid Circuit
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentScenario = 'solar';
+    let tick = 0;
+
+    // Grid Node Positions
+    const nodes = [
+      { id: 'solar', label: 'Kamuthi Solar', x: 50, y: 35, icon: '☀️', color: '#ffb703' },
+      { id: 'wind', label: 'Muppandal Wind', x: 50, y: 80, icon: '💨', color: '#00f0ff' },
+      { id: 'sub', label: 'Substation', x: 200, y: 55, icon: '⚡', color: '#38bdf8' },
+      { id: 'bess', label: 'BESS Battery', x: 200, y: 95, icon: '🔋', color: '#a855f7' },
+      { id: 'city', label: 'Chennai Metro', x: 350, y: 55, icon: '🏙️', color: '#00ff88' }
+    ];
+
+    // Transmission Lines
+    const lines = [
+      { from: 0, to: 2, power: 1.0 }, // Solar -> Sub
+      { from: 1, to: 2, power: 0.8 }, // Wind -> Sub
+      { from: 2, to: 3, power: 0.5, bidirectional: true }, // Sub <-> BESS
+      { from: 2, to: 4, power: 1.2 }  // Sub -> City
+    ];
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * (window.devicePixelRatio || 1);
+      canvas.height = rect.height * (window.devicePixelRatio || 1);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function setScenario(type) {
+      currentScenario = type;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      if (type === 'solar') {
+        document.getElementById('btnSolar').classList.add('active');
+        document.getElementById('statusScenario').innerText = '☀️ High Solar';
+        lines[0].power = 1.6;
+        lines[1].power = 0.5;
+        lines[2].power = 0.8; // Charging battery
+      } else if (type === 'wind') {
+        document.getElementById('btnWind').classList.add('active');
+        document.getElementById('statusScenario').innerText = '💨 Muppandal Wind High';
+        lines[0].power = 0.4;
+        lines[1].power = 1.8;
+        lines[2].power = 0.7; // Charging battery
+      } else if (type === 'peak') {
+        document.getElementById('btnPeak').classList.add('active');
+        document.getElementById('statusScenario').innerText = '🌆 Night Peak Demand';
+        lines[0].power = 0.0; // No solar
+        lines[1].power = 0.6;
+        lines[2].power = -1.2; // Battery discharging into sub!
+      }
+    }
+
+    function animate() {
+      tick += 0.04;
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Scale coordinates dynamically to canvas dimensions
+      const sx = w / 400;
+      const sy = h / 110;
+
+      // Draw Transmission Lines & Moving Energy Pulses
+      lines.forEach((l) => {
+        const n1 = nodes[l.from];
+        const n2 = nodes[l.to];
+
+        const x1 = n1.x * sx;
+        const y1 = n1.y * sy;
+        const x2 = n2.x * sx;
+        const y2 = n2.y * sy;
+
+        // Base wire line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Pulsing glow line
+        ctx.strokeStyle = l.power < 0 ? 'rgba(168, 85, 247, 0.3)' : 'rgba(0, 240, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Animated Energy Flow Particles
+        const particleCount = 3;
+        const speed = Math.abs(l.power) * 0.4;
+        const dir = l.power >= 0 ? 1 : -1;
+
+        for (let i = 0; i < particleCount; i++) {
+          let progress = ((tick * speed + (i / particleCount)) % 1);
+          if (dir === -1) progress = 1 - progress;
+
+          const px = x1 + (x2 - x1) * progress;
+          const py = y1 + (y2 - y1) * progress;
+
+          ctx.fillStyle = l.power < 0 ? '#c084fc' : '#00ff88';
+          ctx.shadowColor = l.power < 0 ? '#c084fc' : '#00ff88';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
+        }
+      });
+
+      // Draw Nodes
+      nodes.forEach((n) => {
+        const nx = n.x * sx;
+        const ny = n.y * sy;
+
+        // Outer glow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.strokeStyle = n.color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(nx, ny, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Node Emoji
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(n.icon, nx, ny);
+
+        // Node Subtitle Label
+        ctx.font = '7.5px sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(n.label.split(' ')[0], nx, ny + 15);
+      });
+
+      // Update Telemetry Values realistically with micro-fluctuations
+      const freqNoise = (Math.sin(tick * 2) * 0.02).toFixed(2);
+      const freq = (50.00 + parseFloat(freqNoise)).toFixed(2);
+      document.getElementById('valFreq').innerText = freq + ' Hz';
+
+      if (currentScenario === 'solar') {
+        document.getElementById('valGen').innerText = (14.2 + Math.sin(tick) * 0.1).toFixed(1) + ' GW';
+        document.getElementById('valBess').innerText = Math.min(99, Math.floor(85 + Math.sin(tick) * 4)) + '% ⬆';
+      } else if (currentScenario === 'wind') {
+        document.getElementById('valGen').innerText = (15.8 + Math.cos(tick) * 0.2).toFixed(1) + ' GW';
+        document.getElementById('valBess').innerText = Math.min(99, Math.floor(91 + Math.cos(tick) * 3)) + '% ⬆';
+      } else {
+        document.getElementById('valGen').innerText = (4.1 + Math.sin(tick) * 0.1).toFixed(1) + ' GW';
+        document.getElementById('valBess').innerText = Math.max(12, Math.floor(64 - (tick * 0.5) % 30)) + '% ⬇';
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
