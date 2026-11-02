@@ -29,6 +29,11 @@ const elements = {
   guideModal: document.getElementById('guideModal'),
   guideCloseBtn: document.getElementById('guideCloseBtn'),
   guideDismissBtn: document.getElementById('guideDismissBtn'),
+  secretTitleTrigger: document.getElementById('secretTitleTrigger'),
+  secretTitleBtn: document.getElementById('secretTitleBtn'),
+  secretPresenterModal: document.getElementById('secretPresenterModal'),
+  presenterCloseBtn: document.getElementById('presenterCloseBtn'),
+  presenterDismissBtn: document.getElementById('presenterDismissBtn'),
   sunDisc: document.getElementById('sunDisc'),
   hardwareCard: document.getElementById('hardwareCard'),
   hwIcon: document.getElementById('hwIcon'),
@@ -448,6 +453,79 @@ function initEvents() {
       resetToDefaultBooth();
     });
   }
+
+  // 🤫 Secret Presenter HUD Listeners (Click Title to Toggle)
+  const togglePresenterHUD = () => {
+    sfx.playPop();
+    if (elements.secretPresenterModal) {
+      elements.secretPresenterModal.classList.toggle('hidden');
+    }
+  };
+
+  if (elements.secretTitleTrigger) {
+    elements.secretTitleTrigger.addEventListener('click', togglePresenterHUD);
+  } else if (elements.secretTitleBtn) {
+    elements.secretTitleBtn.addEventListener('click', togglePresenterHUD);
+  }
+
+  if (elements.presenterCloseBtn) {
+    elements.presenterCloseBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.secretPresenterModal) elements.secretPresenterModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.presenterDismissBtn) {
+    elements.presenterDismissBtn.addEventListener('click', () => {
+      sfx.playPop();
+      if (elements.secretPresenterModal) elements.secretPresenterModal.classList.add('hidden');
+    });
+  }
+
+  // Keyboard shortcut: Press 'Escape' to close, or press 'H' or 'P' to toggle
+  window.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'Escape' && elements.secretPresenterModal && !elements.secretPresenterModal.classList.contains('hidden')) {
+      elements.secretPresenterModal.classList.add('hidden');
+    } else if (e.key === 'h' || e.key === 'H' || e.key === 'p' || e.key === 'P') {
+      togglePresenterHUD();
+    }
+  });
+
+  // Presenter Modal Tabs
+  const presTabBtns = document.querySelectorAll('.pres-tab-btn');
+  presTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sfx.playPop();
+      presTabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetTab = btn.getAttribute('data-tab');
+      document.querySelectorAll('.pres-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+      const activePane = document.getElementById(`pane-${targetTab}`);
+      if (activePane) activePane.classList.add('active');
+    });
+  });
+
+  // Audience Q&A Filter Buttons
+  const qaFilterBtns = document.querySelectorAll('.qa-filter-btn');
+  qaFilterBtns.forEach(fBtn => {
+    fBtn.addEventListener('click', () => {
+      sfx.playPop();
+      qaFilterBtns.forEach(b => b.classList.remove('active'));
+      fBtn.classList.add('active');
+      const filter = fBtn.getAttribute('data-filter');
+      const qaCards = document.querySelectorAll('#fullQAGrid .v-qa-card');
+      qaCards.forEach(card => {
+        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
 
   // Canvas Click
   elements.canvas.addEventListener('click', (e) => {

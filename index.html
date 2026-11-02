@@ -14,10 +14,10 @@
   <div class="game-wrapper">
     <!-- Top Game Bar: Big, Friendly, Clean Badges -->
     <header class="game-header">
-      <div class="brand">
+      <div class="brand secret-title-trigger" id="secretTitleTrigger" title="Secret Presenter HUD • Click to Toggle">
         <span class="brand-icon">⚡</span>
         <div>
-          <h1 class="brand-title">TN GRID MASTER • தமிழ்நாடு மின் கட்டமைப்பு</h1>
+          <h1 class="brand-title" id="secretTitleBtn">TN GRID MASTER • தமிழ்நாடு மின் கட்டமைப்பு</h1>
           <p class="brand-tagline">Solar vs Coal Showdown • Tamil Nadu School Exhibition Edition</p>
         </div>
       </div>
@@ -412,6 +412,497 @@
         </button>
         <button class="btn-dismiss" id="reportCloseBtn">
           <span>Close Report</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🤫 SECRET PRESENTER HUD MODAL (Triggered by Clicking Title) -->
+  <div class="modal-backdrop hidden" id="secretPresenterModal">
+    <div class="modal-card presenter-card">
+      <div class="modal-header presenter-header">
+        <div class="presenter-title-area">
+          <div class="presenter-badge">⚡ SECRET PRESENTER HUD</div>
+          <h2>TN Grid Master • Exhibition Run-of-Show & Teleprompter</h2>
+          <p class="presenter-subtitle">Visual Presentation Stepper & Audience Q&A Cards • Click Title Again or Press ESC to Hide</p>
+        </div>
+        <button class="modal-exit" id="presenterCloseBtn">&times;</button>
+      </div>
+
+      <!-- Presenter Navigation Bar -->
+      <div class="presenter-nav">
+        <button class="pres-tab-btn active" data-tab="flow">
+          <span class="tab-icon">⚡</span>
+          <span>3:45 Live Workflow</span>
+        </button>
+        <button class="pres-tab-btn" data-tab="kavin">
+          <span class="tab-icon">💻</span>
+          <span>Kavin (Software & Physics)</span>
+        </button>
+        <button class="pres-tab-btn" data-tab="faaris">
+          <span class="tab-icon">🔌</span>
+          <span>Faaris (Hardware Demo)</span>
+        </button>
+        <button class="pres-tab-btn" data-tab="mithran">
+          <span class="tab-icon">🎙️</span>
+          <span>Mithran (Anchor & Story)</span>
+        </button>
+        <button class="pres-tab-btn" data-tab="qa">
+          <span class="tab-icon">💬</span>
+          <span>Audience Q&A Cards</span>
+        </button>
+      </div>
+
+      <div class="modal-body presenter-body">
+        <!-- PANE 1: 3:45 LIVE WORKFLOW -->
+        <div class="pres-pane active" id="pane-flow">
+          <div class="flow-hero-banner">
+            <span class="flow-hero-icon">🎪</span>
+            <div>
+              <h3>Exhibition Flow: 3:45 Min Total (Leaves 6+ Min for Audience Play & Q&A)</h3>
+              <p>Keep continuous talking under 4 minutes to avoid audience fatigue. Transition cleanly with visual cues!</p>
+            </div>
+          </div>
+
+          <!-- Stepper Cards (NOT TABLES) -->
+          <div class="presenter-stepper">
+            <!-- Step 1 -->
+            <div class="stepper-card step-mithran">
+              <div class="step-badge">
+                <span class="step-num">1</span>
+                <span class="step-time">0:00 – 1:00 (60s)</span>
+              </div>
+              <div class="step-content">
+                <div class="step-header">
+                  <h4>🎙️ Mithran — The Hook & Tamil Nadu Story</h4>
+                  <span class="role-pill">Anchor Lead</span>
+                </div>
+                <p class="step-summary">
+                  Welcomes teachers & parents. Connects to the everyday mystery: <em>"Why do power cuts happen at 7 PM?"</em>
+                  Highlights Tamil Nadu's clean energy leadership (<strong>Muppandal Wind Pass</strong> + <strong>Kamuthi 648MW Solar</strong>).
+                  Reveals the crisis: <strong>6:30 PM Sunset + 80M People turning on ACs & lights!</strong>
+                </p>
+                <div class="step-cue">
+                  <span class="cue-icon">👉</span>
+                  <span><strong>Handoff:</strong> "To show you our physical bench, here is our Hardware Lead, Faaris!"</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="stepper-card step-faaris">
+              <div class="step-badge">
+                <span class="step-num">2</span>
+                <span class="step-time">1:00 – 2:15 (75s)</span>
+              </div>
+              <div class="step-content">
+                <div class="step-header">
+                  <h4>⚡ Faaris — Working Hardware & Sensory Demo</h4>
+                  <span class="role-pill">Hardware Lead</span>
+                </div>
+                <div class="component-chips">
+                  <span class="chip">☀️ 4.9V Solar Panel</span>
+                  <span class="chip">🤖 Arduino Uno (Pin A0)</span>
+                  <span class="chip">🔁 Dual 5V Relays</span>
+                  <span class="chip">🌀 5V Propeller Fan</span>
+                  <span class="chip">📟 16x2 LCD Display</span>
+                </div>
+                <div class="action-highlight-box">
+                  <span class="action-icon">🔦</span>
+                  <div>
+                    <strong>THE LIVE ACTION DEMO (1:45):</strong>
+                    <p>Faaris shines the flashlight on the solar panel: <em>"The relay clicks ON, Green LED glows, LCD confirms 100% clean power, and the fan spins at full speed on pure sunlight!"</em></p>
+                  </div>
+                </div>
+                <div class="step-cue">
+                  <span class="cue-icon">👉</span>
+                  <span><strong>Handoff:</strong> "To show how this scales up on screen, here is our Software Lead, Kavin!"</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="stepper-card step-kavin">
+              <div class="step-badge">
+                <span class="step-num">3</span>
+                <span class="step-time">2:15 – 3:30 (75s)</span>
+              </div>
+              <div class="step-content">
+                <div class="step-header">
+                  <h4>💻 Kavin — Digital Twin, Grid Physics & BESS</h4>
+                  <span class="role-pill">Software & Physics Lead</span>
+                </div>
+                <div class="physics-chips">
+                  <span class="chip cyan">⚡ 230V AC Domestic Standard</span>
+                  <span class="chip gold">🔄 50.00 Hz Turbine Sync</span>
+                  <span class="chip green">🔋 485 MWh BESS Battery</span>
+                  <span class="chip purple">📐 Joule's Law: P_loss = I² × R</span>
+                </div>
+                <div class="action-highlight-box kavin-box">
+                  <span class="action-icon">🖱️</span>
+                  <div>
+                    <strong>THE SCREEN TRIGGER (3:00):</strong>
+                    <p>Kavin clicks 'Evening Peak' on screen: <em>"At 7:30 PM, solar drops to zero, but our 485 MWh battery discharges in 20 milliseconds, keeping city lights and fans on without burning coal!"</em></p>
+                  </div>
+                </div>
+                <div class="step-cue">
+                  <span class="cue-icon">👉</span>
+                  <span><strong>Handoff:</strong> "We invite everyone to press our hardware buttons and test the grid!"</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="stepper-card step-joint">
+              <div class="step-badge">
+                <span class="step-num">4</span>
+                <span class="step-time">3:30 – 3:45 (15s)</span>
+              </div>
+              <div class="step-content">
+                <div class="step-header">
+                  <h4>🎮 All 3 Members — Joint Wrap & Audience Play</h4>
+                  <span class="role-pill">The Whole Team</span>
+                </div>
+                <p class="joint-quote">
+                  "Thank you so much for visiting our booth! Please come press the blue buttons on our desk, adjust the sliders on screen, and see if you can keep Tamil Nadu powered without triggering a blackout!"
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick 45s Rapid Pitch Card -->
+          <div class="rapid-pitch-card">
+            <div class="rapid-header">
+              <span class="rapid-icon">⚡</span>
+              <h4>45-Second Rapid Pitch (For Rushing Visitors)</h4>
+            </div>
+            <div class="rapid-grid">
+              <div class="rapid-box">
+                <span class="rapid-name">Mithran (15s)</span>
+                <p>"Power cuts happen at 7 PM because 80M people turn on ACs right at sunset! We built TN Grid Master to show how green energy can power Tamil Nadu 24/7!"</p>
+              </div>
+              <div class="rapid-box">
+                <span class="rapid-name">Faaris (15s)</span>
+                <p><em>(Shines flashlight)</em> "Watch our desk solar panel: the Arduino clicks the relay and spins the fan on 100% clean solar energy with live voltage on our LCD!"</p>
+              </div>
+              <div class="rapid-box">
+                <span class="rapid-name">Kavin (15s)</span>
+                <p>"On our screen, our digital twin uses a 485 MWh battery to store daytime sun and keep homes at 230V all night! Step up and test the grid yourself!"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: KAVIN'S PROMPTER & Q&A -->
+        <div class="pres-pane" id="pane-kavin">
+          <div class="prompter-hero">
+            <div class="prompter-title">
+              <span class="prompter-avatar">💻</span>
+              <div>
+                <h3>Kavin's Teleprompter & Grid Physics Guide</h3>
+                <span class="prompter-role">Software & Grid Physics Lead • Speaking Slot: 2:15 – 3:30 (75s)</span>
+              </div>
+            </div>
+            <div class="shyness-shield">
+              <span class="shield-icon">🛡️</span>
+              <span><strong>Kavin's Screen Shield:</strong> Look at the screen and point mouse at the moving power lines. When parents and teachers look at the simulation, all eyes are off you!</span>
+            </div>
+          </div>
+
+          <div class="prompter-speech-bubble">
+            <h4>🎤 Kavin's Exact Word-for-Word Speech:</h4>
+            <p>"Thank you, Faaris! Hello teachers, parents, and friends!</p>
+            <p>Running right here on our screen is our <strong>full-scale Digital Twin Simulation</strong>, built using real Tamil Nadu electrical substation data and real physical formulas:</p>
+            <p>1. <strong>Real Power Stations:</strong> Across our map, we have modeled real Tamil Nadu energy hubs: <strong>Kamuthi Solar Park</strong> (648 Megawatts), <strong>Muppandal Wind Pass</strong> in Kanyakumari, <strong>Kudankulam Nuclear Station</strong> (2,000 Megawatts steady clean baseload), and our <strong>Thermal Plants</strong> in North Chennai and Tuticorin as backup.</p>
+            <p>2. <strong>Real Electrical Physics:</strong> Our simulation calculates real cable resistance and line heat loss, while stepping voltage down to our standard home level of <strong>230 Volts AC</strong> and locking grid frequency at <strong>50.00 Hertz</strong>.</p>
+            <p>3. <strong>The Big Solution — 485 MWh Battery Storage (BESS):</strong> At noon, when solar produces huge extra power, we don't waste it—we charge our massive battery!</p>
+            <div class="live-action-badge">
+              <span>🖱️ ACTION: Click 'Evening Peak' button on screen now!</span>
+            </div>
+            <p><em>'Now look at 7:30 PM: The sun is down, but our battery instantly injects clean power across Tamil Nadu in milliseconds, keeping city lights and fans running smoothly without burning extra coal!'</em></p>
+            <p><strong>Try it yourself!</strong> We invite everyone—parents, teachers, and students—to step right up, press our hardware buttons, and test if you can keep Tamil Nadu powered without triggering a blackout!"</p>
+          </div>
+
+          <!-- Kavin's Top Q&A Visual Cards -->
+          <div class="visual-qa-header">
+            <h4>💡 Kavin's Top Questions & Answers (Tap to Review):</h4>
+          </div>
+          <div class="visual-qa-grid">
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>Why must the grid frequency be locked at 50.00 Hz?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> 50 Hz represents turbine rotational speed. If demand exceeds generation, generator turbines physically slow down. If frequency dips below 49.5 Hz, industrial motors overheat and safety switches trip to prevent transformer damage, causing blackouts.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>How did you calculate transmission line losses?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Joule's Law: <code>P_loss = I² × R</code>. Transmitting at 110 kV or 400 kV drops current (I), minimizing wire heat loss. Substations step it down to safe 230V AC for homes.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>What is the "Duck Curve" and how does the battery fix it?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> At noon, solar creates a massive surplus "belly". At 6:30 PM, solar drops to zero right as everyone turns on ACs, creating a steep "neck". Our 485 MWh battery absorbs the midday belly and powers the evening neck!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>Why does home voltage drop on hot summer nights?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Thousands of neighborhood ACs pull huge current together, causing transformer voltage sag. Power drops from 230V to 180V, slowing ceiling fans until battery support steps in.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>Can I play the game? How do I win?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Step right up! Keep all city nodes green at 230V and 50 Hz. Slide the solar/wind levers and hit the battery button to survive the evening peak without blackouts!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>Did you use a game engine or code it yourself?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Pure JavaScript and HTML5 Canvas! We wrote our own physics engine (engine.js) running at 60 FPS that calculates power flows and animated current lines in real time.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: FAARIS'S PROMPTER & Q&A -->
+        <div class="pres-pane" id="pane-faaris">
+          <div class="prompter-hero">
+            <div class="prompter-title">
+              <span class="prompter-avatar">🔌</span>
+              <div>
+                <h3>Faaris's Teleprompter & Hardware Guide</h3>
+                <span class="prompter-role">Hardware & Electronics Lead • Speaking Slot: 1:00 – 2:15 (75s)</span>
+              </div>
+            </div>
+            <div class="shyness-shield">
+              <span class="shield-icon">🛡️</span>
+              <span><strong>Faaris's Board Trick:</strong> Point with your fingers to each component as you name it. The audience looks down at your electronics, taking all eyes off you!</span>
+            </div>
+          </div>
+
+          <div class="prompter-speech-bubble">
+            <h4>🎤 Faaris's Exact Word-for-Word Speech:</h4>
+            <p>"Thank you, Mithran! Hello everyone!</p>
+            <p>Right here on our desk is our <strong>physical smart grid test bench</strong>:</p>
+            <p>1. <em>(Point to solar panel)</em> <strong>Real Solar Generation:</strong> Here is a real <strong>4.9V Photovoltaic Solar Panel</strong> connected to an Arduino Uno microcontroller. It measures real light from the room.</p>
+            <p>2. <em>(Point to blue relay box)</em> <strong>Automated Switching:</strong> The Arduino controls these dual 5V relays that click and switch power lines between clean solar energy and backup grid lines.</p>
+            <p>3. <em>(Point to fan)</em> <strong>Real Consumer Load:</strong> Connected to our power line is this <strong>5V propeller fan</strong>, representing the fans and ventilation running in our homes and classrooms.</p>
+            <p>4. <em>(Point to LCD and LEDs)</em> <strong>Live Screen & Lights:</strong> Our <strong>16x2 LCD display</strong> shows real-time voltage and clean energy percentage. And our <strong>Tri-Color LEDs</strong> show grid health: Green for 100% clean solar, Yellow for battery transition, and Red for peak overload.</p>
+            <div class="live-action-badge">
+              <span>🔦 ACTION: Pick up flashlight & shine directly on the solar panel!</span>
+            </div>
+            <p><em>'Look what happens when sunlight hits our solar panel! The relay clicks ON, our Green LED lights up, our fan spins at full speed on pure solar power, and the LCD confirms 100% clean power!'</em></p>
+            <p><em>(Turn off flashlight)</em> <em>'When the sun is gone, the relay clicks off, and our system smoothly switches to backup power.'</em></p>
+            <p>Now, to show you how our software scales this up to power all of Tamil Nadu on the big screen, here is our Software & Grid Physics Lead, <strong>Kavin</strong>!"</p>
+          </div>
+
+          <div class="visual-qa-header">
+            <h4>💡 Faaris's Top Questions & Answers (Tap to Review):</h4>
+          </div>
+          <div class="visual-qa-grid">
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>Why can't Arduino power the fan directly without a relay?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> An Arduino pin gives only 20–40mA. The fan motor pulls 150–200mA and creates back-EMF inductive spikes that would fry the chip. The relay acts as an isolated electromagnetic switch.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>How does the Arduino measure solar voltage safely?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Built-in 10-bit ADC on Pin A0 maps 0–5V DC into 0–1023. Code computes: <code>Voltage = (val * 5.0) / 1023.0</code>. Since panel is 4.9V, it stays safely within the 5.0V limit.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>Is that solar panel and fan really working?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> 100% real! <em>(Faaris shines flashlight)</em> Watch the LCD jump from 1.8V to 4.8V, the relay clicks, and the fan spins on pure light right before your eyes!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>Is this circuit safe for children to touch?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Completely shock-safe! The entire table operates on 5 Volts DC—the exact same voltage as a phone charger cable. Zero shock hazard!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>What do the three LED colors mean?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> 🟢 Green = 100% Clean Solar Power. 🟡 Yellow = Sunlight fading, battery assisting. 🔴 Red = Peak overload warning!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>Can I hold the flashlight and test it?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Yes! Take the flashlight, shine it on the black solar panel, and watch the fan speed up and the voltage numbers climb on the LCD!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 4: MITHRAN'S PROMPTER & Q&A -->
+        <div class="pres-pane" id="pane-mithran">
+          <div class="prompter-hero">
+            <div class="prompter-title">
+              <span class="prompter-avatar">🎙️</span>
+              <div>
+                <h3>Mithran's Teleprompter & Story Guide</h3>
+                <span class="prompter-role">Anchor & Energy Story Lead • Speaking Slot: 0:00 – 1:00 (60s)</span>
+              </div>
+            </div>
+            <div class="shyness-shield">
+              <span class="shield-icon">🛡️</span>
+              <span><strong>Mithran's Forehead Trick:</strong> Look at people's foreheads instead of eyes. To them, it looks like confident eye contact, while you feel completely at ease!</span>
+            </div>
+          </div>
+
+          <div class="prompter-speech-bubble">
+            <h4>🎤 Mithran's Exact Word-for-Word Speech:</h4>
+            <p>"Hello! Good morning, teachers, parents, and friends! Welcome to our booth!</p>
+            <p>Quick question for everyone: Have you ever noticed that whenever power cuts or dim lights happen at home, it usually happens right between 6:30 and 8:00 in the evening?</p>
+            <p>Most people don't know this, but our home state, <strong>Tamil Nadu</strong>, is actually India's #1 green energy champion!</p>
+            <p>We are blessed with the mighty <strong>Muppandal wind corridor</strong> in Kanyakumari—one of the largest onshore wind farms on Earth—and the massive <strong>Kamuthi Solar Park</strong> in Ramanathapuram, spanning over 2,500 acres. On bright, breezy afternoons, over <strong>60%</strong> of Tamil Nadu's electricity is generated completely clean and free from the sun and wind!</p>
+            <p>But here is the big everyday puzzle:</p>
+            <p><strong>At 6:30 in the evening, the sun sets, the wind drops, and at that exact moment, 80 million people return home from work and school, turning on their lights, TV, and air conditioners!</strong></p>
+            <p>If power generation and consumer demand are not matched second-by-second, the entire electrical grid collapses into blackouts or low-voltage brownouts!</p>
+            <p>To demonstrate how modern smart grids solve this, our team created <strong>TN Grid Master: A Cyber-Physical Smart Grid Digital Twin</strong> that bridges real benchtop electronics with a live software simulation.</p>
+            <p>To show you how our physical smart grid bench works, here is our Hardware Lead, <strong>Faaris</strong>!"</p>
+          </div>
+
+          <div class="visual-qa-header">
+            <h4>💡 Mithran's Top Questions & Answers (Tap to Review):</h4>
+          </div>
+          <div class="visual-qa-grid">
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>Why focus on Tamil Nadu instead of an imaginary grid?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Tamil Nadu is already India's renewable leader with Muppandal wind and Kamuthi solar (648MW). Using real state geography makes the science relevant to our daily lives.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER QUESTION</div>
+              <h5>What does "Cyber-Physical" mean in simple terms?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> "Physical" is Faaris's real solar panel and spinning fan. "Cyber" is Kavin's digital software twin. Together, they demonstrate how small electronics link to a statewide smart grid.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>Why does power cut off at 7 PM in summer?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> The sun has set, so solar is zero, but millions turn on ACs and lights at once. Demand spikes past supply, and substations cut power to protect transformers from burning out.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT QUESTION</div>
+              <h5>Why does rooftop solar shut down during a power cut?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Anti-islanding safety! Grid-tied inverters must shut down so they don't send live power into street cables and electrocute repair technicians. You need a battery to stay powered.</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>What is a "Smart Grid" compared to normal electricity?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Normal grids only send power blindly. Smart grids use sensors and computers to detect voltage drops in milliseconds and automatically dispatch batteries before lights even flicker!</p>
+            </div>
+
+            <div class="v-qa-card">
+              <div class="v-qa-tag student">🎒 STUDENT QUESTION</div>
+              <h5>How did the three of you divide the work?</h5>
+              <p class="v-qa-ans"><strong>Answer:</strong> Faaris built the Arduino circuit and relays. Kavin programmed the JavaScript physics simulation. I researched Tamil Nadu energy data and organized our exhibition story!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 5: AUDIENCE Q&A CARDS -->
+        <div class="pres-pane" id="pane-qa">
+          <div class="qa-filter-bar">
+            <span class="filter-caption">Filter by Audience:</span>
+            <button class="qa-filter-btn active" data-filter="all">🌟 All Questions</button>
+            <button class="qa-filter-btn" data-filter="teacher">👩‍🏫 Teachers</button>
+            <button class="qa-filter-btn" data-filter="parent">👨‍👩‍👧 Parents</button>
+            <button class="qa-filter-btn" data-filter="student">🎒 Students</button>
+          </div>
+
+          <div class="visual-qa-grid full-deck" id="fullQAGrid">
+            <!-- Questions dynamically filterable -->
+            <div class="v-qa-card" data-category="teacher">
+              <div class="v-qa-meta">
+                <span class="v-qa-tag teacher">👩‍🏫 TEACHER</span>
+                <span class="v-qa-owner">Answered by: Kavin</span>
+              </div>
+              <h5>Why must the electrical grid frequency stay locked at 50.00 Hz?</h5>
+              <p class="v-qa-ans">50 Hz represents turbine rotational speed across India. If demand exceeds supply, turbines slow down. If frequency dips below 49.5 Hz, industrial motors overheat and safety switches trip to prevent transformer damage.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="teacher">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER</span>
+                <span class="v-qa-owner">Answered by: Faaris</span>
+              </div>
+              <h5>Why can't Arduino digital pins drive the fan motor directly?</h5>
+              <p class="v-qa-ans">Arduino pins safely supply max 20–40mA. Motor fans require 150–200mA and produce inductive back-EMF spikes. The relay completely isolates the low-power Arduino from high motor current.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="teacher">
+              <div class="v-qa-tag teacher">👩‍🏫 TEACHER</span>
+                <span class="v-qa-owner">Answered by: Kavin</span>
+              </div>
+              <h5>How does BESS battery response compare to thermal coal plants?</h5>
+              <p class="v-qa-ans">Coal plants take 4 to 8 hours to boil water and ramp up steam turbines. BESS uses solid-state electronic inverters that inject hundreds of megawatts in under 20 milliseconds.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="parent">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT</span>
+                <span class="v-qa-owner">Answered by: Mithran</span>
+              </div>
+              <h5>Why do power cuts almost always happen between 6:30 and 8:30 PM?</h5>
+              <p class="v-qa-ans">Sunset drops solar to zero just as 80 million people return home and turn on ACs, lights, and TVs simultaneously. When demand surges past supply, voltage sags and substations cut power.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="parent">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT</span>
+                <span class="v-qa-owner">Answered by: Faaris</span>
+              </div>
+              <h5>Is that solar panel and fan really working or just a model?</h5>
+              <p class="v-qa-ans">100% real working hardware! When flashlight light hits the panel, the Arduino measures the voltage, clicks the relay, and spins the fan on clean solar energy right on the table.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="parent">
+              <div class="v-qa-tag parent">👨‍👩‍👧 PARENT</span>
+                <span class="v-qa-owner">Answered by: Kavin</span>
+              </div>
+              <h5>If our house has rooftop solar, why does our power still cut off?</h5>
+              <p class="v-qa-ans">Anti-islanding safety regulations! Grid-tied inverters automatically disconnect during outages so power doesn't feed back into street cables and endanger electricians. You need battery storage to stay powered.</p>
+            </div>
+
+            <div class="v-qa-card" data-category="student">
+              <div class="v-qa-tag student">🎒 STUDENT</span>
+                <span class="v-qa-owner">Answered by: Kavin</span>
+              </div>
+              <h5>Can I play the simulation? How do I win?</h5>
+              <p class="v-qa-ans">Yes! Step right up! Your goal is to keep all city nodes green at 230V and 50 Hz. Slide the solar and wind levers, and tap the battery button to survive the evening peak without blackouts!</p>
+            </div>
+
+            <div class="v-qa-card" data-category="student">
+              <div class="v-qa-tag student">🎒 STUDENT</span>
+                <span class="v-qa-owner">Answered by: Faaris</span>
+              </div>
+              <h5>Can I hold the flashlight and test the solar panel?</h5>
+              <p class="v-qa-ans">Yes! Aim the flashlight right at the solar panel and watch the LCD voltage jump while the fan spins at high speed!</p>
+            </div>
+
+            <div class="v-qa-card" data-category="student">
+              <div class="v-qa-tag student">🎒 STUDENT</span>
+                <span class="v-qa-owner">Answered by: Mithran</span>
+              </div>
+              <h5>What is a "Smart Grid" in simple words?</h5>
+              <p class="v-qa-ans">A grid with computer brains! It detects voltage drops in milliseconds and automatically routes battery power to keep your home lights on before you even notice a flicker.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer presenter-footer">
+        <span class="pres-tip">💡 Tip: You can also press <kbd>ESC</kbd> or click the top title anytime to toggle this HUD!</span>
+        <button class="btn-dismiss" id="presenterDismissBtn">
+          <span>Close HUD & Back to Simulation</span>
         </button>
       </div>
     </div>
