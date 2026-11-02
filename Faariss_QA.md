@@ -79,6 +79,23 @@
 
 ---
 
+## 🛡️ Faaris's 5 Golden Formulas to Dodge Unknown Questions Gracefully
+*(Use these if a parent, teacher, or student asks something unexpected or outside your scope!)*
+
+1. **Formula 1: The "Engineering Scope" Pivot (Most Professional)**
+   * *"That’s a really sharp question! For our exhibition bench, we specifically narrowed our scope to 5V relay isolation and ADC solar reading. We haven't tested that specific component yet, but it's on our list for Version 2.0!"*
+2. **Formula 2: The "Let's Test It Together" Move (Interactive Dodge)**
+   * *"We haven't measured that exact condition, but let's test it right now! Here, take this flashlight, aim it at the panel, and let's watch the voltage reading on the LCD!"*
+3. **Formula 3: The "Turn the Tables" Trick (Great for Parents & Teachers)**
+   * *"That’s an interesting electronics question! From your experience with circuits or home inverters, how do you think that's usually resolved?"*
+4. **Formula 4: The "Bridge" Trick (Spokesperson Move)**
+   * *"While we didn't test that specific part, what our circuit DOES demonstrate is that mechanical relays provide complete electrical isolation to protect microcontrollers from motor back-EMF."*
+5. **Formula 5: The "Pass the Baton" Team Shield**
+   * *If asked about the Tamil Nadu story: "Mithran researched the state's energy background—Mithran, can you share the Muppandal and Kamuthi numbers?"*
+   * *If asked about the software simulation: "Kavin programmed the digital twin on screen—Kavin, how did the code calculate that?"*
+
+---
+
 ## 📱 Faaris's Pocket Cheat Sheet (Keep on your phone)
 
 ```text

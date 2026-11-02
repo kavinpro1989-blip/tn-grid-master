@@ -4,6 +4,8 @@
 **Team Members:** Mithran (Anchor), Faaris (Hardware), Kavin (Software & Physics)  
 **Target Audience:** Parents, Teachers, and Fellow Students (NO JUDGES)  
 **Total Presentation Time:** 3 Minutes 45 Seconds  
+**Live Website URL:** https://kavinpro1989-blip.github.io/tn-grid-master/  
+**Secret Presenter HUD Shortcut:** Click title `TN GRID MASTER` or press `H` or `P` on keyboard  
 
 ---
 

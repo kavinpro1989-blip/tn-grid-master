@@ -76,6 +76,23 @@
 
 ---
 
+## 🛡️ Mithran's 5 Golden Formulas to Dodge Unknown Questions Gracefully
+*(Use these if a parent, teacher, or student asks something unexpected or outside your scope!)*
+
+1. **Formula 1: The "Engineering Scope" Pivot (Most Professional)**
+   * *"That’s a really sharp question! For our exhibition presentation, we specifically focused on Tamil Nadu's renewable peak balancing and household blackouts. We haven't researched that specific policy/detail yet, but it's on our list for Version 2.0!"*
+2. **Formula 2: The "Let's Test It Together" Move (Interactive Dodge)**
+   * *"We haven't simulated that exact scenario yet, but our live software can test it right now! Step up, let's adjust the controls and see what the grid does!"*
+3. **Formula 3: The "Turn the Tables" Trick (Great for Parents & Teachers)**
+   * *"That’s one of the biggest debates in energy today! From your perspective, how do you think our state should balance that?"*
+4. **Formula 4: The "Bridge" Trick (Spokesperson Move)**
+   * *"While we didn't study that specific aspect, what our state data DOES clearly show is that clean solar at noon must be backed up by batteries at 6:30 PM to keep lights on."*
+5. **Formula 5: The "Pass the Baton" Team Shield**
+   * *If asked about circuit hardware: "Faaris handles our physical circuits and relays—Faaris, show them how the switches work!"*
+   * *If asked about physics/code: "Kavin programmed the physics engine—Kavin, how does the math handle that?"*
+
+---
+
 ## 📱 Mithran's Pocket Cheat Sheet (Keep on your phone)
 
 ```text

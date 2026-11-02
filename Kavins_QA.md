@@ -83,6 +83,23 @@
 
 ---
 
+## 🛡️ Kavin's 5 Golden Formulas to Dodge Unknown Questions Gracefully
+*(Use these if a parent, teacher, or student asks something unexpected or outside your scope!)*
+
+1. **Formula 1: The "Engineering Scope" Pivot (Most Professional)**
+   * *"That’s a really sharp question! For our exhibition model, we specifically narrowed our scope to household 230V balance and battery storage speed. We haven't modeled that specific factor yet, but it's on our list for Version 2.0!"*
+2. **Formula 2: The "Let's Test It Together" Move (Interactive Dodge)**
+   * *"We actually haven't tested that exact scenario yet! But that’s the beauty of our live simulation—let's test it right now! Step up, let's drag the demand slider all the way up and see what the grid does on screen!"*
+3. **Formula 3: The "Turn the Tables" Trick (Great for Parents & Teachers)**
+   * *"That’s actually one of the biggest debates in the energy sector right now! From your perspective, how do you think Tamil Nadu should balance that?"*
+4. **Formula 4: The "Bridge" Trick (Spokesperson Move)**
+   * *"While we didn't model that specific detail in this prototype, what our research DID show very clearly is that keeping the grid at 50.00 Hz and using fast 20ms battery storage prevents neighborhood blackouts."*
+5. **Formula 5: The "Pass the Baton" Team Shield**
+   * *If asked about the state story: "Mithran researched Tamil Nadu's energy distribution—Mithran, can you share the Muppandal and Kamuthi numbers?"*
+   * *If asked about hardware/relays: "Faaris handles our operational control levers—Faaris, show them how the switches work!"*
+
+---
+
 ## 📱 Kavin's Pocket Cheat Sheet (Keep on your phone)
 
 ```text
